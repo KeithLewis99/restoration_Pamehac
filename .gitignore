@@ -1,0 +1,13 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+
+*.docx
+*.zip
+*.jpg
+
+
+Rcode_archive/
+data/
+figs_KristinLoughlin/
