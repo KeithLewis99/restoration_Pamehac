@@ -3,11 +3,15 @@
 .RData
 .Ruserdata
 
-*.docx
-*.zip
+
+*.pdf
+*.png
+*.csv
 *.jpg
+*.xlsx
+*.html
+*.zip
 
-
+PamehacBrook_Restoration_Kristin_Loughlin.docx
 Rcode_archive/
-data/
 figs_KristinLoughlin/
