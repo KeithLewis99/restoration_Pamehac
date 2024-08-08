@@ -1,5 +1,5 @@
 # Created 2024-07-09
-## This is just a compliation of Kristin Loughlin's code.  If the code is commented out, it is because I cannot find a corresponding figure.  If I could find a corresponding figure, I sometimes had to make changes, either because of data issues or changes in ggplot2.  Aside from minor changes in ggplot2, I have tried to document all changes.  
+## This is just a compilation of Kristin Loughlin's code.  If the code is commented out, it is because I cannot find a corresponding figure.  If I could find a corresponding figure, I sometimes had to make changes, either because of data issues or changes in ggplot2.  Aside from minor changes in ggplot2, I have tried to document all changes.  
 
 source("Pam_data.R")
 library(ggplot2)
