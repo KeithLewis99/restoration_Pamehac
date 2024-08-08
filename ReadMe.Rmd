@@ -1,0 +1,12 @@
+---
+title: "ReadMe"
+author: "Keith Lewis"
+date: "2024-08-07"
+output: html_document
+---
+
+# Data
+See the Rose Blanche code for explanations on what I think Kristin did and my concerns, i.e., how to use the delta method for tehse types of data as well as how the initial summaries were naively done.  
+BUT......the really, really, really good thing for Pamehac is that there is a file "output_pamehac_by_station.csv" that has all of the data as derived from the AMEC functions but in raw form!!!  
+
+Need a function
