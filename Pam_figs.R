@@ -28,7 +28,7 @@ Pam_salmonids_bio_plot <-
                       name="",
                       breaks=c("ABOVE", "BELOW"),
                       labels=c("Above Diversion", "Below Diversion")) +
-  geom_errorbar(aes(ymax=mean-se, ymin=mean+se), linewidth=1, width=0.25, position=position_dodge(0.5)) +
+  geom_errorbar(aes(ymax=mean+se, ymin=mean-se), linewidth=1, width=0.25, position=position_dodge(0.5)) +
   theme(panel.grid.minor=element_blank(), panel.grid.major=element_blank())
 
 Pam_salmonids_bio_plot
@@ -56,7 +56,7 @@ Pam_salmonids_den_plot<-ggplot(Pam_Mean_Density, aes(as.factor(Year), mean, colo
                       name="",
                       breaks=c("ABOVE", "BELOW"),
                       labels=c("Above Diversion", "Below Diversion")) +
-  geom_errorbar(aes(ymax=mean-se, ymin=mean+se), linewidth=1, width=0.25, position=position_dodge(0.5)) +
+  geom_errorbar(aes(ymax=mean+se, ymin=mean-se), linewidth=1, width=0.25, position=position_dodge(0.5)) +
   theme(panel.grid.minor=element_blank(), panel.grid.major=element_blank())
 
 Pam_salmonids_den_plot
@@ -147,7 +147,7 @@ Pam_salmondense_plot <-
                       labels=c("Above Diversion", "Below Diversion")) +
   geom_vline(xintercept = 3.5, linetype="dashed", linewidth=0.5) +
   geom_vline(xintercept = 4.5, linetype="dashed", linewidth=0.5) +
-  geom_errorbar(aes(ymax=mean-se, ymin=mean+se), linewidth=0.5, width=0.25, position=position_dodge(1)) +
+  geom_errorbar(aes(ymax=mean+se, ymin=mean-se), linewidth=0.5, width=0.25, position=position_dodge(1)) +
   theme(panel.grid.minor=element_blank(), panel.grid.major=element_blank())
 Pam_salmondense_plot
 dev.off()
@@ -583,7 +583,7 @@ Pam_salmondense_plot <-
                     labels=c("Above Diversion", "Below Diversion")) +
   geom_vline(xintercept = 3.5, linetype="dashed", size=0.5) +
   geom_vline(xintercept = 4.5, linetype="dashed", size=0.5) +
-  geom_errorbar(aes(ymax=mean-se, ymin=mean+se), size=0.5, width=0.25, position=position_dodge(0.9)) +
+  geom_errorbar(aes(ymax=mean+se, ymin=mean-se), size=0.5, width=0.25, position=position_dodge(0.9)) +
   theme(panel.grid.minor=element_blank(), panel.grid.major=element_blank())
 Pam_salmondense_plot
 #dev.off()
@@ -619,7 +619,7 @@ ASYOY_Spawner <-
                     labels=c("Above Diversion", "Below Diversion")) +
   geom_vline(xintercept = 3.5, linetype="dashed", size=0.5) +
   geom_vline(xintercept = 4.5, linetype="dashed", size=0.5) +
-  geom_errorbar(aes(ymax=mean-se, ymin=mean+se), size=0.5, width=0.25, position=position_dodge(0.9)) +
+  geom_errorbar(aes(ymax=mean+se, ymin=mean-se), size=0.5, width=0.25, position=position_dodge(0.9)) +
   theme(panel.grid.minor=element_blank(), panel.grid.major=element_blank())
 
 ASYOY_Spawner
@@ -657,7 +657,7 @@ AS_Spawner <-
                     labels=c("Above Diversion", "Below Diversion")) +
   geom_vline(xintercept = 3.5, linetype="dashed", size=0.5) +
   geom_vline(xintercept = 4.5, linetype="dashed", size=0.5) +
-  geom_errorbar(aes(ymax=mean-se, ymin=mean+se), size=0.5, width=0.25, position=position_dodge(0.9)) +
+  geom_errorbar(aes(ymax=mean+se, ymin=mean-se), size=0.5, width=0.25, position=position_dodge(0.9)) +
   theme(panel.grid.minor=element_blank(), panel.grid.major=element_blank())
 
 AS_Spawner
