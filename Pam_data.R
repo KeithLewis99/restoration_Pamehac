@@ -2,6 +2,8 @@
 ## This is just a compliation of Kristin Loughlin's code
 library(readr)
 library(plyr)
+library(dplyr)
+library(magrittr)
 
 # read data ----
 output_pamehac_by_station <- read.csv("data/output_pamehac_by_station.csv")
@@ -37,7 +39,7 @@ Pam_allspecies_meanden <- ddply(output_pamehac_by_station, c("Year", "type", "Sp
                                 N    = length(stand.species.abundance.contr),
                                 mean = mean(stand.species.abundance.contr),
                                 sd   = sd(stand.species.abundance.contr),
-                                se   = sd / sqrt(N)
+                                se   = sd / sqrt(N) # these are naively calculated - see ReadMe for this project and in Rose Blanche
 )
 
 Pam_allspecies_meanden
@@ -74,3 +76,42 @@ Pam_Mean_Density <- ddply(pam_salmonids, c("Year", "Type"), summarise,
 )
 
 Pam_Mean_Density
+
+
+# delta method ----
+# manipulations
+## by species, year, and type: on station ----
+
+dfb <- output_pamehac_by_station[, c(1:5, 13:15)]
+dfb <- rename(dfb, bm = stand.species.biomass.contr,
+              bm_ucl = stand.species.biomass.contr.ucl,
+              bm_lcl = stand.species.biomass.contr.lcl)
+str(dfb)
+
+
+
+dft <- dfb |>
+  group_by(Species, Year, type) |>
+  mutate(bm_var = ((bm_ucl - bm)/1.96)^2, 
+         bm_sd = sqrt(bm_var),
+         bm_se = sqrt(bm_var)/length(Station),
+         n = length(Station),
+         pd = bm_var/length(Station)^2,
+         pdVar = bm_var*pd 
+  )
+str(dft, give.attr=FALSE)
+dft
+
+dfd <- dft |>
+  group_by(Species, Year, type) |>
+  summarise(mean = mean(bm),
+         VAR = sum(pdVar), 
+         ll = mean - 1.96*(sqrt(VAR)/length(type)),
+         ul = mean + 1.96*(sqrt(VAR)/length(type))
+         )
+dfd
+View(dfd)
+## by year, and type: on station ----
+### all salmonids
+
+# END ----
