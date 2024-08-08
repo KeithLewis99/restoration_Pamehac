@@ -9,4 +9,23 @@ output: html_document
 See the Rose Blanche code for explanations on what I think Kristin did and my concerns, i.e., how to use the delta method for tehse types of data as well as how the initial summaries were naively done.  
 BUT......the really, really, really good thing for Pamehac is that there is a file "output_pamehac_by_station.csv" that has all of the data as derived from the AMEC functions but in raw form!!!  
 
-Need a function
+Need a function to do this?
+
+# Issues
+The delta method produces negative lower CIs.  This should not happen but my guess is that the Carle Strube (CS) method uses a normal distribution, ergo when the variance is high and the point estimate close to zero, you get negative CIs.  
+
+On a more minor note:  
+Are there any diagnostics or other concerns with the CS method?  
+Why does the AMEC function not return its output aside from a graph and a csv file???
+
+See: https://bookdown.org/ts_robinson1994/10EconometricTheorems/dm.html
+Could use a bootstrap?
+
+# CS method
+The AMEC function does a DeLury biomass depletion model (see Krebs, Ecological Methodology) first to see if there is a negative slop and if yes, does the CS approach.  
+
+Multipass methods do not provide robust estimates of abundance when numbers captured are low - need > 30 before estimating abundance.
+
+The CIs around the point estimates apper symetrical which suggests that this is a normal distribution.
+
+I tried looking at the CarleStrub function in package FSA but can't figure out how it works.  
