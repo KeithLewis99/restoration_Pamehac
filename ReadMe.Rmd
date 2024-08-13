@@ -1,9 +1,23 @@
 ---
-title: "ReadMe"
+title: "ReadMe - Pamehac"
 author: "Keith Lewis"
 date: "2024-08-07"
 output: html_document
 ---
+
+# Introduction
+This file is simply a record of issues that I have had with the Pamehac analysis that was started by Kristin Loughlin and is a continuation of work begun by Dave Scruton.   See ReadMe files from Rose Blanche and Seal Cove for additional info.
+
+# Notes
+
+Got a zip file from Kristin Loughlin with no folders but files as follows:  
+- Carle Strub Estimates    
+- data in various formats  
+- some R files for various plots  
+
+I reorganized for my own needs.  I have recreated all teh figures although there are still questions, especially about the confidence intervals.
+
+
 
 # Data
 See the Rose Blanche code for explanations on what I think Kristin did and my concerns, i.e., how to use the delta method for tehse types of data as well as how the initial summaries were naively done.  
@@ -11,21 +25,32 @@ BUT......the really, really, really good thing for Pamehac is that there is a fi
 
 Need a function to do this?
 
-# Issues
-The delta method produces negative lower CIs.  This should not happen but my guess is that the Carle Strube (CS) method uses a normal distribution, ergo when the variance is high and the point estimate close to zero, you get negative CIs.  
+# Delta Method (DM)
+The delta method produces negative lower CIs.  This should not happen but my guess is that the Carle Strube (CS) method uses a normal distribution, ergo when the variance is high and the point estimate is close to zero, you get negative CIs.  Some of this is also because the zeros in teh data - the zeros pull the mean values down but the variances are based on the sites with fish so you get a double whammy effect.  See also CS method for potential problems.  
+
+Wrote Greg Roberston who suggests that the DM may not be appropriate in this case.
+
+
+See: https://bookdown.org/ts_robinson1994/10EconometricTheorems/dm.html
+Could use a bootstrap?
+
+Do we use weights to account for the fact that the biomass and density are simply estimates from a single site.
+
+# CS method
+The AMEC function does a DeLury biomass depletion model (see Krebs, Ecological Methodology) first to see if there is a negative slop and if yes, does the CS approach.  
+
+Multipass methods do not provide robust estimates of abundance when numbers captured are low - need > 30 before estimating abundance.  We are no where near this on Pamehac in many cases.  Also, the NAs in variance are, at least in one case, because there was only a few fish e.g., BT:1990:SITE 6 - pass 1 had 1 fish, pass 2 had 2 fish, pass 3 had 1 fish.  Also depends on if you use all the passes.
+
+The CIs around the point estimates apper symetrical which suggests that this is a normal distribution.
+
+I tried looking at the CarleStrub function in package FSA (in R and Github) but can't figure out how it works in R.  Below are some websites about the math which I also can't quite figure out. 
 
 On a more minor note:  
 Are there any diagnostics or other concerns with the CS method?  
 Why does the AMEC function not return its output aside from a graph and a csv file???
 
-See: https://bookdown.org/ts_robinson1994/10EconometricTheorems/dm.html
-Could use a bootstrap?
 
-# CS method
-The AMEC function does a DeLury biomass depletion model (see Krebs, Ecological Methodology) first to see if there is a negative slop and if yes, does the CS approach.  
-
-Multipass methods do not provide robust estimates of abundance when numbers captured are low - need > 30 before estimating abundance.
-
-The CIs around the point estimates apper symetrical which suggests that this is a normal distribution.
-
-I tried looking at the CarleStrub function in package FSA but can't figure out how it works.  
+# Useful websites
+https://www.pisces-conservation.com/removalhelp/index.html?maximumweightedlikelihood.htm  
+https://derekogle.com/fishR/examples/oldFishRVignettes/Depletion.pdf  
+https://www2.dnr.state.mi.us/PUBLICATIONS/PDFS/ifr/Manual/SMII%20Chapter07.pdf  
