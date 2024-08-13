@@ -20,14 +20,16 @@ library(cowplot)
 # data ----
 str(dft, give.attr=FALSE)
 dft_BT <- dft[dft$Species == "BT",]
+dft_BT$int <- interaction(dft_BT$type, dft_BT$time)
 plot(density(dft_BT$bm))
+summary(dft_BT$bm)
 
 
 ### Need glmmTMB to have random effects and a non-normal distribution
 #### Gamma is OK here because there are no zeros
 bt.glmm1 <- glmmTMB(
   bm ~ as.factor(type) + as.factor(time) + (1 | Year),
-  #dispformula = ~ Int,
+  dispformula = ~ int,
   family=ziGamma(link="log"), ziformula = ~1,
   REML = TRUE,
   data = dft_BT
@@ -41,14 +43,17 @@ summary(bt.glmm1)
 ## Compre the results of:
 ### glmmTMB to glm.  The estimates are virtually identical but the Std. Errors are much smaller for glmmTMB.
 ### PLOTS/RESULTS WITH AND WITHOUT DISPERSION FOR THE GLMMTMB.  
-bt.glmm2 <- glmmTMB(Biomass_100~Time*Treatment + (1|Year), 
-                    #dispformula = ~ Int,
-                    family = Gamma(link=log),
-                    REML = TRUE,
-                    data=bt.np)
+bt.glmm2 <- glmmTMB(
+  bm ~ as.factor(type) + as.factor(time) + (1 | Year),
+  family=ziGamma(link="log"), ziformula = ~1,
+  REML = TRUE,
+  data = dft_BT
+)
 summary(bt.glmm2)
+
 # str(bt.glmm2)
-anova(bt.glmm1, bt.glmm2) # this suggests that model bt.glmm1 with dispersion is much better than without (bt.glmm2)
+anova(bt.glmm1, bt.glmm2) # this suggests that model bt.glmm2 without dispersion is better than with (bt.glmm1)
+
 ## The estimates are virtually identical but the Std. Errors are slightly smaller than the model with dispersion.  
 #Further, the diagnostics look better much better for this model (see below but tested separately for bt.glmm2 which is no longer in the code), especially for homogeneity of variance and this model has a much better AIC. 
 # OK, the bt.glmm1 model is best.  Now, its time to see if its valid (Fifield said no need to test the less valid model at this point)?  Talked to Fifield about how to do this.  He and glmmTMB suggest using the DHARMa package
@@ -62,9 +67,9 @@ plot(bt.glmm1_simres)
 
 ### temporal independence
 # But, to look at temporal autocorrelation, we need to recalculate them with Year as a grouping variable
-bt.glmm1_simres_recalc <- recalculateResiduals(bt.glmm1_simres, group = bt.np$Year)
+bt.glmm1_simres_recalc <- recalculateResiduals(bt.glmm1_simres, group = dft_BT$Year)
 # plot(bt.glmm1_simres_recalc) Dave said that this is not required
-testTemporalAutocorrelation(bt.glmm1_simres_recalc, time = unique(bt.np$Year))
+testTemporalAutocorrelation(bt.glmm1_simres_recalc, time = unique(dft_BT$Year))
 
 # resids look great: conclude no temproal issues
 
