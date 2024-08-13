@@ -4,6 +4,7 @@ library(readr)
 library(plyr)
 library(dplyr)
 library(magrittr)
+library(ggplot2)
 
 # read data ----
 output_pamehac_by_station <- read.csv("data/output_pamehac_by_station.csv")
@@ -95,13 +96,14 @@ dft <- dfb |>
   mutate(bm_var = ((bm_ucl - bm)/1.96)^2, 
          bm_sd = sqrt(bm_var),
          bm_se = sqrt(bm_var)/length(Station),
+         #bm_sd1 = (bm_ucl - bm)/1.96, # gives the same result as bm_sd
          n = length(Station),
          pd = bm_var/length(Station)^2,
          pdVar = bm_var*pd 
   )
 
+# add a Before/After variable
 dft$time <- NA
-i = 1
 for(i in seq_along(dft$Year)){
   if(dft$Year[i] == 1990){
     dft$time[i] <- "Before"
@@ -123,7 +125,7 @@ dfd <- dft |>
          ul = mean + 1.96*(sqrt(VAR)/length(type))
          )
 dfd
-View(dfd)
+#View(dfd)
 str(dfd, give.attr=FALSE)
 
 # so, i'm pretty sure that the above is "right" but it does lead to a lot of negative lower CIs and this is not good becaue you can't have negative fish.
@@ -143,10 +145,11 @@ str(dfd, give.attr=FALSE)
 # So this plot shows that there's a lot of estimates below 0
   
 dfd[dfd$Species == "AS" & dfd$Year == 1991,]
-dft[dft$Species == "AS" & dft$Year == 1991,]
+dft[dft$Species == "AS" & dft$Year == 1991,][order(dft[dft$Species == "AS" & dft$Year == 1991,]$type),]
 
 
 ## by year, and type: on station ----
 ### all salmonids
+
 
 # END ----
