@@ -41,9 +41,17 @@ The AMEC function does a DeLury biomass depletion model (see Krebs, Ecological M
 
 Multipass methods do not provide robust estimates of abundance when numbers captured are low - need > 30 before estimating abundance.  We are no where near this on Pamehac in many cases.  Also, the NAs in variance are, at least in one case, because there was only a few fish e.g., BT:1990:SITE 6 - pass 1 had 1 fish, pass 2 had 2 fish, pass 3 had 1 fish.  Also depends on if you use all the passes.
 
-The CIs around the point estimates apper symetrical which suggests that this is a normal distribution.
+The CIs around the point estimates appear symetrical which suggests that this is a normal distribution.
 
 I tried looking at the CarleStrub function in package FSA (in R and Github) but can't figure out how it works in R.  Below are some websites about the math which I also can't quite figure out. 
+
+## CS method: variance and CIs
+I made some mistakes in my initial formulation of the delta method.  First, I did the partial derivative as variance/n^2 when it should just be 1/n^2.  Then, I got SE of the mean and SE of the parameter mixed up.  Variance should be the SE^2 (which I did) but there is no SD.
+
+## Why are some CIs wide
+Several reasons:
+1. lack of data  - if only a few fish, often get NA
+2. 
 
 On a more minor note:  
 Are there any diagnostics or other concerns with the CS method?  
@@ -53,4 +61,5 @@ Why does the AMEC function not return its output aside from a graph and a csv fi
 # Useful websites
 https://www.pisces-conservation.com/removalhelp/index.html?maximumweightedlikelihood.htm  
 https://derekogle.com/fishR/examples/oldFishRVignettes/Depletion.pdf  
-https://www2.dnr.state.mi.us/PUBLICATIONS/PDFS/ifr/Manual/SMII%20Chapter07.pdf  
+https://www2.dnr.state.mi.us/PUBLICATIONS/PDFS/ifr/Manual/SMII%20Chapter07.pdf 
+https://drlvk.github.io/nm/section-standard-error.html
