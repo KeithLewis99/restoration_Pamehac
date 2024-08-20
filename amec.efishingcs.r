@@ -107,6 +107,7 @@ print(c(as.character(unique.site[aaa]), unique.year[bbb], unique.station[ccc]))
 	  	
 	 		##get Carle Strube depletion estimate for biomass for a given species using the FSA (fisheries stock assessment) package 	
 	 		##first summarize biomass by sweep
+	 		#browser()
 	 		biomass.summary.data<-as.data.frame.table((tapply(qa.species.data$Weight.g, list(qa.species.data$Sweep), sum)))
  			names(biomass.summary.data)<-c('Sweep','biomass.sum')
 	 		##calculate the cumulative catch by sweep and save to biomass.summary.data
@@ -240,6 +241,7 @@ print(c(as.character(unique.site[aaa]), unique.year[bbb], unique.station[ccc]))
 	combined.biomass.summary.data<-cbind(combined.biomass.summary.data,biomass.cum.catch)
 
 	##ensure that there is a negative slope for removal analysis
+	browser()
 	combined.biomass.delury.model<-lm(biomass.sum~ biomass.cum.catch, data=combined.biomass.summary.data)
 	
   ##CS estimate will work with only one data point (it just makes that the estimate) but confidence intervals won't.  So we will get the estimate and only calculate conf limits if there is enough data.  alternatively they are set as NAs
@@ -261,13 +263,13 @@ print(c(as.character(unique.site[aaa]), unique.year[bbb], unique.station[ccc]))
   ##do full set of calculations if we have estimate and conf limits
   if(!is.na(combined.biomass.cs.estimate) & !is.na(combined.biomass.cs.ucl) & !is.na(combined.biomass.cs.lcl)) {
   
-					##plot cs depletion data and overlay points for cs estimate(green) and 95%CI's (red)
-	 				with(combined.biomass.summary.data, plot(biomass.sum~biomass.cum.catch, ylim=c(0,max(combined.biomass.summary.data$biomass.sum)), xlim=c(0,combined.biomass.cs.ucl)))
-					##abline(combined.biomass.delury.model)
-					points(x=combined.biomass.cs.estimate, y=0, pch=8, col="green", cex=1.5)
-					points(x=combined.biomass.cs.lcl, y=0, pch=8, col="red", cex=1.5)
-					points(x=combined.biomass.cs.ucl, y=0, pch=8, col="red", cex=1.5)
-					mtext('CS depletion model for all fish biomass')
+	# 				##plot cs depletion data and overlay points for cs estimate(green) and 95%CI's (red)
+	#  				with(combined.biomass.summary.data, plot(biomass.sum~biomass.cum.catch, ylim=c(0,max(combined.biomass.summary.data$biomass.sum)), xlim=c(0,combined.biomass.cs.ucl)))
+	# 				##abline(combined.biomass.delury.model)
+	# 				points(x=combined.biomass.cs.estimate, y=0, pch=8, col="green", cex=1.5)
+	# 				points(x=combined.biomass.cs.lcl, y=0, pch=8, col="red", cex=1.5)
+	# 				points(x=combined.biomass.cs.ucl, y=0, pch=8, col="red", cex=1.5)
+	# 				mtext('CS depletion model for all fish biomass')
 
 					##return values for CS estimates and CI's
 					##combined.biomass.delury.estimate<--biomass.delury.model[[1]][[1]]/biomass.delury.model[[1]][[2]]
@@ -292,7 +294,7 @@ print(c(as.character(unique.site[aaa]), unique.year[bbb], unique.station[ccc]))
 	 				species.proportion<-cbind(species.proportion,stand.species.biomass.contr.ucl)
 	 				species.proportion<-cbind(species.proportion,stand.species.biomass.contr.lcl)
 
-					with(species.proportion, barplot(species.biomass.contributions, names.arg=Species, ylab="biomass (g)"))
+					#with(species.proportion, barplot(species.biomass.contributions, names.arg=Species, ylab="biomass (g)"))
 }
 
      ##if we have no estimate or conf limits do the following
@@ -378,13 +380,13 @@ print("CATCH DATA RESULTED IN cs MODEL FAILURE")
         if(!is.na(combined.abundance.cs.estimate) & !is.na(combined.abundance.cs.ucl) & !is.na(combined.abundance.cs.lcl)) { 	
   
 			##plot cs depletion data and overlay points for cs estimate(green) and 95%CI's (red)
-	 		with(combined.abundance.summary.data, plot(abundance.sum~abundance.cum.catch, ylim=c(0,max(combined.abundance.summary.data$abundance.sum)), xlim=c(0,combined.abundance.cs.ucl)))
-			##abline(combined.abundance.delury.model)
-			points(x=combined.abundance.cs.estimate, y=0, pch=8, col="green", cex=1.5)
-			points(x=combined.abundance.cs.lcl, y=0, pch=8, col="red", cex=1.5)
-			points(x=combined.abundance.cs.ucl, y=0, pch=8, col="red", cex=1.5)
-
-			mtext('CS depletion model for all fish abundance')
+	#  		with(combined.abundance.summary.data, plot(abundance.sum~abundance.cum.catch, ylim=c(0,max(combined.abundance.summary.data$abundance.sum)), xlim=c(0,combined.abundance.cs.ucl)))
+	# 		##abline(combined.abundance.delury.model)
+	# 		points(x=combined.abundance.cs.estimate, y=0, pch=8, col="green", cex=1.5)
+	# 		points(x=combined.abundance.cs.lcl, y=0, pch=8, col="red", cex=1.5)
+	# 		points(x=combined.abundance.cs.ucl, y=0, pch=8, col="red", cex=1.5)
+	# 
+	# 		mtext('CS depletion model for all fish abundance')
 
 			##return values for CS estimates and CI's
 			##combined.abundance.delury.estimate<--abundance.delury.model[[1]][[1]]/abundance.delury.model[[1]][[2]]
@@ -410,8 +412,8 @@ print("CATCH DATA RESULTED IN cs MODEL FAILURE")
 	 		species.proportion<-cbind(species.proportion,stand.species.abundance.contr.lcl)
 ##browser()
 			##make barplot breaking down abundance by species using the proportion method
-			with(species.proportion, barplot(species.abundance.contributions, names.arg=Species, ylab="abundance"))
-			mtext(unique.site[aaa])
+			# with(species.proportion, barplot(species.abundance.contributions, names.arg=Species, ylab="abundance"))
+			# mtext(unique.site[aaa])
 	 		
 }
      ##if we have no estimate or conf limits do the following:
@@ -460,8 +462,8 @@ print("CATCH DATA RESULTED IN cs MODEL FAILURE")
              species.proportion<-cbind(species.proportion,stand.species.abundance.contr.lcl)
              ##browser()
              ##make barplot breaking down abundance by species using the proportion method
-             with(species.proportion, barplot(species.abundance.contributions, names.arg=Species, ylab="abundance"))
-             mtext(unique.site[aaa])
+             # with(species.proportion, barplot(species.abundance.contributions, names.arg=Species, ylab="abundance"))
+             # mtext(unique.site[aaa])
              
            }
           
