@@ -105,8 +105,9 @@ apply(pm90_tab[c(1, 3), c(-1:-2)], MARGIN=1, FUN = removal, method = "CarleStrub
 # removal for all species and all stations
 pm90_tab1 <- pm90_sum |>
   pivot_wider(id_cols = c(Species, Station), 
-              names_from = Sweep, values_from = ) #bio.sum
+              names_from = Sweep, values_from = bio.sum) #abun
 
+# remove the rows with NA in first sweep or only one sweep
 res <- apply(pm90_tab1[c(1, 3, 5:7, 9:13, 16:17), c(-1:-2)], MARGIN=1, FUN = removal, method = "CarleStrub", just.ests=T)
 
 res <- data.frame(spp = pm90_tab1$Species[c(1, 3, 5:7, 9:13, 16:17)],
@@ -114,5 +115,80 @@ res <- data.frame(spp = pm90_tab1$Species[c(1, 3, 5:7, 9:13, 16:17)],
                   t(res))
 res
 res[res$spp == "AS",]
+
+# large variance ----
+library(FSA)
+library(dplyr)
+pm16 <- read.csv("data/year_summaries/Pamehac_2016_by_station.csv")
+pm16_sum <- pm16 |>
+  group_by(Species, Station, Sweep) |>
+  summarise(bio.sum = sum(Weight.g), abun = n()) |>
+#  mutate(counter = if_else(Sweep == 1, 0, 1)) |>
+  mutate(spc = if_else(Sweep == 1, 0, cumsum(abun))) # sum previous catch
+  
+pm16_sum |> print(n = Inf)
+
+
+
+# removal for all species and all stations
+library(tidyr)
+pm16_tab1 <- pm16_sum |>
+  pivot_wider(id_cols = c(Species, Station), 
+              names_from = Sweep, values_from = abun) #bio.sum
+pm16_tab1 |> print(n = Inf)
+
+# remove the rows with NA in first sweep or only one sweep
+res <- apply(pm16_tab1[c(1:20, 29:30), c(-1:-2)], MARGIN=1, FUN = removal, method = "CarleStrub", just.ests=T)
+
+res <- data.frame(spp = pm16_tab1$Species[c(1:20, 29:30)],
+                  sta = pm16_tab1$Station[c(1:20, 29:30)], 
+                  t(res))
+res
+res[res$spp == "AS",]
+res_list <- apply(pm16_tab1[c(1:20, 29:30), c(-1:-2)], MARGIN=1, FUN = removal, method = "CarleStrub")
+res_list[[1]]
+
+
+round(c(res_list[[1]]$catch, res_list[[1]]$int, res_list[[1]]$est[1:5]), 2)
+
+out <- as.data.frame(matrix(NA, 10, 11))
+colnames(out) <- c("c1",  "c2", "c3","k",  "T", "X", 
+                   "No",  "No.se", "No.LCI", 
+                   "No.UCI", "p"
+                   )
+for(i in seq_along(res_list[1:10])){
+  out[i,] <- round(c(res_list[[i]]$catch, 
+                     res_list[[i]]$int, 
+                     res_list[[i]]$est[1:5]), 2)
+  
+  #return(out)
+}
+out
+cbind(sta = pm16_tab1$Station[c(1:10)], out)
+
+with(out, plot(p, No.se)) # negative exponential relationship between capture probability and variance
+with(out, plot(X/No, p)) # linear relationship between ratio of X/No and p which suggests that when first and second capture are large, p is high
+with(out, plot(c3/T, p)) # negative linear relationship - suggests that the lower the last catch is relative to total catch, then lower p and therefore, lower the variance.  
+# which is why 8A has such large variance.  The p is very low which means high variance (in part) and p is low because of the ratio of c3 to total catch (all else being equal)
+
+
+# catches ----
+library(ggplot2)
+p <- ggplot(pm16_sum, aes(x = as.factor(Sweep), y = abun, group = Station)) +
+  geom_point() +
+  geom_line() +
+  facet_wrap(vars(Species))
+p
+
+plotly::ggplotly(p)
+
+# plots as recommended in Eg. 7.6 in Lockwood 2000
+p <- ggplot(pm16_sum, aes(x = spc, y = abun, group = Station)) +
+  geom_point() +
+  geom_line() +
+  facet_wrap(vars(Species))
+p
+
+plotly::ggplotly(p)
 
 # END ----
