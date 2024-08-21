@@ -69,6 +69,7 @@ df_abun[df_abun$abundance.caught >= 30 & !is.na(df_abun$abundance.caught), ]
 length(df_abun$abundance.caught[df_abun$abundance.caught <= 5 & !is.na(df_abun$abundance.caught)])/(20*12) # > 30 = 11, > 20 = 17, > 10 = 29, > 5 = 0.4
 
 # FSA ----
+# figuring out how FSA::removal works and how to get the output
 library(FSA)
 library(dplyr)
 pm90 <- read.csv("data/year_summaries/Pamehac_1990_by_station.csv")
@@ -116,28 +117,27 @@ res <- data.frame(spp = pm90_tab1$Species[c(1, 3, 5:7, 9:13, 16:17)],
 res
 res[res$spp == "AS",]
 
+
+
+
 # large variance ----
 library(FSA)
 library(dplyr)
 pm16 <- read.csv("data/year_summaries/Pamehac_2016_by_station.csv")
+# summarize abundance and biomass
 pm16_sum <- pm16 |>
   group_by(Species, Station, Sweep) |>
-  summarise(bio.sum = sum(Weight.g), abun = n()) |>
-#  mutate(counter = if_else(Sweep == 1, 0, 1)) |>
-  mutate(spc = if_else(Sweep == 1, 0, cumsum(abun))) # sum previous catch
-  
-pm16_sum |> print(n = Inf)
+  summarise(bio.sum = sum(Weight.g), abun = n()) 
 
-
-
-# removal for all species and all stations
+# create a data set for FSA::removal for all species and all stations - not that this is for abundance - if you change to biomass, you need to change some code below so that its apples:apples 
 library(tidyr)
 pm16_tab1 <- pm16_sum |>
   pivot_wider(id_cols = c(Species, Station), 
-              names_from = Sweep, values_from = abun) #bio.sum
+              names_from = Sweep, values_from = abun) #bio.sum abun
 pm16_tab1 |> print(n = Inf)
 
-# remove the rows with NA in first sweep or only one sweep
+# remove the rows with NA in first sweep or only one sweep - this is manual - need to change subset below if you change the data set
+## just estimates
 res <- apply(pm16_tab1[c(1:20, 29:30), c(-1:-2)], MARGIN=1, FUN = removal, method = "CarleStrub", just.ests=T)
 
 res <- data.frame(spp = pm16_tab1$Species[c(1:20, 29:30)],
@@ -145,17 +145,21 @@ res <- data.frame(spp = pm16_tab1$Species[c(1:20, 29:30)],
                   t(res))
 res
 res[res$spp == "AS",]
+
+## get all output from "removal" and put in list for comparisions and to figure out why some of the variances are so huge
 res_list <- apply(pm16_tab1[c(1:20, 29:30), c(-1:-2)], MARGIN=1, FUN = removal, method = "CarleStrub")
 res_list[[1]]
 
 
 round(c(res_list[[1]]$catch, res_list[[1]]$int, res_list[[1]]$est[1:5]), 2)
 
+# create a matrix to be populated by output from res_list
 out <- as.data.frame(matrix(NA, 10, 11))
 colnames(out) <- c("c1",  "c2", "c3","k",  "T", "X", 
                    "No",  "No.se", "No.LCI", 
                    "No.UCI", "p"
                    )
+# loop to extract output from res_list
 for(i in seq_along(res_list[1:10])){
   out[i,] <- round(c(res_list[[i]]$catch, 
                      res_list[[i]]$int, 
@@ -164,31 +168,173 @@ for(i in seq_along(res_list[1:10])){
   #return(out)
 }
 out
-cbind(sta = pm16_tab1$Station[c(1:10)], out)
+out <- cbind(sta = pm16_tab1$Station[c(1:10)], out)
 
+# create some plots that I thought would be interesting
 with(out, plot(p, No.se)) # negative exponential relationship between capture probability and variance
-with(out, plot(X/No, p)) # linear relationship between ratio of X/No and p which suggests that when first and second capture are large, p is high
+with(out, plot(X/No, p)) #   positive linear relationship which suggests that when first and second capture are large, p is high
 with(out, plot(c3/T, p)) # negative linear relationship - suggests that the lower the last catch is relative to total catch, then lower p and therefore, lower the variance.  
 # which is why 8A has such large variance.  The p is very low which means high variance (in part) and p is low because of the ratio of c3 to total catch (all else being equal)
 
 
-# catches ----
+# equal capture ----
+## plot ----
+# decrease in abundance with sweep
 library(ggplot2)
-p <- ggplot(pm16_sum, aes(x = as.factor(Sweep), y = abun, group = Station)) +
+p <- ggplot(pm16_sum, 
+            aes(x = as.factor(Sweep), y = bio.sum, 
+                group = Station, fill = Station,
+                    text = paste("Sweep: ", Sweep, "\n",
+              #"Abund: ", abun, "\n",
+              "Biomass: ", bio.sum, "\n",
+              "Stn: ", Station, 
+              sep = ""))) +
   geom_point() +
   geom_line() +
-  facet_wrap(vars(Species))
-p
+  facet_wrap(vars(Species),
+             )
+plotly::ggplotly(p, tooltip = "text")
 
-plotly::ggplotly(p)
 
-# plots as recommended in Eg. 7.6 in Lockwood 2000
-p <- ggplot(pm16_sum, aes(x = spc, y = abun, group = Station)) +
+# plots as recommended in Eg. 7.6 in Lockwood 2000 to demonstrate equal catchability
+## spc = sum of previous catch
+### calculations of sum of previous catches below
+pm16_sum$spc <- rep(NA, nrow(pm16_sum))
+
+for(i in seq_along(pm16_sum$Sweep)){
+  if(pm16_sum$Sweep[i] == 1){
+    pm16_sum$spc[i] <- 0
+  } else if(pm16_sum$Sweep[i] == 2) {
+    #  z[i] <- cumsum(x[i-1])
+    pm16_sum$spc[i] <- pm16_sum$abun[i-1]
+  } else {
+    pm16_sum$spc[i] <- sum(pm16_sum$abun[(i-2):(i-1)])
+  }
+}
+
+p <- ggplot(pm16_sum[pm16_sum$Species == "AS",], 
+            aes(x = spc, y = abun, 
+                group = Station, fill = Station,
+                text = paste("SPC: ", spc, "\n",
+                   "Abund: ", abun, "\n",
+                   "Stn: ", Station, "\n",
+                   "Sweep: ", Sweep,
+                   sep = "")
+          )) +
   geom_point() +
-  geom_line() +
-  facet_wrap(vars(Species))
-p
+  geom_line() 
+#  geom_smooth(method='lm', se = F) 
+#  facet_wrap(vars(Species))
 
-plotly::ggplotly(p)
+p
+plotly::ggplotly(p, tooltip = "text")
+
+
+
+## GF ----
+# goodness of fit as recommended in Lockwood 2000
+## The test statistic χ 2 from Equation (15) is compared with chi-square (0.95), Table 2, with k-2 degrees of freedom (df). Note that two degrees of freedom are lost because N is estimated (Snedecor and Cochran 1991:77). If 2 χ 2 < χ(0.95), probability of capture did not differ significantly (at the 95% level of certainty) between passes; if χ 2 ≥ χ(0.95) , then probability of capture was significantly different with 95% certainty (don't think this last part is right.
+
+out$GF <- with(out, round((c1 - (No*p))^2/No*p + 
+                 (c2 - No*(1-p)*p)^2/(No*(1-p)*p) +
+                 (c3 - (No*(1-p)^2*p))^2/(No*(1-p)^2*p)
+  ,4)             
+)
+out
+
+temp <- 10
+my_varıable
+# a comparison of the GF statistics with the sum of previous catches plots gives good correspondence but the plots tell you why there is a lack of fit.
+
+pchisq(0.03478419, 2)
+pchisq(out$GF[1], 2)
+
+
+# matches Lockwood 2000 more or less - i confirmed that the small discrepancies are due to rounding error by Lockwood
+N = 546
+p = 0.5496
+c1 = 300
+c2 = 130
+c3 = 69
+(c1 - (N*p))^2/N*p + 
+  (c2 - N*(1-p)*p)^2/(N*(1-p)*p) +
+  (c3 - (N*(1-p)^2*p))^2/(N*(1-p)^2*p)
+
+1-pchisq(1.2813, 2) #- this is the pvalue
+qchisq(1-0.5269498, 2) #- returns the test statistic
+qchisq(0.95, 1) #- gives the critical test
+
+
+# Seber Goodness of Fit test for three passes
+cs_gf <- function(N, p, c1, c2, c3){
+  (c1 - (N*p))^2/N*p + 
+    (c2 - N*(1-p)*p)^2/(N*(1-p)*p) +
+    (c3 - N*(1-p)^2*p)^2/(N*(1-p)^2*p)
+  }
+
+
+# test 8A
+N = 1426
+p = 0.1
+c1 = 150
+c2 = 103
+c3 = 133
+cs_gf(N, p, c1, c2, c3)
+
+
+# test 1
+i = 2
+N = out$No[i]
+p = out$p[i]
+c1 = out$c1[i]
+c2 = out$c2[i]
+c3 = out$c3[i]
+cs_gf(N, p, c1, c2, c3)
+
+1-pchisq(7.656638, 2) #- this is the pvalue
+qchisq(0.95, 1) #- gives the critical test
+
+
+
+pm16_sum[pm16_sum$Species == "AS",] |> print(n=Inf)
+
+
+
+# just a scratch to figure out how to do cumsum and sum properly
+x <- 1:10
+cumsum(x[1:3])
+z <- rep(NA, 10)
+i = 10
+for(i in seq_along(x)){
+  if(i == 1){
+    z[i] <- 0
+  } else if(i > 2) {
+    #  z[i] <- cumsum(x[i-1])
+    z[i] <- sum(x[c(1:i-1)])
+  }
+}
+z
+z[3]
+
+cumsum(x[c(1:i-1)])
+sum(x[c(1:i-1)])
+
+
+
+
+#  mutate(counter = if_else(Sweep == 1, 0, 1)) |>
+#mutate(spc = if_else(Sweep == 1, 0, lag(abun)) # sum previous catch
+#mutate(spc = if_else(Sweep == 1, 0, sum(lag(abun, Sweep - 1)))) # sum previous catch
+#mutate(spc = case_when(Sweep == 1, 0, lag(abun, Sweep-1)) # sum previous catch
+
+sum(abun[1:n-1])
+pm16_sum
+pm16_sum |> print(n = Inf)
+
+sum(lag(pm16_sum$abun[1:3], as.numeric(pm16_sum$Sweep[1:3])))
+lag(pm16_sum$abun[2], pm16_sum$Sweep[1])
+
+lag(as.numeric(pm16_sum$abun[1:3]), n= 2)
+str(pm16_sum)
 
 # END ----
