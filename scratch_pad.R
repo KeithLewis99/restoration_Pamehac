@@ -147,11 +147,14 @@ res
 res[res$spp == "AS",]
 
 ## get all output from "removal" and put in list for comparisions and to figure out why some of the variances are so huge
-res_list <- apply(pm16_tab1[c(1:20, 29:30), c(-1:-2)], MARGIN=1, FUN = removal, method = "CarleStrub")
+res_list <- apply(pm16_tab1[c(1:20, 29:30), c(-1:-2)], MARGIN=1, FUN = removal, method = "CarleStrub") # 
 res_list[[1]]
 
 
-round(c(res_list[[1]]$catch, res_list[[1]]$int, res_list[[1]]$est[1:5]), 2)
+# had to drop the last row bc only 2 passes
+res_list <- apply(pm16_tab1[c(1:20, 29), c(-1:-2)], MARGIN=1, FUN = removal, method = "Moran", just.est = T, Tmult = 20) # CarleStrub
+
+
 
 # create a matrix to be populated by output from res_list
 out <- as.data.frame(matrix(NA, 10, 11))
@@ -178,11 +181,12 @@ with(out, plot(c3/T, p)) # negative linear relationship - suggests that the lowe
 
 
 # equal capture ----
+## there are two assumptions here - equal catchability in all sampling efforts and equal capture among groups.
 ## plot ----
 # decrease in abundance with sweep
 library(ggplot2)
 p <- ggplot(pm16_sum, 
-            aes(x = as.factor(Sweep), y = bio.sum, 
+            aes(x = as.factor(Sweep), y = abun, 
                 group = Station, fill = Station,
                     text = paste("Sweep: ", Sweep, "\n",
               #"Abund: ", abun, "\n",
@@ -299,6 +303,66 @@ qchisq(0.95, 1) #- gives the critical test
 pm16_sum[pm16_sum$Species == "AS",] |> print(n=Inf)
 
 
+## equal capture - groups ----
+ggplot(res, aes(x = sta, y = p, group = spp)) +
+  geom_point() + 
+  geom_errorbar(aes(ymax = p.UCI, ymin=p.LCI), width = 0.25) +
+  facet_grid(~spp)
+
+
+pm16_tab2 <- pm16_tab1 |>
+  group_by(Station) |>
+  summarise(s1 = sum(`1`, na.rm = T), s2 = sum(`2`, na.rm = T), s3 = sum(`3`, na.rm = T))
+pm16_tab2
+
+res1 <- apply(pm16_tab2[, -1], MARGIN=1, FUN = removal, method = "CarleStrub", just.ests=T)  
+
+res1 <- data.frame(sta = pm16_tab2$Station, 
+                  t(res1))
+res1
+
+
+# capture prob
+ggplot(res1, aes(x = sta, y = p)) +
+  geom_point() + 
+  geom_errorbar(aes(ymax = p.UCI, ymin=p.LCI), width = 0.25)
+
+
+
+pm16_sum$spc <- rep(NA, nrow(pm16_sum))
+
+for(i in seq_along(pm16_sum$Sweep)){
+  if(pm16_sum$Sweep[i] == 1){
+    pm16_sum$spc[i] <- 0
+  } else if(pm16_sum$Sweep[i] == 2) {
+    #  z[i] <- cumsum(x[i-1])
+    pm16_sum$spc[i] <- pm16_sum$abun[i-1]
+  } else {
+    pm16_sum$spc[i] <- sum(pm16_sum$abun[(i-2):(i-1)])
+  }
+}
+
+pm16_sum_comb <- pm16_sum |>
+  group_by(Station, Sweep) |>
+  summarise(sum_abun = sum(abun), sum_spc = sum(spc))
+
+p <- ggplot(pm16_sum_comb, 
+            aes(x = sum_spc, y = sum_abun, 
+                group = Station, fill = Station,
+                text = paste("SPC: ", sum_spc, "\n",
+                             "Abund: ", sum_abun, "\n",
+                             "Stn: ", Station, "\n",
+                             "Sweep: ", Sweep,
+                             sep = "")
+            )) +
+  geom_point() +
+  geom_line() 
+#  geom_smooth(method='lm', se = F) 
+#  facet_wrap(vars(Species))
+
+p
+plotly::ggplotly(p, tooltip = "text")
+
 
 # just a scratch to figure out how to do cumsum and sum properly
 x <- 1:10
@@ -336,5 +400,19 @@ lag(pm16_sum$abun[2], pm16_sum$Sweep[1])
 
 lag(as.numeric(pm16_sum$abun[1:3]), n= 2)
 str(pm16_sum)
+
+
+# import files in catch and convert to proper format
+#create a pattern and bind directory to pattern
+temp = list.files(path = "data/year_summaries/", pattern="Pamehac_.*_by_station.csv$", full.names = T)
+
+# import files as a list
+myfiles = (lapply(temp, read.delim))
+str(myfiles)
+
+# create either a large dataframe and then do some summaries
+# as above, create summaries for FSA
+# 
+
 
 # END ----
