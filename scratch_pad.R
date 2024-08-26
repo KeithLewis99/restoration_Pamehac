@@ -152,7 +152,8 @@ res_list[[1]]
 
 
 # had to drop the last row bc only 2 passes
-res_list <- apply(pm16_tab1[c(1:20, 29), c(-1:-2)], MARGIN=1, FUN = removal, method = "Moran", just.est = T, Tmult = 20) # CarleStrub
+## This was an attempt to deal with the unequal capture rates but both the Moran and Schnute methods produce UCIs that are infinite and adjusting Tmult doesn't really seem to help.
+# res_list <- apply(pm16_tab1[c(1:20, 29), c(-1:-2)], MARGIN=1, FUN = removal, method = "Moran", just.est = T, Tmult = 20) # CarleStrub
 
 
 
@@ -247,7 +248,7 @@ out$GF <- with(out, round((c1 - (No*p))^2/No*p +
 out
 
 temp <- 10
-my_varıable
+
 # a comparison of the GF statistics with the sum of previous catches plots gives good correspondence but the plots tell you why there is a lack of fit.
 
 pchisq(0.03478419, 2)
@@ -401,18 +402,95 @@ lag(pm16_sum$abun[2], pm16_sum$Sweep[1])
 lag(as.numeric(pm16_sum$abun[1:3]), n= 2)
 str(pm16_sum)
 
-
+# import ----
 # import files in catch and convert to proper format
 #create a pattern and bind directory to pattern
 temp = list.files(path = "data/year_summaries/", pattern="Pamehac_.*_by_station.csv$", full.names = T)
 
 # import files as a list
-myfiles = (lapply(temp, read.delim))
-str(myfiles)
+ls_pam = (lapply(temp, read.csv))
+str(ls_pam)
+str(ls_pam,1)
+str(ls_pam[1])
+
+names(ls_pam) <- c("1990", "1991", "1992", "1996", "2016")
+ ls_pam[1][[1]]$Station
+ ls_pam[1]$'1990'$Station
+ ls_pam$'1990'$Station
+
+ls_pam[1]$'1990'$Station <- as.character(ls_pam[1]$'1990'$Station)
+
+
 
 # create either a large dataframe and then do some summaries
 # as above, create summaries for FSA
 # 
+str(ls_pam[1])
+library(dplyr)
+df_all <- bind_rows(ls_pam)
+
+# make all the sites the same name
+## remove SITE
+for(i in seq_along(df_all$Station)){
+  df_all$Station[i] <- gsub("SITE\\s", paste0("\\6"), df_all$Station[i])
+}
+## remove "space"
+unique(df_all$Station)
+for(i in seq_along(df_all$Station)){
+  df_all$Station[i] <- gsub("*\\s", paste0("\\1"), df_all$Station[i])
+}
+unique(df_all$Station)
+
+## remove "space" for Species
+unique(df_all$Species)
+for(i in seq_along(df_all$Species)){
+  df_all$Species[i] <- gsub("*\\s", paste0("\\1"), df_all$Species[i])
+}
+unique(df_all$Species)
+
+
+# first, create a table for T
+source("functions.R")
+df_sum <- df_all |>
+  group_by(Year, Species, Station, Sweep) |>
+  summarise(bio.sum = sum(Weight.g), abun = n()) 
+
+# calculate sum of previous catch
+df_sum$spc <- NA
+spc(df_sum)
+str(df_sum, give.attr=F)
+
+# view
+df_view <- df_sum |>
+  filter(Species == "AS") |>
+  pivot_wider(id_cols = c(Year, Species, Sweep),
+              names_from = Station, 
+              values_from =abun) 
+df_view |> print(n=Inf)
+
+# calculate T
+library(tidyr)
+df_tab <- df_sum |>
+  summarise(T = sum(abun)) |> 
+  pivot_wider(id_cols = c(Year, Species),
+              names_from = Station, 
+              values_from =T)
+
+df_tab |> print(n=Inf)
+str(df_tab, give.attr = F)
+
+
+# check that these are actually the variances of T
+df_var <- df_tab |>
+  group_by(Species) |>
+  summarise(across(!c(Year), .f = var, na.rm=T)) 
+df_var
+
+# this is the calibration site
+df_max <- df_var |> 
+  pivot_longer(!Species, names_to = "Station", values_to = "Variance") |>
+  group_by(Species) |>
+  slice(which.max(Variance))
 
 
 # END ----
