@@ -417,8 +417,11 @@ names(ls_pam) <- c("1990", "1991", "1992", "1996", "2016")
  ls_pam[1][[1]]$Station
  ls_pam[1]$'1990'$Station
  ls_pam$'1990'$Station
+ ls_pam[[1]]$Station # gets to contents directly
+ ls_pam[["1990"]]$Station
 
-ls_pam[1]$'1990'$Station <- as.character(ls_pam[1]$'1990'$Station)
+# change 1990# change 1990# change 1990 to character variable 
+ ls_pam[["1990"]]$Station <- as.character(ls_pam[["1990"]]$Station)
 
 
 
@@ -442,7 +445,6 @@ for(i in seq_along(df_all$Station)){
 unique(df_all$Station)
 
 ## remove "space" for Species
-unique(df_all$Species)
 for(i in seq_along(df_all$Species)){
   df_all$Species[i] <- gsub("*\\s", paste0("\\1"), df_all$Species[i])
 }
@@ -457,8 +459,161 @@ df_sum <- df_all |>
 
 # calculate sum of previous catch
 df_sum$spc <- NA
-spc(df_sum)
+
+library(purrr)
+source("functions.R")
+test <- df_sum |>
+  group_by(Year, Species, Station) |>
+  mutate(.fns = spc(df_sum))
+
+map(df_sum, spc(df_sum))
+
+test <- apply(df_sum, 1, FUN = function(x) spc)
+
+df_sum <- spc(arrange(df_sum, Year, Species, Station, Sweep))
 str(df_sum, give.attr=F)
+View(df_sum)
+write.csv2()
+
+
+a <- sort(rep(1:4, 3))
+b <- rep(seq(1,3), 4)
+c <- rep(c(10, 5, 1), 4)
+
+df <- as.data.frame(cbind(a, b, c))
+
+# this works but crazy number of filters
+
+
+test <- df_sum %>%
+  filter(!(Species == "ASYOY" & Station == 6 & Year == 1990)) |>
+  filter(!(Species == "BT" & Station == 5 & Year == 1990)) |>
+  filter(!(Species == "BTYOY" & Station == 4 & Year == 1990)) |>
+  filter(!(Species == "BTYOY" & Station == 5 & Year == 1990)) |>
+  filter(!(Species == "ASYOY" & Station == 5 & Year == 1991)) |>
+  filter(!(Species == "BTYOY" & Station == 8 & Year == 1991)) |>
+  filter(!(Species == "AS" & Station == 5 & Year == 1992)) |>
+  filter(!(Species == "AS" & Station == 9 & Year == 1992)) |>
+  filter(!(Species == "BTYOY" & Station == 7 & Year == 1992)) |>
+  filter(!(Species == "ASYOY" & Station == 5 & Year == 1996)) |>
+  filter(!(Species == "ASYOY" & Station == 6 & Year == 1996)) |>
+  filter(!(Species == "ASYOY" & Station == 8 & Year == 1996)) |>
+  filter(!(Species == "BT" & Station == 4 & Year == 1996)) |>
+  filter(!(Species == "BT" & Station == "8A" & Year == 1996)) |>
+  filter(!(Species == "BTYOY" & Station == 4 & Year == 2016)) |>
+  filter(!(Species == "BT" & Station == 3 & Year == 2016)) |>
+  filter(!(Species == "BTYOY" & Station == 1 & Year == 2016)) |>
+  group_by(Year, Species, Station) |>
+  mutate(spc = case_when(
+    Sweep == 1 ~ 0,
+    Sweep == 2 ~ abun[Sweep == 1],
+    Sweep == 3 ~ sum(c(abun[Sweep == 1 | Sweep == 2])),
+    Sweep == 4 ~ sum(c(abun[Sweep == 1 | Sweep == 2 | Sweep == 3])),
+    Sweep == 5 ~ sum(c(abun[Sweep == 1 | Sweep == 2 | Sweep == 3 | Sweep == 4]))
+  ))
+
+test
+View(test)
+View(test[test$Species == "ASYOY",])
+
+
+
+
+
+# as above but try and remove when not caught on first sample - these will just be zeros - this is close
+test <- df_sum %>%
+  filter(!(Species == "ASYOY" & Station == 6 & Year == 1990)) |>
+  # filter(!(Species == "BT" & Station == 5 & Year == 1990)) |>
+  # filter(!(Species == "BTYOY" & Station == 4 & Year == 1990)) |>
+  # filter(!(Species == "BTYOY" & Station == 5 & Year == 1990)) |>
+  filter(!(Species == "ASYOY" & Station == 5 & Year == 1991)) |>
+  #filter(!(Species == "BTYOY" & Station == 8 & Year == 1991)) |>
+  filter(!(Species == "AS" & Station == 5 & Year == 1992)) |>
+  filter(!(Species == "AS" & Station == 9 & Year == 1992)) |>
+  #filter(!(Species == "BTYOY" & Station == 7 & Year == 1992)) |>
+  filter(!(Species == "ASYOY" & Station == 5 & Year == 1996)) |>
+  filter(!(Species == "ASYOY" & Station == 6 & Year == 1996)) |>
+  filter(!(Species == "ASYOY" & Station == 8 & Year == 1996)) |>
+  # filter(!(Species == "BT" & Station == 4 & Year == 1996)) |>
+  # filter(!(Species == "BT" & Station == "8A" & Year == 1996)) |>
+  # filter(!(Species == "BTYOY" & Station == 4 & Year == 2016)) |>
+  # filter(!(Species == "BT" & Station == 3 & Year == 2016)) |>
+  # filter(!(Species == "BTYOY" & Station == 1 & Year == 2016)) |>
+  group_by(Year, Species, Station) |>
+  mutate(spc = case_when(
+    min(Sweep) > 1 ~ 0,
+     (min(Sweep) == 1 & Sweep == 1) ~ 0))
+#    (min(Sweep) == 1 & Sweep == 2) ~ abun[Sweep == 1]))
+    # Sweep == 3 ~ sum(c(abun[Sweep == 1 | Sweep == 2])),
+    # Sweep == 4 ~ sum(c(abun[Sweep == 1 | Sweep == 2 | Sweep == 3])),
+    # Sweep == 5 ~ sum(c(abun[Sweep == 1 | Sweep == 2 | Sweep == 3 | Sweep == 4]))
+df_sum$spc <- NA
+df_sum[df_sum$Year == 1990 & df_sum$Species == "BT" & df_sum$Station == 6,] |>
+  group_by(Station) |>
+  #summarise(min = min(Sweep))
+  mutate(spc = case_when(
+    (min(Sweep) > 1 & Sweep == min(Sweep)) ~ 0,
+    (min(Sweep) == 1 & Sweep == 1) ~ 0,
+    (min(Sweep) == 1 & Sweep == 2) ~ abun[Sweep == 1]))
+
+View(test)
+
+# this works for a subset!!!!
+df_sum[df_sum$Year == 1990 & df_sum$Species == "AS" & df_sum$Station == 6,] |>
+  group_by(Station) |>
+  #summarise(min = min(Sweep))
+  mutate(spc = case_when(
+    Sweep == 1 ~ 0,
+    Sweep == 2 ~ ifelse(any(Sweep == 1), abun[Sweep ==1], 0),
+    Sweep == 3 ~ ifelse(any(Sweep == 1), sum(c(abun[Sweep == 1 | Sweep == 2])), NA),
+    Sweep == 4 ~ ifelse(any(Sweep == 1), sum(c(abun[Sweep == 1 | Sweep == 2 | Sweep == 3])), NA),
+    Sweep == 5 ~ ifelse(any(Sweep == 1), sum(c(abun[Sweep == 1 | Sweep == 2 | Sweep == 3 | Sweep == 4])), -1)
+    
+    ))
+
+
+
+test <- df_sum |>
+  group_by(Year, Species, Station) |>
+  #summarise(min = min(Sweep))
+  mutate(spc = case_when(
+    Sweep == 1 ~ 0,
+    Sweep == 2 ~ ifelse(any(Sweep == 1), abun[Sweep ==1], 0),
+    Sweep == 3 ~ ifelse(any(Sweep == 1), sum(c(abun[Sweep == 1 | Sweep == 2])), NA),
+    Sweep == 4 ~ ifelse(any(Sweep == 1), sum(c(abun[Sweep == 1 | Sweep == 2 | Sweep == 3])), NA),
+    Sweep == 5 ~ ifelse(any(Sweep == 1), sum(c(abun[Sweep == 1 | Sweep == 2 | Sweep == 3 | Sweep == 4])), -1)
+    
+  ))
+
+View(test)
+
+
+
+df_sum |>
+  filter(Year == 1990 & Species == "BT" & Station == 5) |>
+  summarise(min = min(Sweep))
+
+library(ggplot2)
+p <- ggplot(
+            #df_sum,
+            #df_sum[df_sum$Species == "AS",], 
+            df_sum[df_sum$Species == "AS" & df_sum$Year == 2016,], 
+            aes(x = spc, y = abun, 
+                group = Station, fill = Station,
+                text = paste("SPC: ", spc, "\n",
+                             "Abund: ", abun, "\n",
+                             "Stn: ", Station, "\n",
+                             "Sweep: ", Sweep,
+                             sep = "")
+            )) +
+  geom_point() +
+  geom_path() +
+#  geom_smooth(method='lm', se = F) 
+  facet_wrap(vars(Year))
+
+p
+
+#####DO SPC GRAPHS and GF tests######
 
 # view
 df_view <- df_sum |>
@@ -479,7 +634,7 @@ df_tab <- df_sum |>
 df_tab |> print(n=Inf)
 str(df_tab, give.attr = F)
 
-
+###### CHECK THIS####
 # check that these are actually the variances of T
 df_var <- df_tab |>
   group_by(Species) |>
