@@ -500,7 +500,7 @@ df_tmp
 df_sum <- bind_rows(df_sum, df_tmp) |>
   arrange(Year, Species, Station, Sweep)
 
-View(df_sum)
+#View(df_sum)
 
 # now for when Sweep == 1 is True but there is a missing sweeps - don't need this bc you are only using the first value but it will make the spc graphs a bit hard to interpret
 # test <- df_sum |>
@@ -540,6 +540,7 @@ p
 
 # but first, let's get some summary stats
 ## number of sweeps per station
+library(tidyr)
 df_sum |>
   group_by(Year, Species, Station) |>
   summarize(Sweeps = length(Sweep)) |>
@@ -556,15 +557,20 @@ df_sum |>
 library(tidyr)
 df_tab1 <- df_sum |>
   group_by(Year, Species, Station) |>
-  filter(length(Sweep) > 1) |>
+  #filter(Sweep <=3 & length(Sweep) > 1 | is.na(Sweep == 2)) |>
+#  filter(length(Sweep) > 1 & Sweep <= 3) |>
+  filter(length(Sweep) > 1 & Sweep <= 3) |>
+#& !is.null(Sweep == 2) | length(Sweep) > 1 & !is.null(Sweep == 3)) |>
   ungroup() |>
   pivot_wider(id_cols = c(Year, Species, Station), 
-              names_from = Sweep, values_from = abun) #bio.sum abun
+              names_from = Sweep, values_from = abun) |> #bio.sum abun
+  filter(!(is.na(`2`) & is.na(`3`))) 
 df_tab1 |> print(n = Inf)
 
+library(FSA)
+#res_list <- apply(df_tab1[c(1:2, 4:10), c(4:6)], MARGIN=1, FUN = removal, method = "CarleStrub") # 
+res_list <- apply(df_tab1[, c(4:6)], MARGIN=1, FUN = removal, method = "CarleStrub") # takes NA's
 
-res_list <- apply(df_tab1[c(1:2, 4:10), c(4:6)], MARGIN=1, FUN = removal, method = "CarleStrub") # 
-res_list[[1]]
 
 # this works but only when three catches so maybe that is fine - filter above on this.
 out <- as.data.frame(matrix(NA, length(res_list), 11))
@@ -572,16 +578,40 @@ colnames(out) <- c("c1",  "c2", "c3","k",  "T", "X",
                    "No",  "No.se", "No.LCI", 
                    "No.UCI", "p"
 )
-# loop to extract output from res_list
+
+# loop to extract output from res_list when catch 2 or catch 3 is NA
+# for(i in seq_along(res_list)){
+#   if(length(res_list[[i]]$catch) ==3){
+#     out[i,] <- round(c(res_list[[i]]$catch, 
+#                        res_list[[i]]$int, 
+#                        res_list[[i]]$est[1:5]), 2)
+#     
+#   }
+# }
+# out
+# out <- cbind(sta = pm16_tab1$Station[c(1:10)], out)
+
+
 for(i in seq_along(res_list)){
-  out[i,] <- round(c(res_list[[i]]$catch, 
-                     res_list[[i]]$int, 
-                     res_list[[i]]$est[1:5]), 2)
-  
-  #return(out)
+  if(length(res_list[[i]]$catch) ==3){
+    out[i,] <- round(c(res_list[[i]]$catch, 
+                       res_list[[i]]$int, 
+                       res_list[[i]]$est[1:5]), 2)
+    
+  } else if (names(res_list[[i]]$catch[2]) == 2 & 
+             length(res_list[[i]]$catch) == 2){
+    out[i,c(1:2, 4:11)] <- round(c(res_list[[i]]$catch, 
+                       res_list[[i]]$int, 
+                       res_list[[i]]$est[1:5]), 2)
+  } else if (names(res_list[[i]]$catch[2]) == 3 & 
+             length(res_list[[i]]$catch) == 2){
+    out[i,c(1, 3:11)] <- round(c(res_list[[i]]$catch, 
+                                   res_list[[i]]$int, 
+                                   res_list[[i]]$est[1:5]), 2)
+  }
 }
-out
-out <- cbind(sta = pm16_tab1$Station[c(1:10)], out)
+
+View(out)
 
 
 
