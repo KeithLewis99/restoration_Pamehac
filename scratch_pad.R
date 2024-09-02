@@ -513,12 +513,10 @@ df_sum <- bind_rows(df_sum, df_tmp) |>
 #View(test1)  
 
 ## spc plot ----
+### year by spp ----
 library(ggplot2)
 p <- ggplot(
             df_sum,
-            #df_sum[df_sum$Species == "AS",], 
-            #df_sum[df_sum$Species == "AS" & df_sum$Station == 8,], 
-            #df_sum[df_sum$Species == "AS" & df_sum$Year == 2016,], 
             aes(x = spc, y = abun, 
                 group = Station, fill = Station,
                 text = paste("SPC: ", spc, "\n",
@@ -529,11 +527,29 @@ p <- ggplot(
             )) +
   geom_point() +
   geom_path() +
-#  geom_smooth(method='lm', se = F) 
-  #facet_wrap(vars(Year))
   facet_grid(Year ~ Species)
 
 p
+
+### subset ----
+p <- ggplot(
+  #df_sum[df_sum$Species == "AS",], 
+  #df_sum[df_sum$Species == "AS" & df_sum$Station == 8,], 
+  df_sum[df_sum$Species == "AS" & df_sum$Year == 2016,], 
+  aes(x = spc, y = abun, 
+      group = Station, fill = Station,
+      text = paste("SPC: ", spc, "\n",
+                   "Abund: ", abun, "\n",
+                   "Stn: ", Station, "\n",
+                   "Sweep: ", Sweep,
+                   sep = "")
+  )) +
+  geom_point() +
+  geom_path()
+
+p
+
+plotly:: ggplotly(p, tooltip = "text")
 
 ## GF ----
 ## need to set up for CS and then calculate GF based on L243
@@ -611,12 +627,104 @@ for(i in seq_along(res_list)){
   }
 }
 
+
+out <- cbind(year = df_tab1$Year, 
+             spp = df_tab1$Species, 
+             sta = df_tab1$Station, 
+             out)
+
 View(out)
+head(out)
+out |> filter(spp == "AS" & year == 2016)
 
 
+### GF calc ----
 
-## use GF, spc and variance to determine calibration stream
+out$GF <- with(out, round((c1 - (No*p))^2/No*p + 
+                            (c2 - No*(1-p)*p)^2/(No*(1-p)*p) +
+                            (c3 - (No*(1-p)^2*p))^2/(No*(1-p)^2*p)
+                          ,4)             
+)
+
+
+1-pchisq(1.2813, 2) #- this is the pvalue
+qchisq(1-0.5269498, 2) #- returns the test statistic
+qchisq(0.95, 1) #- gives the critical test 3.84
+
+# total year:spp:site:catch
+nrow(df_sum)
+
+# total year:spp:site
+df_sum |> group_by(Year, Species, Station) |> 
+  summarise (catch_num = n()) |> 
+  ungroup() |>
+  summarise(tot = n())
+
+length(unique(df_sum$Year))
+length(unique(df_sum$Station))
+
+# sum catches by year and species
+df_tab1 |>
+  group_by(Year, Species) |>
+  summarise(sum_c1 = sum(`1`, na.rm = T),
+            sum_c2 = sum(`2`, na.rm = T),
+            sum_c3 = sum(`3`, na.rm = T)
+            )
+
+# sum catches by year
+df_tab1 |>
+  group_by(Species) |>
+  summarise(sum_c1 = sum(`1`, na.rm = T),
+            sum_c2 = sum(`2`, na.rm = T),
+            sum_c3 = sum(`3`, na.rm = T)
+  )
+
+
+# filter out sites with only 1 catch or where c2 & c3 == NA
+nrow(out)
+out |> filter(GF > qchisq(0.95, 1)) # 10 sites don't make GF with T > 30 on 5 sites 
+nrow(out |> filter(GF > qchisq(0.95, 1)))
+out |> filter(T < 30)
+nrow(out |> filter(T < 30)) # 97 of 124
+nrow(out |> filter(T < 20)) # 85 of 124
+nrow(out |> filter(T < 10)) # 57 of 124
+
+# density of total catch
+plot(density(out$T))
+
+
+p <- ggplot(out, aes(x = T, y = No, group = as.factor(spp), colour = spp)) +
+  geom_point()
+p
+
+
+## Hedger ----
 ### from Hedger et al
+
+# calibration site
+df_cal <- out |>
+  filter(X > 30 & GF < qchisq(0.95, 1)) |>
+  group_by(year) |>
+  filter(length(year) >3)
+df_cal |> print(n = Inf)
+
+
+df_cal <- out |>
+  group_by(sta, spp) |>
+  filter(n() > 3) |>
+  arrange(spp, sta, year) #|>
+#  ungroup() |>
+#  filter(X > 20 & GF < qchisq(0.95, 1)) 
+df_cal |> print(n = Inf)
+View(df_cal)
+
+df_var_test <- out |>
+  group_by(spp, sta) |>
+  summarise(var = var(T))
+
+df_var_test |> print(n = Inf)
+
+
 ### Prob capture[i] = number captured[i]/T - number captured[i-1]
 ### then, apply this from the calibration stream to all sites to get N = number captured[1]/prob capture.  
 
@@ -631,24 +739,25 @@ df_view <- df_sum |>
               values_from =abun) 
 df_view |> print(n=Inf)
 
-# calculate T
-
-df_tab <- df_sum |>
+# calculate T in order to find site with greatest variance
+df_tabT <- df_sum |>
   summarise(T = sum(abun)) |> 
   pivot_wider(id_cols = c(Year, Species),
               names_from = Station, 
               values_from =T)
 
-df_tab |> print(n=Inf)
-str(df_tab, give.attr = F)
+df_tabT |> print(n=Inf)
+str(df_tabT, give.attr = F)
 
-df_tab[df_tab$Species == "AS",]
+df_tabT[df_tabT$Species == "AS",]
 vt <- c(2, "NA", 2, 21, 36)
+vt <- df_tabT[df_tabT$Species == "AS", 3]
 var(vt, na.rm = T)
 
 ###### CHECK THIS####
 # check that these are actually the variances of T - they are
-df_var <- df_tab |>
+## and update this as its deprecated
+df_var <- df_tabT |>
   group_by(Species) |>
   summarise(across(!c(Year), .f = var, na.rm=T)) 
 df_var
@@ -658,12 +767,21 @@ df_max <- df_var |>
   pivot_longer(!Species, names_to = "Station", values_to = "Variance") |>
   group_by(Species) |>
   slice(which.max(Variance))
+df_max
 
+# use these to see if sites in df_max are suitable
+target <- c(6, 8, 9)
+out |> filter(sta %in% c(6, 8, 9))
+
+species <- "BTYOY"
+out |> filter(sta == 9 & spp == species)
+df_tabT |> filter(Species == species) |>
+  select(Year, Species, `9`)
 
 p <- ggplot(
   #df_sum,
   #df_sum[df_sum$Species == "AS",], 
-  df_sum[df_sum$Species == "AS" & df_sum$Station == 8,], 
+  df_sum[df_sum$Species == "BTYOY" & df_sum$Station == 6,], 
   #df_sum[df_sum$Species == "AS" & df_sum$Year == 2016,], 
   aes(x = spc, y = abun, 
       group = Station, fill = Station,
