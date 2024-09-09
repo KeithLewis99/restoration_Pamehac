@@ -421,7 +421,7 @@ names(ls_pam) <- c("1990", "1991", "1992", "1996", "2016")
  ls_pam[[1]]$Station # gets to contents directly
  ls_pam[["1990"]]$Station
 
-# change 1990# change 1990# change 1990 to character variable 
+ # change 1990# change 1990# change 1990 to character variable 
  ls_pam[["1990"]]$Station <- as.character(ls_pam[["1990"]]$Station)
 
 
@@ -462,7 +462,7 @@ df_sum <- df_all |>
 # calculate sum of previous catch
 df_sum$spc <- NA
 
-write.csv2()
+# for later - write.csv2()
 
 
 # calculate spc and flag sites without a Sweep == 1
@@ -480,7 +480,7 @@ df_sum <- df_sum |>
 View(df_sum)
 
 
-# in order to add a Sweep == 1 where abundance == 0, need a subset where 1st sweep != 0; it didn't need to be minimum but then its consistent
+# in the original data, when no fish is caught, there is no row.  Therefore, in order to add a Sweep == 1 where abundance == 0, need a subset where 1st sweep != 0; it didn't need to be minimum but then its consistent
 test <- df_sum |>
   group_by(Year, Species, Station) |>
   filter(!any(Sweep == 1)) |>
@@ -502,7 +502,7 @@ df_sum <- bind_rows(df_sum, df_tmp) |>
 
 #View(df_sum)
 
-# now for when Sweep == 1 is True but there is a missing sweeps - don't need this bc you are only using the first value but it will make the spc graphs a bit hard to interpret
+# now for when Sweep == 1 is True but there is a missing sweep - don't need this bc you are only using the first value but it will make the spc graphs a bit hard to interpret
 # test <- df_sum |>
 #     #filter(na.omit) 
 #     filter(!is.na(spc)) |>  
@@ -569,7 +569,7 @@ df_sum |>
 
 
 
-# tabulate so that catches are columns - required for FSA::removal
+# tabulate by Year:Species:Station and so that catches are individual columns - required for FSA::removal
 library(tidyr)
 df_tab1 <- df_sum |>
   group_by(Year, Species, Station) |>
@@ -583,6 +583,8 @@ df_tab1 <- df_sum |>
   filter(!(is.na(`2`) & is.na(`3`))) 
 df_tab1 |> print(n = Inf)
 
+
+### CS ----
 library(FSA)
 #res_list <- apply(df_tab1[c(1:2, 4:10), c(4:6)], MARGIN=1, FUN = removal, method = "CarleStrub") # 
 res_list <- apply(df_tab1[, c(4:6)], MARGIN=1, FUN = removal, method = "CarleStrub") # takes NA's
@@ -639,7 +641,6 @@ out |> filter(spp == "AS" & year == 2016)
 
 
 ### GF calc ----
-
 out$GF <- with(out, round((c1 - (No*p))^2/No*p + 
                             (c2 - No*(1-p)*p)^2/(No*(1-p)*p) +
                             (c3 - (No*(1-p)^2*p))^2/(No*(1-p)^2*p)
@@ -651,6 +652,7 @@ out$GF <- with(out, round((c1 - (No*p))^2/No*p +
 qchisq(1-0.5269498, 2) #- returns the test statistic
 qchisq(0.95, 1) #- gives the critical test 3.84
 
+## Summary stats
 # total year:spp:site:catch
 nrow(df_sum)
 
@@ -701,23 +703,28 @@ p
 ## Hedger ----
 ### from Hedger et al
 
-# calibration site
+# calibration site - more than 30 fish, chi-sq < chi-sq critical value, and more than 3 years
 df_cal <- out |>
-  filter(X > 30 & GF < qchisq(0.95, 1)) |>
-  group_by(year) |>
-  filter(length(year) >3)
-df_cal |> print(n = Inf)
-
-
-df_cal <- out |>
+  #filter(X > 30 & GF < qchisq(0.95, 1)) |>
+  #group_by(year) |>
   group_by(sta, spp) |>
-  filter(n() > 3) |>
-  arrange(spp, sta, year) #|>
-#  ungroup() |>
-#  filter(X > 20 & GF < qchisq(0.95, 1)) 
+  filter(length(year) > 3) |>
+  arrange(spp, sta, year)
 df_cal |> print(n = Inf)
 View(df_cal)
 
+
+# what spp:sta groups have more than 3 years
+out |>
+  group_by(sta, spp) |>
+  filter(n() > 3) |>
+  arrange(spp, sta, year) |>
+#  ungroup() |>
+#  filter(X > 20 & GF < qchisq(0.95, 1)) 
+  print(n = Inf)
+
+
+# variance of total catch (T) by spp:sta
 df_var_test <- out |>
   group_by(spp, sta) |>
   summarise(var = var(T))
@@ -730,7 +737,7 @@ df_var_test |> print(n = Inf)
 
 
 
-# view
+# table for abundance by Year:Species:Sweep by Station 
 library(tidyr)
 df_view <- df_sum |>
   filter(Species == "AS") |>
@@ -738,6 +745,7 @@ df_view <- df_sum |>
               names_from = Station, 
               values_from =abun) 
 df_view |> print(n=Inf)
+
 
 # calculate T in order to find site with greatest variance
 df_tabT <- df_sum |>
@@ -749,20 +757,24 @@ df_tabT <- df_sum |>
 df_tabT |> print(n=Inf)
 str(df_tabT, give.attr = F)
 
+# manually calculate variance
 df_tabT[df_tabT$Species == "AS",]
 vt <- c(2, "NA", 2, 21, 36)
 vt <- df_tabT[df_tabT$Species == "AS", 3]
+var(vt, na.rm = T) # both of the above give identical answers
+
+df_tabT[df_tabT$Species == "BTYOY",]
+vt <- df_tabT[df_tabT$Species == "BTYOY", 4]
 var(vt, na.rm = T)
 
-###### CHECK THIS####
-# check that these are actually the variances of T - they are
-## and update this as its deprecated
+# variances of T
+## these match with the manually calcuated variances above - proceed
 df_var <- df_tabT |>
   group_by(Species) |>
-  summarise(across(!c(Year), .f = var, na.rm=T)) 
+  summarise(across(!c(Year), \(x) var(x, na.rm=T))) 
 df_var
 
-# this is the calibration site, i.e, what site has the max variance
+# site with max variance which is what Hedger used, i.e, what site has the max variance
 df_max <- df_var |> 
   pivot_longer(!Species, names_to = "Station", values_to = "Variance") |>
   group_by(Species) |>
@@ -770,18 +782,20 @@ df_max <- df_var |>
 df_max
 
 # use these to see if sites in df_max are suitable
-target <- c(6, 8, 9)
+target <- c(6, 8, 9) # from the Station of df_max
 out |> filter(sta %in% c(6, 8, 9))
+
 
 species <- "BTYOY"
 out |> filter(sta == 9 & spp == species)
 df_tabT |> filter(Species == species) |>
   select(Year, Species, `9`)
 
+# a plot of the site with the most variance
 p <- ggplot(
   #df_sum,
   #df_sum[df_sum$Species == "AS",], 
-  df_sum[df_sum$Species == "BTYOY" & df_sum$Station == 6,], 
+  df_sum[df_sum$Species == "AS" & df_sum$Station == 8,], 
   #df_sum[df_sum$Species == "AS" & df_sum$Year == 2016,], 
   aes(x = spc, y = abun, 
       group = Station, fill = Station,
@@ -797,8 +811,16 @@ p <- ggplot(
 p
 
 
+# extract just estimates - want to see what has a p with low variance
+## create body
+estFSA <- as.data.frame(matrix(NA, length(res_list), 8))
+colnames(estFSA) <- names(res_list[1][[1]]$est)
 
-
+# loop
+for(i in seq_along(res_list)){
+  estFSA[i,] <- res_list[i][[1]]$est
+}
+estFSA
 
 
 # sample data ----
