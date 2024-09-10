@@ -712,7 +712,7 @@ df_cal <- out |>
   arrange(spp, sta, year)
 df_cal |> print(n = Inf)
 View(df_cal)
-
+df_cal |> group_by(stn) |>
 
 # what spp:sta groups have more than 3 years
 out |>
@@ -779,17 +779,23 @@ df_max <- df_var |>
   pivot_longer(!Species, names_to = "Station", values_to = "Variance") |>
   group_by(Species) |>
   slice(which.max(Variance))
-df_max
+df_max # none of these match stations with > 3 years
 
 # use these to see if sites in df_max are suitable
-target <- c(6, 8, 9) # from the Station of df_max
-out |> filter(sta %in% c(6, 8, 9))
+# target <- c(6, 8, 9) # from the Station of df_max
+# out |> filter(sta %in% c(6, 8, 9))
 
 
-species <- "BTYOY"
-out |> filter(sta == 9 & spp == species)
-df_tabT |> filter(Species == species) |>
-  select(Year, Species, `9`)
+# species <- "BTYOY"
+# out |> filter(sta == 9 & spp == species)
+# df_tabT |> filter(Species == species) |>
+#   select(Year, Species, `9`)
+
+# of stations with >3 sites, variance is greatest for AS:stn== 2, ASYOY:stn==5 but these have very low counts; AS:stn== 7, ASYOY:stn==6
+## AS:stn== 1 has low counts
+View(df_cal |>
+  filter(spp == "AS" & sta == 1 | spp == "ASYOY" & sta == 5))
+
 
 # a plot of the site with the most variance
 p <- ggplot(
@@ -816,11 +822,28 @@ p
 estFSA <- as.data.frame(matrix(NA, length(res_list), 8))
 colnames(estFSA) <- names(res_list[1][[1]]$est)
 
+
 # loop
 for(i in seq_along(res_list)){
   estFSA[i,] <- res_list[i][[1]]$est
 }
+
+
+estFSA <- cbind(year = df_tab1$Year, 
+      spp = df_tab1$Species, 
+      sta = df_tab1$Station, 
+      No = estFSA[, 1], 
+      round(estFSA[, 2:8], 3))
 estFSA
+
+estFSA |>
+       filter(spp == "AS" & sta == 6 | spp == "ASYOY" & sta == 6) |>
+      arrange(spp, year)
+
+str(estFSA)  
+estFSA |>
+  filter(p.LCI > 0)
+
 
 
 # sample data ----
