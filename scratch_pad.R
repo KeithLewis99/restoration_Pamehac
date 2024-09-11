@@ -715,13 +715,10 @@ View(df_cal)
 df_cal |> group_by(stn) |>
 
 # what spp:sta groups have more than 3 years
-out |>
+View(out |>
   group_by(sta, spp) |>
   filter(n() > 3) |>
-  arrange(spp, sta, year) |>
-#  ungroup() |>
-#  filter(X > 20 & GF < qchisq(0.95, 1)) 
-  print(n = Inf)
+  arrange(spp, sta, year))
 
 
 # variance of total catch (T) by spp:sta
@@ -837,13 +834,66 @@ estFSA <- cbind(year = df_tab1$Year,
 estFSA
 
 estFSA |>
-       filter(spp == "AS" & sta == 6 | spp == "ASYOY" & sta == 6) |>
+       filter(spp == "AS" & sta == 7 | spp == "ASYOY" & sta == 6) |>
       arrange(spp, year)
 
 str(estFSA)  
 estFSA |>
   filter(p.LCI > 0)
 
+
+
+## calibration ----
+### equal capture probability
+#### so, based on samples in years, high captures in most years, high variability, GF, and spc, it seems liek AS:stn == 7 is best (4 years, second variance, 3/4 for GF and spc)
+### equal cap ----
+
+temp <- df_cal |> 
+  filter(spp == "AS" & sta == "7" & year != 1991)
+
+temp |> 
+  summarise(meanP = mean(p)/n())
+
+df_cal_new <- df_cal |>
+  select(year, spp, sta, c1, T, No) |>
+  mutate(N_cal = c1/0.196)
+df_cal_new
+
+
+### var cap ----
+### variable capture probability
+with(temp, plot(c1, p))
+
+lm1 <- lm(temp$p ~ temp$c1)
+summary(lm1)
+
+lm2 <- lm(log(temp$p) ~ log(temp$c1))
+summary(lm2)
+plot(temp$c1, exp(lm2$fitted.values), ylim = c(0.4, 0.8))
+points(temp$c1, temp$p, col = "red")
+
+c1 <- 0
+a <- lm2$coefficients[[1]]
+b <- lm2$coefficients[[2]]
+
+# for zero, log(0) = -Inf and that multipled by a negative is Inf????
+
+pcal_temp <- exp(a)*c1^b
+
+c1/pcal_temp
+
+df_cal_new$N_cal_var <- df_cal_new$c1/(exp(a)*df_cal_new$c1^b)
+df_cal_new |> print(n = Inf)
+
+0/0
+  
+pairs(df_cal_new[, c(4:8)] )
+
+library(GGally)
+ggpairs(df_cal_new, columns = c(4:8), 
+        title = "Scatter Plot Matrix for depletion fishing", 
+        axisLabels = "show") 
+ggsave("corrplot.pdf")
 
 
 # sample data ----
