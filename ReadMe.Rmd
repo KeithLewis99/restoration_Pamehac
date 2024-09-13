@@ -29,10 +29,28 @@ Need a function to do this?
 ## Why are some CIs wide
 Several reasons:
 1. lack of data  - if only a few fish, often get NA
-2. 
+2. lack of depletion
 
 On a more minor note:  
 Are there any diagnostics or other concerns with the CS method?  
 Why does the AMEC function not return its output aside from a graph and a csv file???
 
+## abundance estimate 
+After extensive exploration, it is clear that there is no "right" way to model abundance for all of the species:year:stations.
 
+Few stations meet the T > 30 criteria in a given year
+Some: CS approach is fine
+Some: assumtions aren't met due to c2 > c1 or c1 ~ c2 >> c3.
+Hedger approach seems to work in some cases but wildly off in others.  
+
+GF > GF_crit is an indicator but SPC needs to be looked at too.
+
+Need a tiered, measured approach
+ - If T > 30 & GF < GF_crit and SPC looks OK (c1 > c2 > c3), then CS
+    - If GF > GF_crit | SPC look bad, then 
+      - if c1 << c2, then T (can't trust No and calibration will underestimate).  
+      - if calibration >~ T and No, use calibration.  
+      - if c1 ~ c2 >> c3, then T (can't trust No and calibration will overestimate)  
+ - If T < 30 & T > 20 same as above
+ - If T < 20 & T > 10: same as above
+ - If T < 10 - then T == No almost all the time but why use CS as its not really valid.

@@ -516,7 +516,7 @@ df_sum <- bind_rows(df_sum, df_tmp) |>
 ### year by spp ----
 library(ggplot2)
 p <- ggplot(
-            df_sum,
+            df_sum |> filter(Species == "AS"|Species == "ASYOY"),
             aes(x = spc, y = abun, 
                 group = Station, fill = Station,
                 text = paste("SPC: ", spc, "\n",
@@ -530,6 +530,8 @@ p <- ggplot(
   facet_grid(Year ~ Species)
 
 p
+plotly:: ggplotly(p, tooltip = "text")
+
 
 ### subset ----
 p <- ggplot(
@@ -854,10 +856,11 @@ temp <- df_cal |>
 temp |> 
   summarise(meanP = mean(p)/n())
 
-df_cal_new <- df_cal |>
+# this was added to df_cal but it should be based on out bc df_cal doesn't have all teh stations on account of n < 3
+df_view <- out |>
   select(year, spp, sta, c1, T, No) |>
   mutate(N_cal = c1/0.196)
-df_cal_new
+df_view
 
 
 ### var cap ----
@@ -882,18 +885,152 @@ pcal_temp <- exp(a)*c1^b
 
 c1/pcal_temp
 
-df_cal_new$N_cal_var <- df_cal_new$c1/(exp(a)*df_cal_new$c1^b)
-df_cal_new |> print(n = Inf)
+df_view$N_cal_var <- df_view$c1/(exp(a)*df_view$c1^b)
+df_view
 
-0/0
+
   
-pairs(df_cal_new[, c(4:8)] )
+pairs(df_view[, c(4:8)] )
 
 library(GGally)
-ggpairs(df_cal_new, columns = c(4:8), 
+ggpairs(df_view, columns = c(4:8), 
         title = "Scatter Plot Matrix for depletion fishing", 
         axisLabels = "show") 
 ggsave("corrplot.pdf")
+
+# see if the variable callibration helps - seems to be really off for some sites
+p <- ggplot(df_view, aes(x = No, y = N_cal_var,
+            text = paste("Year: ", year, "\n",
+                         "Spec: ", spp, "\n",
+                         "Stn: ", sta, "\n",
+                         "Tot: ", T, "\n",
+                         "No: ", No, "\n",
+                         "Nvar: ", round(N_cal_var, 2),
+                         sep = ""))) +
+  geom_point() + 
+  geom_abline (slope=1, linetype = "dashed", color="Red")
+
+plotly::ggplotly(p, tooltip = "text")
+
+# see ReadMe - I think my attempt to develop a calibration site has not been successful. Explore options
+
+# what about for sites with bad GF
+# how many have T > 30 as they should for CS
+## 25
+temp <- out |>
+  group_by(year, spp) |>
+  filter(T > 30) |> 
+  summarise(tot = n())
+temp
+
+# how many have T > 20 as they should for CS
+## 38
+temp1 <- out |>
+  group_by(year, spp) |>
+  filter(T > 20) |> 
+  summarise(tot = n())
+temp1
+
+full_join(temp, temp1, by = c('year', 'spp'))  
+
+# how may have GF > GFcrit
+## 10 - not too bad but 3/10 have GF > GFcrit
+temp3 <- out |> 
+  group_by(year, spp) |>
+  filter(GF > qchisq(0.95, 1)) |> 
+  summarise(GFcrit = n())
+temp3  
+
+temp4 <- out |> 
+  filter(GF > qchisq(0.95, 1))
+View(temp4)  
+
+# 36 have c2 or c3 > c1
+temp5 <- out |>
+  #filter(c2 > c1 & T < 10 | c3 > c1 & T < 10)
+  filter(c2 > c1 | c3 > c1)
+temp5
+
+# how many have c3 > 5: 17
+temp6 <- out |>
+  filter(c3 > 5)
+temp6
+
+# how many behave as they should with a decrease among sweeps
+## 46/124 - only 3 have GF > GFcrit
+temp7 <- out |>
+  filter(c1 > c2 & c2 > c3)
+temp7
+
+### AS ----
+# for AS, what > 20
+View(out |>
+  group_by(year, spp) |>
+  filter(T <= 10 & spp == "AS"))  # n = 11
+  #filter(T <= 20 & T > 10 & spp == "AS")) # n = 9
+  #filter(T <= 10 & spp == "AS")) # n = 14
+
+# > 20 & GF > GF crit - 2 have c2 > c1, other c1 ~ c2 >>> c3
+# < 20 & > 10 & GF > GF crit - 2 have c2 > c1; other, 1991:6, has GF < GFcrit but c3 > c1
+
+out |>
+  filter(spp == "AS" & sta == 1 & year == 1996 | # 
+           spp == "AS" & sta == 2 & year == 2016 |
+           spp == "AS" & sta == 4 & year == 2016 |
+           spp == "AS" & sta == 5 & year == 1996 |
+           spp == "AS" & sta == 8 & year == 1996 |
+           spp == "AS" & sta == 6 & year == 1991) # problem with SPC
+
+
+df_view |>
+  filter(spp == "AS" & sta == 1 & year == 1996 |
+           spp == "AS" & sta == 2 & year == 2016 |
+           spp == "AS" & sta == 4 & year == 2016 |
+           spp == "AS" & sta == 5 & year == 1996 |
+           spp == "AS" & sta == 8 & year == 1996 |
+           spp == "AS" & sta == 6 & year == 1991
+        )
+df_all <- left_join(out, df_view, by = c('year', 'spp', 'sta', 'c1', 'T', 'No'))
+
+View(df_all |>
+       filter(spp == "AS" & sta == 1 & year == 1996 |
+            spp == "AS" & sta == 2 & year == 2016 |
+            spp == "AS" & sta == 4 & year == 2016 |
+            spp == "AS" & sta == 5 & year == 1996 |
+            spp == "AS" & sta == 8 & year == 1996 |
+            spp == "AS" & sta == 6 & year == 1991
+      ))
+
+
+### ASYOY ----
+View(out |>
+       group_by(year, spp) |>
+       #filter( T > 20 & spp == "ASYOY")) # n = 14
+       #filter(T <= 20 & T > 10 & spp == "ASYOY")) # n = 6
+      filter(T <= 10 & spp == "ASYOY")) # n = 8
+
+# > 20 & GF > GF crit - none but 1992:6 is close - use all
+# < 20 & < 10 & GF > GF crit: none but 2 NAs and c2 > c1 - use OK GF and just T on the others
+out |>
+  filter(spp == "ASYOY" & sta == 6 & year == 1992 | # just to check
+           spp == "ASYOY" & sta == 5 & year == 1991 |
+           spp == "ASYOY" & sta == 4 & year == 1992
+          )
+
+
+df_view |>
+  filter(spp == "ASYOY" & sta == 6 & year == 1992 | # just to check - its fine - use it
+           spp == "ASYOY" & sta == 5 & year == 1991 | 
+           spp == "ASYOY" & sta == 4 & year == 1992
+  )
+
+
+## ToDO
+# need to check SPCs
+# need to make an ifelse statement to implement
+# variance for calibration sites
+# need to combine with weights to get biomass (use delta method)
+
 
 
 # sample data ----
