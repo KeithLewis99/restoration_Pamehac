@@ -37,16 +37,30 @@ Are there any diagnostics or other concerns with the CS method?
 Why does the AMEC function not return its output aside from a graph and a csv file???
 
 ## abundance estimate - literature
-After extensive exploration, it is clear that there is no "right" way to model abundance for all of the species:year:stations.  This is consistent with Riley and Fausch [-@riley1992underestimation] who found "decreasing capture probability was a frequent probmlem when estimating trout abundance in small Colorado mountain streams".  Their streams seem comparable to Seal Cove.
+After extensive exploration, it is clear that there is no "right" way to model abundance for all of the species:year:stations.  This is consistent with Riley and Fausch [-@riley1992underestimation] who found "decreasing capture probability was a frequent problem when estimating trout abundance in small Colorado mountain streams".  Their streams seem comparable to Seal Cove.
 
-Riley and Fausch [-@riley1992underestimation] found that 2 and 3-pass estimates result in underestimates but 3 is better than 2.  Suggest that its due to decreasing p but not complexity of habitat but I found their statistical methods wanting on this front.  But the power of chi-square tests is low below populatoin size of 200. Therefore, its important to look at chi-square and spc together.  
+Cowx [-@cowx1983review] showed that Carle Strub is the more reliable method than earlier approaches such as Zippin. Has the equations, much like the tutorial by Lockwood [-@lockwood2000stream].  Also lists 5 assumptions of depletion methods.  Gives the downsides of all methods except CS.
 
+Gatz and Loar [-@gatz1988petersen] show that results can be improved by combining Petersen with removal methods in a reasonable amount of time, i.e., 2 days
+
+Riley and Fausch [-@riley1992underestimation] found that 2 and 3-pass estimates result in underestimates but 3 is better than 2.  Suggest that its due to decreasing p but not complexity of habitat but I found their statistical methods wanting on this front.  But the power of chi-square tests is low below population size of 200. Therefore, its important to look at chi-square and spc together.  
+
+Lockwood [-@lockwood2000stream] is a great tutorial on recapture and depletion methods.
+
+Reid 2009 - single pass
 
 Hedger et al. [-@hedger2013improving] found that - summarize constant $\rho$ based on first pass and variable p based on 
 
-Reid
+Matechou 2016 (not in refs) - open models for removal - cool but to be read later
 
-Richter 
+Hanks 2018 - power
+
+Hedger 2018 - bias
+
+Link 2018 (not in refs) robust design and removal.  Looks cool but may not apply and will be hard to implement
+Rivera 2021 - a review
+
+Richter et al [-@richter2022correcting] use a Bayesian method to correct for size bias.  There is a lot of merit in this approach - i'm just not sure if it really makes that much difference in the end.  They also have some rules for when to stop sampling but also which reaches to include in the data set.  Should explore. https://github.com/ianarichter/bayesian-removal-model
 
 ## abundance estimate - findings and solutions
 Few stations meet the T > 30 criteria in a given year
