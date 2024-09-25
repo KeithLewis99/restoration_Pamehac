@@ -3,6 +3,7 @@ title: "ReadMe - Pamehac"
 author: "Keith Lewis"
 date: "2024-08-07"
 output: html_document
+bibliography: refs/references.bib
 ---
 
 # Introduction
@@ -35,9 +36,19 @@ On a more minor note:
 Are there any diagnostics or other concerns with the CS method?  
 Why does the AMEC function not return its output aside from a graph and a csv file???
 
-## abundance estimate 
-After extensive exploration, it is clear that there is no "right" way to model abundance for all of the species:year:stations.
+## abundance estimate - literature
+After extensive exploration, it is clear that there is no "right" way to model abundance for all of the species:year:stations.  This is consistent with Riley and Fausch [-@riley1992underestimation] who found "decreasing capture probability was a frequent probmlem when estimating trout abundance in small Colorado mountain streams".  Their streams seem comparable to Seal Cove.
 
+Riley and Fausch [-@riley1992underestimation] found that 2 and 3-pass estimates result in underestimates but 3 is better than 2.  Suggest that its due to decreasing p but not complexity of habitat but I found their statistical methods wanting on this front.  But the power of chi-square tests is low below populatoin size of 200. Therefore, its important to look at chi-square and spc together.  
+
+
+Hedger et al. [-@hedger2013improving] found that - summarize constant $\rho$ based on first pass and variable p based on 
+
+Reid
+
+Richter 
+
+## abundance estimate - findings and solutions
 Few stations meet the T > 30 criteria in a given year
 Some: CS approach is fine
 Some: assumtions aren't met due to c2 > c1 or c1 ~ c2 >> c3.
@@ -54,3 +65,13 @@ Need a tiered, measured approach
  - If T < 30 & T > 20 same as above
  - If T < 20 & T > 10: same as above
  - If T < 10 - then T == No almost all the time but why use CS as its not really valid.
+ 
+Riley and Fausch (1992): three assumptions with removal methods
+1. closed population - this should always be met in NL
+2. fishing effort must remain constant for each capture occasion - assume that this is the case but see Clarke and Curtis
+3. probability of capture (catchability) remains the same for each capture occasion
+
+
+
+
+# References
