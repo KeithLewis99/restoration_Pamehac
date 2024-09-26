@@ -47,15 +47,15 @@ Riley and Fausch [-@riley1992underestimation] found that 2 and 3-pass estimates 
 
 Lockwood [-@lockwood2000stream] is a great tutorial on recapture and depletion methods.
 
-Reid 2009 - single pass
+Reid 2009 - single pass seems to work OK as an index
 
 Hedger et al. [-@hedger2013improving] found that - summarize constant $\rho$ based on first pass and variable p based on 
 
 Matechou 2016 (not in refs) - open models for removal - cool but to be read later
 
-Hanks 2018 - power
+Hanks 2018 - differences in power bewteen 1- and 3-passses to detect annual population declines diminishes as more sites are surveyed and nearly identical when 5+ sites are surveyed but methods are very correlated. Focus is on trend detection.  But single pass is an index, not absolute abundance. can't compare with other areas with different capture probabilities.  
 
-Hedger 2018 - bias
+Hedger 2018 - bias - need to read this
 
 Link 2018 (not in refs) robust design and removal.  Looks cool but may not apply and will be hard to implement
 Rivera 2021 - a review
