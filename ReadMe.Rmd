@@ -45,9 +45,9 @@ Gatz and Loar [-@gatz1988petersen] show that results can be improved by combinin
 
 Riley and Fausch [-@riley1992underestimation] found that 2 and 3-pass estimates result in underestimates but 3 is better than 2.  Suggest that its due to decreasing p but not complexity of habitat but I found their statistical methods wanting on this front.  But the power of chi-square tests is low below population size of 200. Therefore, its important to look at chi-square and spc together.  
 
-Lockwood [-@lockwood2000stream] is a great tutorial on recapture and depletion methods.
+Lockwood [-@lockwood2000stream] is a great tutorial on recapture and depletion methods.  See also 2013 fishR tutorial but Derek Ogle.
 
-Reid 2009 - single pass seems to work OK as an index
+Reid 2009 - single pass seems to work OK as an index; is this OK for GLMMs?
 
 Hedger et al. [-@hedger2013improving] found that - summarize constant $\rho$ based on first pass and variable p based on 
 
@@ -55,12 +55,33 @@ Matechou 2016 (not in refs) - open models for removal - cool but to be read late
 
 Hanks 2018 - differences in power bewteen 1- and 3-passses to detect annual population declines diminishes as more sites are surveyed and nearly identical when 5+ sites are surveyed but methods are very correlated. Focus is on trend detection.  But single pass is an index, not absolute abundance. can't compare with other areas with different capture probabilities.  
 
-Hedger 2018 - bias - need to read this
+Hedger 2018 - capture probability esimates depend on number of passes and decline with each pass with effect depending on size class - probably not a surprise. Ergo, 3-pass will underestimate.
 
 Link 2018 (not in refs) robust design and removal.  Looks cool but may not apply and will be hard to implement
-Rivera 2021 - a review
+
+Rivera 2021 - a review: very general but with no key insights.  It does provide a nice history of the field.  Almost all depletion can be treated as a CMR analysis but with recapture set to zero.
 
 Richter et al [-@richter2022correcting] use a Bayesian method to correct for size bias.  There is a lot of merit in this approach - i'm just not sure if it really makes that much difference in the end.  They also have some rules for when to stop sampling but also which reaches to include in the data set.  Should explore. https://github.com/ianarichter/bayesian-removal-model
+
+What have I learned:
+- Assumptions [@cowx1983review]: 3 standard and two more  
+    - closed population - this should always be met in NL
+    - probability of capture is the same for all individuals  
+    - probability of capture (catchability) remains the same for each capture occasion - unlikely to be true often
+    - non-standard: the CPUE must significantly reduce the population size  
+    - non-standard: the population was not be so large that catching of one member
+interferes with the capture of another  
+
+What about this??? 2. fishing effort must remain constant for each capture occasion - assume that this is the case but see Clarke and Curtis
+
+
+- Can do depletion on open and closed  
+- Samples > 30 total are required  
+- Goodness-of-fit power isn't great with < 200 fish  
+- Have to capture most of the fish  
+- Assumptions are often violated  
+
+I think that the conclusion here is that you have to pick your poison.  Lots of passes means less sites, less power, and less generalization.  1 pass means more sites but less accuracy of the estimate.
 
 ## abundance estimate - findings and solutions
 Few stations meet the T > 30 criteria in a given year
@@ -68,7 +89,7 @@ Some: CS approach is fine
 Some: assumtions aren't met due to c2 > c1 or c1 ~ c2 >> c3.
 Hedger approach seems to work in some cases but wildly off in others.  
 
-GF > GF_crit is an indicator but SPC needs to be looked at too.
+GF > GF_crit is an indicator (although the power is probably low) but SPC needs to be looked at too.
 
 Need a tiered, measured approach
  - If T > 30 & GF < GF_crit and SPC looks OK (c1 > c2 > c3), then CS
@@ -80,11 +101,6 @@ Need a tiered, measured approach
  - If T < 20 & T > 10: same as above
  - If T < 10 - then T == No almost all the time but why use CS as its not really valid.
  
-Riley and Fausch (1992): three assumptions with removal methods
-1. closed population - this should always be met in NL
-2. fishing effort must remain constant for each capture occasion - assume that this is the case but see Clarke and Curtis
-3. probability of capture (catchability) remains the same for each capture occasion
-
 
 
 
