@@ -45,23 +45,33 @@ Gatz and Loar [-@gatz1988petersen] show that results can be improved by combinin
 
 Riley and Fausch [-@riley1992underestimation] found that 2 and 3-pass estimates result in underestimates but 3 is better than 2.  Suggest that its due to decreasing p but not complexity of habitat but I found their statistical methods wanting on this front.  But the power of chi-square tests is low below population size of 200. Therefore, its important to look at chi-square and spc together.  
 
+Heimbuch et al. [-@doublepass] use a double pass approach but I think that this is a bit like Hedger - they use all sites to get an approximation of catchability - I don't think this is a good idea.
+
 Lockwood [-@lockwood2000stream] is a great tutorial on recapture and depletion methods.  See also 2013 fishR tutorial but Derek Ogle.
 
-Reid 2009 - single pass seems to work OK as an index; is this OK for GLMMs?
+Reid [-@reid2009evaluation] - single pass seems to work OK as an index; is this OK for GLMMs?
+Reid 2011 - eels
 
 Hedger et al. [-@hedger2013improving] found that - summarize constant $\rho$ based on first pass and variable p based on 
 
 Matechou 2016 (not in refs) - open models for removal - cool but to be read later
 
+Reid and Haxton [-@reid2017backpack] used a Bayesian approach to model sampling data, site occupancy, and detection probability.  I think that this is a state-space (N-mixture) approach because they model occupancy and then use that in the model of observations. No covariates to model detection. They also looked at time spent fishing.
+
 Hanks 2018 - differences in power bewteen 1- and 3-passses to detect annual population declines diminishes as more sites are surveyed and nearly identical when 5+ sites are surveyed but methods are very correlated. Focus is on trend detection.  But single pass is an index, not absolute abundance. can't compare with other areas with different capture probabilities.  
 
-Hedger 2018 - capture probability esimates depend on number of passes and decline with each pass with effect depending on size class - probably not a surprise. Ergo, 3-pass will underestimate.
+Hedger 2018 - capture probability estimates depend on number of passes and decline with each pass with effect depending on size class - probably not a surprise. Ergo, 3-pass will underestimate.
 
 Link 2018 (not in refs) robust design and removal.  Looks cool but may not apply and will be hard to implement
 
 Rivera 2021 - a review: very general but with no key insights.  It does provide a nice history of the field.  Almost all depletion can be treated as a CMR analysis but with recapture set to zero.
 
-Richter et al [-@richter2022correcting] use a Bayesian method to correct for size bias.  There is a lot of merit in this approach - i'm just not sure if it really makes that much difference in the end.  They also have some rules for when to stop sampling but also which reaches to include in the data set.  Should explore. https://github.com/ianarichter/bayesian-removal-model
+Richter et al [-@richter2022correcting] use a Bayesian method to correct for size bias.  There is a lot of merit in this approach - i'm just not sure if it really makes that much difference in the end.  They also have some rules for when to stop sampling but also which reaches to include in the data set.  But it seems like they are just doing a standard depletion model with q as catchability - they are not trying to model q in anyway through a regression.  Should explore. https://github.com/ianarichter/bayesian-removal-model
+
+Lamothe et al. 2023 - simulations on occupancy and n-mixture; occupancy models are slightly better.  Fig.1 is great - both are state-space models but occupancy models occupancy before observed number while n-mixture models true abundance before observed abundance. Finish reading. They used gmultmix - need to figure out why this and not multinomPois
+https://cran.rstudio.com/web/packages/unmarked/vignettes/cap-recap.html
+
+Lecture10: https://rushinglab.github.io/WILD6900/articles/Lecture10/Lecture10.html#4
 
 What have I learned:
 - Assumptions [@cowx1983review]: 3 standard and two more  
@@ -81,7 +91,14 @@ What about this??? 2. fishing effort must remain constant for each capture occas
 - Have to capture most of the fish  
 - Assumptions are often violated  
 
-I think that the conclusion here is that you have to pick your poison.  Lots of passes means less sites, less power, and less generalization.  1 pass means more sites but less accuracy of the estimate.
+I think that the conclusion here is that you have to pick your poison.  Lots of passes means less sites, less power, and less generalization.  1 pass means more sites but less accuracy of the estimate.  But I want to confirm the 'pick your poison' with Reid and Ricther.  I also want to know if this really makes any difference or are we just describing general differences, i.e., is estimated abundance just an index where higher values mean more fish than lower values.
+
+However: there is package unmarked (Finske and Chandler 2011) and the Bayesian spinoffs.  
+"With the exception of the `open' population models (colext, gmultmix, and pcountOpen), all fitting functions use a double right-hand sided formula syntax representing the hierarchical model structure. Specifically, covariates
+affecting the **detection process** are specified following the first tilde, and covariates of the **state process** follow the second tilde. **No left-hand side** of the formula is specified because the unmarked Frame defines the response variable uniquely as the y slot."
+"As described in Section 2.2, covariates of detection
+are on the logit-scale and covariates of abundance are on the log-scale for the repeated count
+model."
 
 ## abundance estimate - findings and solutions
 Few stations meet the T > 30 criteria in a given year
