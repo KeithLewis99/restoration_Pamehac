@@ -26,17 +26,17 @@ BUT......the really, really, really good thing for Pamehac is that there is a fi
 
 Need a function to do this?
 
-
+# Abundance Estimates
 ## Why are some CIs wide
-Several reasons:
-1. lack of data  - if only a few fish, often get NA
-2. lack of depletion
+Several reasons:  
+1. lack of data  - if only a few fish, often get NA  
+2. lack of depletion  
 
 On a more minor note:  
 Are there any diagnostics or other concerns with the CS method?  
 Why does the AMEC function not return its output aside from a graph and a csv file???
 
-## abundance estimate - literature
+## literature review
 After extensive exploration, it is clear that there is no "right" way to model abundance for all of the species:year:stations.  This is consistent with Riley and Fausch [-@riley1992underestimation] who found "decreasing capture probability was a frequent problem when estimating trout abundance in small Colorado mountain streams".  Their streams seem comparable to Seal Cove.
 
 Cowx [-@cowx1983review] showed that Carle Strub is the more reliable method than earlier approaches such as Zippin. Has the equations, much like the tutorial by Lockwood [-@lockwood2000stream].  Also lists 5 assumptions of depletion methods.  Gives the downsides of all methods except CS.
@@ -66,7 +66,7 @@ Link 2018 (not in refs) robust design and removal.  Looks cool but may not apply
 
 Rivera 2021 - a review: very general but with no key insights.  It does provide a nice history of the field.  Almost all depletion can be treated as a CMR analysis but with recapture set to zero.
 
-Richter et al [-@richter2022correcting] use a Bayesian method to correct for size bias.  There is a lot of merit in this approach - i'm just not sure if it really makes that much difference in the end.  They also have some rules for when to stop sampling but also which reaches to include in the data set.  But it seems like they are just doing a standard depletion model with q as catchability - they are not trying to model q in anyway through a regression.  Should explore. https://github.com/ianarichter/bayesian-removal-model
+Richter et al [-@richter2022correcting] use a Bayesian method to correct for size bias.  There is a lot of merit in this approach - i'm just not sure if it really makes that much difference in the end.  They also have some rules for when to stop sampling but also which reaches to include in the data set.  But it seems like they are just doing a standard depletion model with q as catchability - they are not trying to model q in anyway through a regression.  Explored this in detail - it still gives wonky estimates because q can be very low.  This may or may not be because of non-declining catches or low sample sizes.  Don't understand how q is estimated based on site and size, especially for all three removal periods. https://github.com/ianarichter/bayesian-removal-model
 
 Lamothe et al. 2023 - simulations on occupancy and n-mixture; occupancy models are slightly better.  Fig.1 is great - both are state-space models but occupancy models occupancy before observed number while n-mixture models true abundance before observed abundance. Finish reading. They used gmultmix - need to figure out why this and not multinomPois
 https://cran.rstudio.com/web/packages/unmarked/vignettes/cap-recap.html
@@ -100,23 +100,58 @@ affecting the **detection process** are specified following the first tilde, and
 are on the logit-scale and covariates of abundance are on the log-scale for the repeated count
 model."
 
-## abundance estimate - findings and solutions
-Few stations meet the T > 30 criteria in a given year
-Some: CS approach is fine
-Some: assumtions aren't met due to c2 > c1 or c1 ~ c2 >> c3.
+Conclusion on umarked:
+Spent a lot of time on package unmarked but there are very few tutorials and everything is dependent on the 'q' estimate which can result in wildly non-sensical estimates
+
+Working on the Richter approach - it seems fine conceptually but suffers from the same problem as package unmarked, i.e., it all comes down to q.  When I set the q, it seems to come up with reasonable results.  
+
+## Scott Reid
+Talked to Scott Reid on 2024-10-16.  A very helpful and pleasant fellow.
+I described my background, the Seal Cove situation where I took the estimates without question and then the Rose Blanche/Pamehac where I noticed large variances.  This promted me to dig deeper and look at the constant capture problem.  I then described using different methods and getting very different values including very improbable ones based on how capture probability is estimated.  Scott was sympathetic and that he had encountered all of these problems.  Indeed, he is so concerned that he has shelved some of his work with abundnace and uses occupancy modeling because he's mostly worried about SAR.  He did say that salmonids are probably OK ito responding well to the electrofisher.
+
+Tiered approach  
+Suggested:
+
+- the importance of talking to the field staff and understanding issues  
+- report a give method with worts or decide if the data is bad or decision tree  
+- the importance of accuracy and precision - if  
+- Consensus approach - do several approaches (or more) and see if they converge.  
+- Bayesian - do a lit review and see what the catchabilities are.
+- possibility of just going with counts?  
+
+
+He shared concerns about pooling, i.e,. there are differences in size, shape, behaviour, and habitat.  He was especially concerned with flow because it probably interacts with all of the previous variables because it affects the distribution of the fish but also affects sampling.  Experience of the crews is very important too.
+
+We discussed collaboration.  
+
+## Paul Regular
+2024-10-17 - Paul gave me almost 2 hours of his time.  I explained what I was up to and we went through the various iterations.  Paul wondered if the model was over paramaterized but was positive about the approach in general. 
+We did come to the conclusion that the model is conflating q and n and is "blaming" q but not n.  Forcing B0 to be positive helps this.  So it would be good to know if the larger fish should be more catchable.  
+We did establish that JAGS uses the greatest values as the intercept.
+
+
+## analyses
+So, I think I found a clue to why the population estiamtes are so high.  If you do the length approach advocated by Richter, then there are some lengths where there is no depletion and this would suggest that there are lots more fish.  But for very low n(n <=3, the q for the second length is still very, very low)
+
+
+## findings and solutions
+Few stations meet the T > 30 criteria in a given year  
+Some: CS approach is fine  
+Some: assumtions aren't met due to c2 > c1 or c1 ~ c2 >> c3.  
 Hedger approach seems to work in some cases but wildly off in others.  
 
 GF > GF_crit is an indicator (although the power is probably low) but SPC needs to be looked at too.
 
-Need a tiered, measured approach
- - If T > 30 & GF < GF_crit and SPC looks OK (c1 > c2 > c3), then CS
-    - If GF > GF_crit | SPC look bad, then 
-      - if c1 << c2, then T (can't trust No and calibration will underestimate).  
-      - if calibration >~ T and No, use calibration.  
-      - if c1 ~ c2 >> c3, then T (can't trust No and calibration will overestimate)  
- - If T < 30 & T > 20 same as above
- - If T < 20 & T > 10: same as above
- - If T < 10 - then T == No almost all the time but why use CS as its not really valid.
+Need a tiered, measured approach (i.e., pick your poison):
+
+- If T > 30 & GF < GF_crit and SPC looks OK (c1 > c2 > c3), then CS  
+- If GF > GF_crit | SPC look bad, then  
+    - if c1 << c2, then T (can't trust No and calibration will underestimate).  
+        - if calibration >~ T and No, use calibration.  
+        - if c1 ~ c2 >> c3, then T (can't trust No and calibration will overestimate)  
+- If T < 30 & T > 20 same as above  
+- If T < 20 & T > 10: same as above  
+- If T < 10 - then T == No almost all the time but why use CS as its not really valid.  
  
 
 
