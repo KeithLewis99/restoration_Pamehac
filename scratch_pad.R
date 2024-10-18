@@ -839,6 +839,7 @@ estFSA |>
        filter(spp == "AS" & sta == 7 | spp == "ASYOY" & sta == 6) |>
       arrange(spp, year)
 
+
 str(estFSA)  
 estFSA |>
   filter(p.LCI > 0)
