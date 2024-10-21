@@ -1,0 +1,79 @@
+Proceed with T.
+Need a Pam_data_new using the import in scratch Pad - this is a new, fresh start and it will clean things up a lot.  Then, create some nice tables like in notes (year x species-age wiht sites, total catch, sites with < 5, and more than three passes. Get these in Read_me
+
+
+Looked at 5 sweeps and talk to Curtis/Clarke
+
+original run
+jagsfit$BUGSoutput$DIC
+[1] 58.93597
+> jagsfit$BUGSoutput$mean$q
+          [,1]      [,2]
+[1,] 0.3601960 0.1181760
+[2,] 0.4021355 0.1441501
+[3,] 0.4641407 0.1300922
+> jagsfit$BUGSoutput$mean$n
+         [,1]      [,2]
+[1,] 10.04858  65.88484
+[2,] 14.12009  66.29729
+[3,] 64.66480 300.41916
+> jagsfit$BUGSoutput$mean$nt
+[1]  75.93342  80.41738 365.08396
+> jagsfit$BUGSoutput$mean$b.size
+[1] -4.964799
+> jagsfit$BUGSoutput$mean$b0
+[1] 32.02528 32.23754 32.69219
+> jagsfit$BUGSoutput$mean$b0.mu
+[1] 32.31782
+> jagsfit$BUGSoutput$mean$c1_pred
+           [,1]      [,2]
+[1,]  0.5507396 0.4585477
+[2,]  0.5798736 0.4838983
+[3,] 10.6701540 6.4051232
+> jagsfit$BUGSoutput$mean$c2_pred
+          [,1]      [,2]
+[1,] 0.5507396 0.3403716
+[2,] 0.1777381 0.3397482
+[3,] 5.1004652 5.6245697
+> jagsfit$BUGSoutput$mean$c3_pred
+          [,1]      [,2]
+[1,] 0.1905436 0.3403716
+[2,] 0.1777381 0.3397482
+[3,] 2.7797615 4.8440162
+
+my run####################################
+> jagsfit$BUGSoutput$DIC
+[1] 34.58356
+> jagsfit$BUGSoutput$mean$q
+          [,1]      [,2]
+[1,] 0.6566085 0.7184622
+[2,] 0.7190460 0.7183536
+[3,] 0.6313093 0.4549286
+> jagsfit$BUGSoutput$mean$n
+          [,1]      [,2]
+[1,]  1.093911  1.059244
+[2,]  1.062844  1.060622
+[3,] 20.211511 20.811244
+> jagsfit$BUGSoutput$mean$nt
+[1]  2.153156  2.123467 41.022756
+> jagsfit$BUGSoutput$mean$b.size
+[1] -0.4190174
+> jagsfit$BUGSoutput$mean$b0
+[1] -0.9439516 -0.9674409 -0.9529172
+> jagsfit$BUGSoutput$mean$b0.mu
+[1] -0.9607864
+> jagsfit$BUGSoutput$mean$c1_pred
+           [,1]      [,2]
+[1,]  0.7041063 0.7502535
+[2,]  0.7529725 0.7508806
+[3,] 12.6635435 9.2200392
+> jagsfit$BUGSoutput$mean$c2_pred
+           [,1]       [,2]
+[1,] 0.70410629 0.03179130
+[2,] 0.03392649 0.03252699
+[3,] 5.08783152 6.49046738
+> jagsfit$BUGSoutput$mean$c3_pred
+           [,1]       [,2]
+[1,] 0.04749775 0.03179130
+[2,] 0.03392649 0.03252699
+[3,] 1.93128485 3.76089558
