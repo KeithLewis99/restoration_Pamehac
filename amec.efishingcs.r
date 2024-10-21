@@ -241,7 +241,7 @@ print(c(as.character(unique.site[aaa]), unique.year[bbb], unique.station[ccc]))
 	combined.biomass.summary.data<-cbind(combined.biomass.summary.data,biomass.cum.catch)
 
 	##ensure that there is a negative slope for removal analysis
-	browser()
+	# browser()
 	combined.biomass.delury.model<-lm(biomass.sum~ biomass.cum.catch, data=combined.biomass.summary.data)
 	
   ##CS estimate will work with only one data point (it just makes that the estimate) but confidence intervals won't.  So we will get the estimate and only calculate conf limits if there is enough data.  alternatively they are set as NAs
