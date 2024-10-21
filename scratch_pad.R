@@ -1,4 +1,11 @@
-# scratch pad
+# scratch pad - this got very convoluted but it was an effort to understand the many ways to estimate abundance based on electrofishing catch data.  This can be broken down into several sections
+#1. bring in the AMEC code to see if it produces the same results - seems like it does so sometime
+#2. tabulate - trying to figure out why Pamehac produces wild CIs when RB doesn't
+#3. FSA - figure out how the package works and why large variance
+#4. import brings in all data and then calculates CS estimates using FSA and calculates sum of previous catches (spc) and goodness of fit tests
+#5. Hedger 2013 paper (see ReadMe) - tried using calibration approaches for p
+
+
 
 # Origins ----
 ## test the impact of 1990 BT
@@ -6,6 +13,7 @@
 source("amec.efishingcs.r")
 amec.efishing8cs("data/year_summaries/Pamehac_1990_by_station") # this the data Kristin used and reproduces Kritin's results in ouptu_pamehac_by_station.csv
 
+# not sure what test1 and test 2 were - they seem to have disappeared
 amec.efishing8cs("data/test1") # this gives completely different output - not even close
 
 amec.efishing8cs("data/test2")# then, BT data but without sweeps 4 and 5. Some of these are close are the same but SITE 5 is very different.
@@ -15,6 +23,7 @@ amec.efishing8cs("data/year_summaries/Pamehac_2016_by_station")
 
 
 # tabulate ----
+## run Pam_data.R
 # this is to tabulate the number of fish per pass by year and species - trying to figure out why Pamehac produces wild CIs when RB doesn't
 
 df_tab <- output_pamehac_by_station[, c(1:2, 3:4, 6)]
@@ -453,6 +462,35 @@ for(i in seq_along(df_all$Species)){
 unique(df_all$Species)
 
 
+# summarise Zeros are NAs
+#with(df_1990, table(Station, Sweep))
+#with(df_1990, table(Station, Sweep, lencat))
+
+
+with(df_all, table(Station, Sweep, Species))
+with(df_all, table(Station, Sweep, Species))
+with(df_all, table(Station, Sweep, Species, Year))
+with(df_all[df_all$Year == 1996,], table(Station, Sweep, Species, Year))
+
+df_all$pass_no <-NA
+
+# summarize just 4-5-pass sites
+temp <- df_all |>
+  group_by(Year, Species, Station) |>
+  mutate(pass_no = ifelse(max(Sweep )<=3, 3, 5)) |>
+  ungroup() |>
+  filter(pass_no == 5) |> 
+  group_by(Year, Species, Station, Sweep) |>
+  summarize(count = n()) |>
+  pivot_wider(names_from = Sweep, values_from = count, values_fill = 0)
+
+str(temp)
+#View(temp)
+write.csv(df_all, "derived_data/df_all.csv")
+
+
+
+
 # sum previous catch ----
 ## first, create a table for T
 df_sum <- df_all |>
@@ -537,7 +575,7 @@ plotly:: ggplotly(p, tooltip = "text")
 p <- ggplot(
   #df_sum[df_sum$Species == "AS",], 
   #df_sum[df_sum$Species == "AS" & df_sum$Station == 8,], 
-  df_sum[df_sum$Species == "AS" & df_sum$Year == 2016,], 
+  df_sum[df_sum$Species == "BTYOY" & df_sum$Year == 2016,], 
   aes(x = spc, y = abun, 
       group = Station, fill = Station,
       text = paste("SPC: ", spc, "\n",
@@ -572,7 +610,7 @@ df_sum |>
 
 
 # tabulate by Year:Species:Station and so that catches are individual columns - required for FSA::removal
-library(tidyr)
+
 df_tab1 <- df_sum |>
   group_by(Year, Species, Station) |>
   #filter(Sweep <=3 & length(Sweep) > 1 | is.na(Sweep == 2)) |>
@@ -584,6 +622,14 @@ df_tab1 <- df_sum |>
               names_from = Sweep, values_from = abun) |> #bio.sum abun
   filter(!(is.na(`2`) & is.na(`3`))) 
 df_tab1 |> print(n = Inf)
+
+
+df_tab_pool <- df_tab1 |>
+  group_by(Year, Station) |>
+  summarise(`1` = sum(`1`, na.rm = T), 
+            `2` = sum(`2`, na.rm = T), 
+            `3` = sum(`3`, na.rm = T))
+df_tab_pool |> print(n = Inf)
 
 
 ### CS ----
@@ -649,7 +695,8 @@ out$GF <- with(out, round((c1 - (No*p))^2/No*p +
                           ,4)             
 )
 
-
+dchisq(1.2813, 2) ## What is the likelihood of this value
+pchisq(1.2813, 2) # probability of this value or less - cumulative density
 1-pchisq(1.2813, 2) #- this is the pvalue
 qchisq(1-0.5269498, 2) #- returns the test statistic
 qchisq(0.95, 1) #- gives the critical test 3.84
@@ -698,6 +745,117 @@ plot(density(out$T))
 
 
 p <- ggplot(out, aes(x = T, y = No, group = as.factor(spp), colour = spp)) +
+  geom_point()
+p
+
+## GF - pool ----
+
+res_list_pool <- apply(df_tab_pool[, c(3:5)], MARGIN=1, FUN = removal, method = "CarleStrub") # takes NA's
+
+
+# this works but only when three catches so maybe that is fine - filter above on this.
+out_pool <- as.data.frame(matrix(NA, length(res_list_pool), 11))
+colnames(out_pool) <- c("c1",  "c2", "c3","k",  "T", "X", 
+                   "No",  "No.se", "No.LCI", 
+                   "No.UCI", "p"
+)
+
+
+for(i in seq_along(res_list_pool)){
+  if(length(res_list_pool[[i]]$catch) ==3){
+    out_pool[i,] <- round(c(res_list_pool[[i]]$catch, 
+                       res_list_pool[[i]]$int, 
+                       res_list_pool[[i]]$est[1:5]), 2)
+    
+  } else if (names(res_list_pool[[i]]$catch[2]) == 2 & 
+             length(res_list_pool[[i]]$catch) == 2){
+    out_pool[i,c(1:2, 4:11)] <- round(c(res_list_pool[[i]]$catch, 
+                                   res_list_pool[[i]]$int, 
+                                   res_list_pool[[i]]$est[1:5]), 2)
+  } else if (names(res_list_pool[[i]]$catch[2]) == 3 & 
+             length(res_list_pool[[i]]$catch) == 2){
+    out_pool[i,c(1, 3:11)] <- round(c(res_list_pool[[i]]$catch, 
+                                 res_list_pool[[i]]$int, 
+                                 res_list_pool[[i]]$est[1:5]), 2)
+  }
+}
+
+
+out_pool <- cbind(year = df_tab_pool$Year, 
+             sta = df_tab_pool$Station, 
+             out_pool)
+
+View(out_pool)
+head(out_pool)
+
+
+out_pool$GF <- with(out_pool, round((c1 - (No*p))^2/No*p + 
+                            (c2 - No*(1-p)*p)^2/(No*(1-p)*p) +
+                            (c3 - (No*(1-p)^2*p))^2/(No*(1-p)^2*p)
+                          ,4)             
+)
+
+dchisq(1.2813, 2) ## What is the likelihood of this value
+pchisq(1.2813, 2) # probability of this value or less - cumulative density
+1-pchisq(1.2813, 2) #- this is the pvalue
+qchisq(1-0.5269498, 2) #- returns the test statistic
+qchisq(0.95, 1) #- gives the critical test 3.84
+
+## Summary stats
+# total year:spp:site:catch
+nrow(df_sum)
+
+# total year:spp:site
+df_sum |> group_by(Year, Species, Station) |> 
+  summarise (catch_num = n()) |> 
+  ungroup() |>
+  summarise(tot = n())
+
+length(unique(df_sum$Year))
+length(unique(df_sum$Station))
+
+# sum catches by year and species
+df_tab1 |>
+  group_by(Year, Species) |>
+  summarise(sum_c1 = sum(`1`, na.rm = T),
+            sum_c2 = sum(`2`, na.rm = T),
+            sum_c3 = sum(`3`, na.rm = T)
+  )
+
+# sum catches by year
+df_tab1 |>
+  group_by(Species) |>
+  summarise(sum_c1 = sum(`1`, na.rm = T),
+            sum_c2 = sum(`2`, na.rm = T),
+            sum_c3 = sum(`3`, na.rm = T)
+  )
+
+
+# filter out sites with only 1 catch or where c2 & c3 == NA
+nrow(out)
+out |> filter(GF > qchisq(0.95, 1)) # 10 sites don't make GF with T > 30 on 5 sites 
+nrow(out |> filter(GF > qchisq(0.95, 1)))
+out |> filter(T < 30)
+nrow(out |> filter(T < 30)) # 97 of 124
+nrow(out |> filter(T < 20)) # 85 of 124
+nrow(out |> filter(T < 10)) # 57 of 124
+
+# for pooled
+# filter out sites with only 1 catch or where c2 & c3 == NA
+nrow(out_pool)
+out_pool |> filter(GF > qchisq(0.95, 1)) # 10 sites don't make GF with T > 30 on 5 sites 
+nrow(out_pool |> filter(GF > qchisq(0.95, 1)))
+out_pool |> filter(T < 30)
+nrow(out_pool |> filter(T < 30)) # 97 of 124
+nrow(out_pool |> filter(T < 20)) # 85 of 124
+nrow(out_pool |> filter(T < 10)) # 57 of 124
+
+
+# density of total catch
+plot(density(out_pool$T))
+
+
+p <- ggplot(out_pool, aes(x = T, y = No)) +
   geom_point()
 p
 
@@ -1032,16 +1190,7 @@ df_view |>
 # variance for calibration sites
 # need to combine with weights to get biomass (use delta method)
 
-
-
-# sample data ----
-a <- sort(rep(1:4, 3))
-b <- rep(seq(1,3), 4)
-c <- rep(c(10, 5, 1), 4)
-
-df <- as.data.frame(cbind(a, b, c))
-df[-4,]
-df[12,3] <- NA
+# tabulation
 
 
 # END ----
