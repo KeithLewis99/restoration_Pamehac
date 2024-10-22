@@ -1,0 +1,219 @@
+# the purpose of this file is to take what was done in scratch pad and make it available for general use for Carle STrub, unmarked, and Bayesian analyses
+
+
+# import ----
+# import files in catch and convert to proper format
+#create a pattern and bind directory to pattern
+temp = list.files(path = "data/year_summaries/", pattern="Pamehac_.*_by_station.csv$", full.names = T)
+
+# import files as a list
+ls_pam = (lapply(temp, read.csv))
+str(ls_pam)
+str(ls_pam,1)
+str(ls_pam[1])
+
+names(ls_pam) <- c("1990", "1991", "1992", "1996", "2016")
+ls_pam[1][[1]]$Station
+ls_pam[1]$'1990'$Station
+ls_pam$'1990'$Station
+ls_pam[[1]]$Station # gets to contents directly
+ls_pam[["1990"]]$Station
+
+# change 1990# change 1990# change 1990 to character variable 
+ls_pam[["1990"]]$Station <- as.character(ls_pam[["1990"]]$Station)
+
+
+
+# create either a large dataframe and then do some summaries
+# as above, create summaries for FSA
+# 
+str(ls_pam[1])
+library(dplyr)
+df_all <- bind_rows(ls_pam)
+
+# standardize data across years
+##
+## remove SITE
+for(i in seq_along(df_all$Station)){
+  df_all$Station[i] <- gsub("SITE\\s", paste0("\\6"), df_all$Station[i])
+}
+## remove "space"
+unique(df_all$Station)
+for(i in seq_along(df_all$Station)){
+  df_all$Station[i] <- gsub("*\\s", paste0("\\1"), df_all$Station[i])
+}
+unique(df_all$Station)
+
+## remove "space" for Species
+for(i in seq_along(df_all$Species)){
+  df_all$Species[i] <- gsub("*\\s", paste0("\\1"), df_all$Species[i])
+}
+unique(df_all$Species)
+
+
+write.csv(df_all, "derived_data/df_all.csv")
+
+
+
+# sum previous catch ----
+## first, create a table for T
+df_sum <- df_all |>
+  group_by(Year, Species, Station, Sweep) |>
+  summarise(bio.sum = sum(Weight.g), abun = n()) 
+
+# calculate sum of previous catch
+df_sum$spc <- NA
+
+# for later - write.csv2()
+
+
+# calculate spc and flag sites without a Sweep == 1
+df_sum <- df_sum |>
+  group_by(Year, Species, Station) |>
+  #summarise(min = min(Sweep))
+  mutate(spc = case_when(
+    Sweep == 1 ~ 0,
+    Sweep == 2 ~ ifelse(any(Sweep == 1), abun[Sweep ==1], -1),
+    Sweep == 3 ~ ifelse(any(Sweep == 1), sum(c(abun[Sweep == 1 | Sweep == 2])), -2),
+    Sweep == 4 ~ ifelse(any(Sweep == 1), sum(c(abun[Sweep == 1 | Sweep == 2 | Sweep == 3])), -3),
+    Sweep == 5 ~ ifelse(any(Sweep == 1), sum(c(abun[Sweep == 1 | Sweep == 2 | Sweep == 3 | Sweep == 4])), -4)
+  ))
+
+View(df_sum)
+
+
+# in the original data, when no fish is caught, there is no row.  Therefore, in order to add a Sweep == 1 where abundance == 0, need a subset where 1st sweep != 0; it didn't need to be minimum but then its consistent
+test <- df_sum |>
+  group_by(Year, Species, Station) |>
+  filter(!any(Sweep == 1)) |>
+  slice_min(Sweep)
+
+View(test)
+
+# create a df from above, remove values, and add Sweep ==1 with bio.sum/abun = 0 and spc == NA; then bind
+df_tmp <- test[1:nrow(test),]
+df_tmp[, c("Sweep", "bio.sum", "abun", "spc")] <- NA
+df_tmp$Sweep[1:nrow(df_tmp[])] <- 1
+df_tmp$bio.sum[1:nrow(df_tmp[])] <- 0
+df_tmp$abun[1:nrow(df_tmp[])] <- 0
+df_tmp
+
+# this is the original df but with a Sweep 1 with abun = 0 for rows where 1st sweep > 1
+df_sum <- bind_rows(df_sum, df_tmp) |>
+  arrange(Year, Species, Station, Sweep)
+
+#View(df_sum)
+
+# now for when Sweep == 1 is True but there is a missing sweep - don't need this bc you are only using the first value but it will make the spc graphs a bit hard to interpret
+# test <- df_sum |>
+#     #filter(na.omit) 
+#     filter(!is.na(spc)) |>  
+#     mutate(Verify = Sweep - lag(Sweep, default = 0) == 1) |>
+#     filter(Verify == FALSE) 
+# 
+# test1 <- left_join(df_sum, test[, c(1:4, 8)], by = c("Year", "Species", "Station", "Sweep"))
+#View(test1)  
+
+## spc plot ----
+### year by spp ----
+library(ggplot2)
+p <- ggplot(
+  df_sum |> filter(Species == "AS"|Species == "ASYOY"),
+  aes(x = spc, y = abun, 
+      group = Station, fill = Station,
+      text = paste("SPC: ", spc, "\n",
+                   "Abund: ", abun, "\n",
+                   "Stn: ", Station, "\n",
+                   "Sweep: ", Sweep,
+                   sep = "")
+  )) +
+  geom_point() +
+  geom_path() +
+  facet_grid(Year ~ Species)
+
+p
+plotly:: ggplotly(p, tooltip = "text")
+
+
+### subset ----
+p <- ggplot(
+  #df_sum[df_sum$Species == "AS",], 
+  #df_sum[df_sum$Species == "AS" & df_sum$Station == 8,], 
+  df_sum[df_sum$Species == "BTYOY" & df_sum$Year == 2016,], 
+  aes(x = spc, y = abun, 
+      group = Station, fill = Station,
+      text = paste("SPC: ", spc, "\n",
+                   "Abund: ", abun, "\n",
+                   "Stn: ", Station, "\n",
+                   "Sweep: ", Sweep,
+                   sep = "")
+  )) +
+  geom_point() +
+  geom_path()
+
+p
+
+plotly:: ggplotly(p, tooltip = "text")
+
+## summary stats ----
+## number of sweeps per station
+library(tidyr)
+df_sum |>
+  group_by(Year, Species, Station) |>
+  summarize(Sweeps = length(Sweep)) |>
+  pivot_wider(id_cols = c(Year, Species), 
+              names_from = Station, values_from = Sweeps)
+
+# zeros - 17 of these
+df_sum |>
+  filter(Sweep == 1 & abun == 0)
+
+
+
+# tabulate by Year:Species:Station and so that catches are individual columns - required for FSA::removal
+
+df_tab1 <- df_sum |>
+  group_by(Year, Species, Station) |>
+  #filter(Sweep <=3 & length(Sweep) > 1 | is.na(Sweep == 2)) |>
+  #  filter(length(Sweep) > 1 & Sweep <= 3) |>
+  filter(length(Sweep) > 1 & Sweep <= 3) |>
+  #& !is.null(Sweep == 2) | length(Sweep) > 1 & !is.null(Sweep == 3)) |>
+  ungroup() |>
+  pivot_wider(id_cols = c(Year, Species, Station), 
+              names_from = Sweep, values_from = abun) |> #bio.sum abun
+  filter(!(is.na(`2`) & is.na(`3`))) 
+df_tab1 |> print(n = Inf)
+
+
+df_tab_pool <- df_tab1 |>
+  group_by(Year, Station) |>
+  summarise(`1` = sum(`1`, na.rm = T), 
+            `2` = sum(`2`, na.rm = T), 
+            `3` = sum(`3`, na.rm = T))
+df_tab_pool |> print(n = Inf)
+
+# tabulate ----
+with(df_all, table(Station, Sweep, Species))
+with(df_all, table(Station, Sweep, Species))
+with(df_all, table(Station, Sweep, Species, Year))
+with(df_all[df_all$Year == 1996,], table(Station, Sweep, Species, Year))
+
+
+# 4-5 passes
+
+df_all$pass_no <-NA
+
+# summarize just 4-5-pass sites
+temp <- df_all |>
+  group_by(Year, Species, Station) |>
+  mutate(pass_no = ifelse(max(Sweep )<=3, 3, 5)) |>
+  ungroup() |>
+  filter(pass_no == 5) |> 
+  group_by(Year, Species, Station, Sweep) |>
+  summarize(count = n()) |>
+  pivot_wider(names_from = Sweep, values_from = count, values_fill = 0)
+
+str(temp)
+#View(temp)
+
+
