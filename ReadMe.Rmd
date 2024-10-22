@@ -6,7 +6,7 @@ output: html_document
 bibliography: refs/references.bib
 ---
 
-```{r}
+```{r, echo = F}
 df_all <- read.csv("derived_data/df_all.csv")
 ```
 
@@ -172,6 +172,32 @@ Need a tiered, measured approach (i.e., pick your poison):
 - If T < 10 - then T == No almost all the time but why use CS as its not really valid.  
  
 Or, Just use T: see Clarke and Curtis meeting above.
+
+```{r, echo=FALSE}
+n <- 100
+p <- 0.5
+
+c1 <- p*n
+c2 <- (n-c1)*p
+c3 <- (n- c1-c2)*p
+T <- sum(c1, c2, c3)
+
+p_vec <- seq(0.01, 1, 0.01)
+T_vec <- rep(NA, length(p_vec))
+
+i <- 2
+for(i in seq_along(p_vec)){
+  c1 <- p_vec[i]*n
+  c2 <- (n-c1)*p_vec[i]
+  c3 <- (n- c1-c2)*p_vec[i]
+  T_vec[i] <- sum(c1, c2, c3)
+}
+
+plot(p_vec, T_vec, type = 'n')
+lines(p_vec, T_vec)
+abline(h=90)
+```
+
 
 ## Tables {.tabset}
 
