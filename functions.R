@@ -15,6 +15,16 @@ spc <- function(x){
 }
 
 
+
+
+# Seber Goodness of Fit test for three passes
+cs_gf <- function(N, p, c1, c2, c3){
+  (c1 - (N*p))^2/N*p + 
+    (c2 - N*(1-p)*p)^2/(N*(1-p)*p) +
+    (c3 - N*(1-p)^2*p)^2/(N*(1-p)^2*p)
+}
+
+
 spc1 <- function(var){
   #browser()
   for(i in seq_along(x$var)){
