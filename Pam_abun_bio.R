@@ -26,7 +26,7 @@ colnames(out) <- c("c1",  "c2", "c3","k",  "T", "X",
 # out
 # out <- cbind(sta = pm16_tab1$Station[c(1:10)], out)
 
-
+# format res_list so that its readable
 for(i in seq_along(res_list)){
   if(length(res_list[[i]]$catch) ==3){
     out[i,] <- round(c(res_list[[i]]$catch, 
@@ -46,13 +46,13 @@ for(i in seq_along(res_list)){
   }
 }
 
-
+# bind year, species and station to res_list
 out <- cbind(year = df_tab1$Year, 
              spp = df_tab1$Species, 
              sta = df_tab1$Station, 
              out)
 
-View(out)
+#View(out)
 head(out)
 out |> filter(spp == "AS" & year == 2016)
 
@@ -69,35 +69,6 @@ pchisq(1.2813, 2) # probability of this value or less - cumulative density
 1-pchisq(1.2813, 2) #- this is the pvalue
 qchisq(1-0.5269498, 2) #- returns the test statistic
 qchisq(0.95, 1) #- gives the critical test 3.84
-
-## Summary stats
-# total year:spp:site:catch
-nrow(df_sum)
-
-# total year:spp:site
-df_sum |> group_by(Year, Species, Station) |> 
-  summarise (catch_num = n()) |> 
-  ungroup() |>
-  summarise(tot = n())
-
-length(unique(df_sum$Year))
-length(unique(df_sum$Station))
-
-# sum catches by year and species
-df_tab1 |>
-  group_by(Year, Species) |>
-  summarise(sum_c1 = sum(`1`, na.rm = T),
-            sum_c2 = sum(`2`, na.rm = T),
-            sum_c3 = sum(`3`, na.rm = T)
-  )
-
-# sum catches by year
-df_tab1 |>
-  group_by(Species) |>
-  summarise(sum_c1 = sum(`1`, na.rm = T),
-            sum_c2 = sum(`2`, na.rm = T),
-            sum_c3 = sum(`3`, na.rm = T)
-  )
 
 
 # filter out sites with only 1 catch or where c2 & c3 == NA
@@ -117,8 +88,8 @@ p <- ggplot(out, aes(x = T, y = No, group = as.factor(spp), colour = spp)) +
   geom_point()
 p
 
-## GF - pool ----
 
+## GF - pool ----
 res_list_pool <- apply(df_tab_pool[, c(3:5)], MARGIN=1, FUN = removal, method = "CarleStrub") # takes NA's
 
 
@@ -154,7 +125,7 @@ out_pool <- cbind(year = df_tab_pool$Year,
                   sta = df_tab_pool$Station, 
                   out_pool)
 
-View(out_pool)
+#View(out_pool)
 head(out_pool)
 
 
@@ -164,8 +135,29 @@ out_pool$GF <- with(out_pool, round((c1 - (No*p))^2/No*p +
                                     ,4)             
 )
 
+out_pool
 dchisq(1.2813, 2) ## What is the likelihood of this value
 pchisq(1.2813, 2) # probability of this value or less - cumulative density
 1-pchisq(1.2813, 2) #- this is the pvalue
 qchisq(1-0.5269498, 2) #- returns the test statistic
 qchisq(0.95, 1) #- gives the critical test 3.84
+
+
+# for pooled
+# filter out sites with only 1 catch or where c2 & c3 == NA
+nrow(out_pool)
+out_pool |> filter(GF > qchisq(0.95, 1)) # 10 sites don't make GF with T > 30 on 5 sites 
+nrow(out_pool |> filter(GF > qchisq(0.95, 1)))
+out_pool |> filter(T < 30)
+nrow(out_pool |> filter(T < 30)) # 97 of 124
+nrow(out_pool |> filter(T < 20)) # 85 of 124
+nrow(out_pool |> filter(T < 10)) # 57 of 124
+
+
+# density of total catch
+plot(density(out_pool$T))
+
+
+p <- ggplot(out_pool, aes(x = T, y = No)) +
+  geom_point()
+p
