@@ -1,5 +1,5 @@
 Proceed with T.
-Need a Pam_data_new using the import in scratch Pad - this is a new, fresh start and it will clean things up a lot.  Then, create some nice tables like in notes (year x species-age wiht sites, total catch, sites with < 5, and more than three passes. Get these in Read_me
+Then, create some nice tables like in notes (year x species-age wiht sites, total catch, sites with < 5, and more than three passes. Get these in Read_me
 
 
 Looked at 5 sweeps and talk to Curtis/Clarke
