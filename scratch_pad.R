@@ -2,7 +2,7 @@
 #1. bring in the AMEC code to see if it produces the same results - seems like it does so sometime
 #2. tabulate - trying to figure out why Pamehac produces wild CIs when RB doesn't
 #3. FSA - figure out how the package works and why large variance
-#4. import brings in all data and then calculates CS estimates using FSA and calculates sum of previous catches (spc) and goodness of fit tests
+#4. goodness of fit tests and function
 #5. Hedger 2013 paper (see ReadMe) - tried using calibration approaches for p
 
 
