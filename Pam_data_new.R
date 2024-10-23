@@ -225,6 +225,30 @@ df_tab1 |>
             sum_c3 = sum(`3`, na.rm = T)
   )
 
+# sum by catch for Year and Species
+df_tab_T <- df_sum |>
+  group_by(Year, Species) |>
+  filter(Sweep <= 3) |>
+  summarize(T = sum(abun)) |>
+#  ungroup() |>
+  pivot_wider(id_cols = c(Year), 
+              names_from = Species, 
+              values_from = T) 
+df_tab_T # this is right
+
+# this is a summation of total sites and catches by year and species
+df_tab_T <- df_sum |>
+  group_by(Year, Species) |>
+  filter(Sweep <= 3) |>
+  summarize(T = sum(abun),
+            n = n_distinct(Station)) |>
+  #  ungroup() |>
+  pivot_wider(id_cols = c(Year), 
+              names_from = Species, 
+              values_from = c(T, n)) 
+df_tab_T
+#write.csv(df_tab_T[, c(1, 6, 2, 7, 3, 8, 4, 9, 5)], "derived_data/df_tab_T.csv")
+
 # pool by Year and Station - this is for the Cote method
 df_tab_pool <- df_tab1 |>
   group_by(Year, Station) |>
