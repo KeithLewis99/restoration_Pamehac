@@ -8,6 +8,7 @@ bibliography: refs/references.bib
 
 ```{r, echo = F}
 df_all <- read.csv("derived_data/df_all.csv")
+df_tab_T <- read.csv("derived_data/df_tab_T.csv")
 ```
 
 # Introduction
@@ -210,6 +211,17 @@ with(df_all, table(Station, Sweep))
 ### Stations-Species-Year
 ```{r}
 with(df_all, table(Station, Sweep, Species, Year))
+```
+
+
+### test
+```{r}
+library(kableExtra)
+library(magrittr)
+kbl(df_tab_T) |>
+  kable_classic() |>
+  add_header_above(c(" " = 1, "Group 1" = 2, "Group 2" = 2, "Group 3" = 2, "Group 4" = 3))
+  
 ```
 
 
