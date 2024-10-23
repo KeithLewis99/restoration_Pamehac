@@ -161,3 +161,7 @@ plot(density(out_pool$T))
 p <- ggplot(out_pool, aes(x = T, y = No)) +
   geom_point()
 p
+
+# tabulations ----
+
+# END ----
