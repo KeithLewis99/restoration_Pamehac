@@ -1,6 +1,12 @@
 Proceed with T.
 Then, create some nice tables like in notes (year x species-age wiht sites, total catch, sites with < 5, and more than three passes. Get these in Read_me
 
+Also, tabulations of T by year and species - done but get into a nice table; done; reorg so colum titles look nice in test tab
+
+Tables in R: https://glin.github.io/reactable/articles/examples.html#column-formatting
+https://cran.r-project.org/web/packages/kableExtra/vignettes/awesome_table_in_html.html#Grouped_Columns__Rows
+# Scale by pool size for analyses as required
+
 
 Looked at 5 sweeps and talk to Curtis/Clarke
 
