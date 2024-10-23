@@ -53,6 +53,7 @@ unique(df_all$Species)
 df_sum <- df_all |>
   group_by(Year, Species, Station, Sweep) |>
   summarise(bio.sum = sum(Weight.g), abun = n()) 
+str(df_sum, give.attr = F)
 
 # calculate sum of previous catch
 df_sum$spc <- NA
@@ -61,6 +62,7 @@ df_sum$spc <- NA
 df_sum <- df_sum |>
   group_by(Year, Species, Station) |>
   #summarise(min = min(Sweep))
+  # case_when is vectorized if-else: so when Sweep ==1, spc is 0, when Sweep ==2 & there is a Sweep ==1, abundance, else -1, when Sweep ==3, if there is a Sweep ==1, sum Sweep 1 & 2, else -2, etc.
   mutate(spc = case_when(
     Sweep == 1 ~ 0,
     Sweep == 2 ~ ifelse(any(Sweep == 1), abun[Sweep ==1], -1),
@@ -94,6 +96,7 @@ df_sum <- bind_rows(df_sum, df_tmp) |>
   arrange(Year, Species, Station, Sweep)
 str(df_sum, give.attr = F)
 #View(df_sum)
+write.csv(df_sum, "derived_data/df_sum.csv")
 
 # now for when Sweep == 1 is True but there is a missing sweep - don't need this bc you are only using the first value but it will make the spc graphs a bit hard to interpret
 # test <- df_sum |>
@@ -130,7 +133,7 @@ plotly:: ggplotly(p, tooltip = "text")
 p <- ggplot(
   #df_sum[df_sum$Species == "AS",], 
   #df_sum[df_sum$Species == "AS" & df_sum$Station == 8,], 
-  df_sum[df_sum$Species == "BTYOY" & df_sum$Year == 2016,], 
+  df_sum[df_sum$Species == "BTYOY" & df_sum$Year == 1990,], 
   aes(x = spc, y = abun, 
       group = Station, fill = Station,
       text = paste("SPC: ", spc, "\n",
@@ -144,6 +147,8 @@ p <- ggplot(
 
 p
 
+#write.csv(df_sum[df_sum$Species == "AS" & df_sum$Year == 2016,], 
+      "derived_data/spc_example.csv")
 plotly::ggplotly(p, tooltip = "text")
 
 # summary stats ----
@@ -165,7 +170,7 @@ df_sum |>
   filter(Sweep == 1 & abun == 0)
 
 ## tables ----
-with(df_all, table(Station, Sweep, Species))
+with(df_all, table(Station, Species))
 with(df_all, table(Station, Sweep, Species))
 with(df_all, table(Station, Sweep, Species, Year))
 with(df_all[df_all$Year == 1996,], table(Station, Sweep, Species, Year))
@@ -181,7 +186,7 @@ df_sum |>
 # 4-5 passes
 df_all$pass_no <-NA
 
-# summarize just 4-5-pass sites
+# summarize just 4-5-pass sites and had fish
 temp <- df_all |>
   group_by(Year, Species, Station) |>
   mutate(pass_no = ifelse(max(Sweep )<=3, 3, 5)) |>
@@ -195,17 +200,20 @@ str(temp)
 
 # tabulate by Year:Species:Station and so that catches are individual columns - required for FSA::removal
 
+# NOTE: WHEN USING:
+### filter(length(Sweep) > 1 & Sweep <= 3) - this give sites where there were at least 2 sweeps but excludes 4 and 5 - this is inappropriate for any analysis involving a catchability estimate.  
+### filter(Sweep <= 3)would be appropriate for using T
 df_tab1 <- df_sum |>
   group_by(Year, Species, Station) |>
   #filter(Sweep <=3 & length(Sweep) > 1 | is.na(Sweep == 2)) |>
-  #  filter(length(Sweep) > 1 & Sweep <= 3) |>
+  #filter(Sweep <= 3)
   filter(length(Sweep) > 1 & Sweep <= 3) |>
   #& !is.null(Sweep == 2) | length(Sweep) > 1 & !is.null(Sweep == 3)) |>
   ungroup() |>
   pivot_wider(id_cols = c(Year, Species, Station), 
-              names_from = Sweep, values_from = abun) |> #bio.sum abun
+              names_from = Sweep, values_from = abun) #|> #bio.sum abun
   filter(!(is.na(`2`) & is.na(`3`))) 
-
+df_tab1[df_tab1$Species == "BT" & df_tab1$Year == 1996,]
 
 df_tab1 |> print(n = Inf)
 
@@ -224,6 +232,8 @@ df_tab1 |>
             sum_c2 = sum(`2`, na.rm = T),
             sum_c3 = sum(`3`, na.rm = T)
   )
+
+df_sum |> filter(Sweep ==4 | Sweep ==5) |> summarise(sum = sum(abun))
 
 # sum by catch for Year and Species
 df_tab_T <- df_sum |>
@@ -247,6 +257,7 @@ df_tab_T <- df_sum |>
               names_from = Species, 
               values_from = c(T, n)) 
 df_tab_T
+str(df_tab_T, give.attr = F)
 #write.csv(df_tab_T[, c(1, 6, 2, 7, 3, 8, 4, 9, 5)], "derived_data/df_tab_T.csv")
 
 # pool by Year and Station - this is for the Cote method
