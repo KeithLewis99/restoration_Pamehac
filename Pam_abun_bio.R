@@ -64,11 +64,12 @@ out$GF <- with(out, round((c1 - (No*p))^2/No*p +
                           ,4)             
 )
 
+write.csv(out, "derived_data/FSA_output.csv")
 dchisq(1.2813, 2) ## What is the likelihood of this value
 pchisq(1.2813, 2) # probability of this value or less - cumulative density
 1-pchisq(1.2813, 2) #- this is the pvalue
 qchisq(1-0.5269498, 2) #- returns the test statistic
-qchisq(0.95, 1) #- gives the critical test 3.84
+qchisq(0.95, 1) #- gives the critical test 3.84 - this is right - it should be one df because k-2: 2 df are lost because N is estimated - see Locwood2000
 
 
 # filter out sites with only 1 catch or where c2 & c3 == NA
@@ -79,6 +80,7 @@ out |> filter(T < 30)
 nrow(out |> filter(T < 30)) # 97 of 124
 nrow(out |> filter(T < 20)) # 85 of 124
 nrow(out |> filter(T < 10)) # 57 of 124
+nrow(out |> filter(T < 5)) # 33 of 124
 
 # density of total catch
 plot(density(out$T))
