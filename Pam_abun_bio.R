@@ -63,7 +63,7 @@ out$GF <- with(out, round((c1 - (No*p))^2/No*p +
                             (c3 - (No*(1-p)^2*p))^2/(No*(1-p)^2*p)
                           ,4)             
 )
-
+str(out)
 write.csv(out, "derived_data/FSA_output.csv")
 dchisq(1.2813, 2) ## What is the likelihood of this value
 pchisq(1.2813, 2) # probability of this value or less - cumulative density
@@ -138,22 +138,18 @@ out_pool$GF <- with(out_pool, round((c1 - (No*p))^2/No*p +
 )
 
 out_pool
-dchisq(1.2813, 2) ## What is the likelihood of this value
-pchisq(1.2813, 2) # probability of this value or less - cumulative density
-1-pchisq(1.2813, 2) #- this is the pvalue
-qchisq(1-0.5269498, 2) #- returns the test statistic
 qchisq(0.95, 1) #- gives the critical test 3.84
 
 
 # for pooled
 # filter out sites with only 1 catch or where c2 & c3 == NA
 nrow(out_pool)
-out_pool |> filter(GF > qchisq(0.95, 1)) # 10 sites don't make GF with T > 30 on 5 sites 
+out_pool |> filter(GF > qchisq(0.95, 1)) # 6 sites don't make GF with T > 30 on 3 sites 
 nrow(out_pool |> filter(GF > qchisq(0.95, 1)))
 out_pool |> filter(T < 30)
-nrow(out_pool |> filter(T < 30)) # 97 of 124
-nrow(out_pool |> filter(T < 20)) # 85 of 124
-nrow(out_pool |> filter(T < 10)) # 57 of 124
+nrow(out_pool |> filter(T < 30)) # 19 of 45
+nrow(out_pool |> filter(T < 20)) # 12 of 45
+nrow(out_pool |> filter(T < 10)) # 6 of 45
 
 
 # density of total catch
