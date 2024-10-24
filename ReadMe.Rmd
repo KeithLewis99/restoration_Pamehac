@@ -31,7 +31,7 @@ Got a zip file from Kristin Loughlin with no folders but files as follows:
 I reorganized for my own needs.  I have recreated all the figures although there are still questions, especially about the confidence intervals so basically, I learved how to do Carle Strub and many other estimates of abundance.
 
 ## Missing values
-2024-10-23: checked that df_all, df_sum, df_tab1, and out all add up.  df_all and df_sum are fine.  df_tab1 can differ from the less refined dataframes because df_tab1 includes only Sweep 1 to Sweep3, originally eliminated sites with only Sweep 1, and then those where Sweeps 2 and 3 were NA.
+2024-10-23: checked that df_all, df_sum, df_tab1, and out all add up.  df_all and df_sum are fine.  df_tab1 can differ from the less refined dataframes because df_tab1 includes only Sweep 1 to Sweep3, i.e., it eliminates sites with only captures on Sweep 1 but the last line (filter) eliminated sites with with captures on Sweep 1 (or 2 or 3) & 4 or 5 (all three have captures on sweep 3).  So, I added df_tab2 for the tabulations because it represents all 140 sites.  Also, df_tab_T presents the data as in the table below (see tab "samples and catches by year"). There are also 17 sites with zeros in the first sweep.
 
 I think that this is OK for analytical purposes but there may be troubles with the tabulation.
 
@@ -115,14 +115,13 @@ Rivera 2021 - a review: very general but with no key insights.  It does provide 
 
 ## What have I learned:
 Assumptions [@cowx1983review]: 3 standard and two more:    
-    - closed population -> this should always be met in NL
-    - probability of capture is the same for all individuals  
-    - probability of capture (catchability) remains the same for each capture occasion - unlikely to be true often
+    - closed population -> this should always be met in NL  
+    - probability of capture is the same for all individuals    
+    - probability of capture (catchability) remains the same for each capture occasion - unlikely to be true often  
     - non-standard: the CPUE must significantly reduce the population size  
-    - non-standard: the population was not be so large that catching of one member
-interferes with the capture of another  
+    - non-standard: the population was not be so large that catching of one member interferes with the capture of another  
 
-What about this??? 2. fishing effort must remain constant for each capture occasion - assume that this is the case but see Clarke and Curtis
+What about this??? 2. fishing effort must remain constant for each capture occasion - assume that this is the case but see Clarke and Curtis - see Notes from them - this is definitely not the case for Pamehac
 
 - Can do depletion on open and closed  
 - Samples > 30 total are required  
@@ -258,9 +257,9 @@ She asked a good question - does the YOY matter when we are really just
 
 
 ## findings and solutions
-Generally, I think that the conclusion here is that you have to pick your poison and there are no silver bullets.  Also, far better to do capture-mark-recapture.
+Generally, I think that the conclusion here is that you have to pick your poison and there are no silver bullets.  Also, far better to do capture-mark-recapture.  But from the WHIL section, clearly there are many sites with very few fish, the spc test often fails, and GF is often not met.  However, T ~ No in many cases, there are few cases when pass-4 or -5 will change things much, and if p > 0.5, T will be very close to No anyway.
 
-For Pamehac: 
+Also, for Pamehac: 
 
 - Few stations meet the T > 30 criteria in a given year  
 - Some: CS approach is fine  
