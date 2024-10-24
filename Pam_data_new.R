@@ -187,7 +187,7 @@ df_sum |>
 df_all$pass_no <-NA
 
 # summarize just 4-5-pass sites and had fish
-temp <- df_all |>
+df_4_5pass <- df_all |>
   group_by(Year, Species, Station) |>
   mutate(pass_no = ifelse(max(Sweep )<=3, 3, 5)) |>
   ungroup() |>
@@ -196,7 +196,7 @@ temp <- df_all |>
   summarize(count = n()) |>
   pivot_wider(names_from = Sweep, values_from = count, values_fill = 0)
 
-str(temp, give.attr = F)
+str(df_4_5pass, give.attr = F)
 
 # tabulate by Year:Species:Station and so that catches are individual columns - required for FSA::removal
 
@@ -204,8 +204,8 @@ str(temp, give.attr = F)
 ### filter(length(Sweep) > 1 & Sweep <= 3) - this give sites where there were at least 2 sweeps but excludes 4 and 5 - this is inappropriate for any analysis involving a catchability estimate.  
 ### filter(Sweep <= 3)would be appropriate for using T
 ### filter(!(is.na(`2`) & is.na(`3`))) - without this, you still get one catch value
-df_tab1 
-temp <- df_sum |>
+
+df_tab1 <- df_sum |>
   group_by(Year, Species, Station) |>
   #filter(Sweep <=3 & length(Sweep) > 1 | is.na(Sweep == 2)) |>
   #filter(Sweep <= 3)
@@ -221,7 +221,7 @@ df_tab1 |> print(n = Inf)
 
 # temp is same as df_tab1 but without the last filter
 ## the query above does not get rid of stations with captures on Sweep 1 (or 2 or 3) & 4 or 5 (all three have captures on sweep 3)
-anti_join(temp, df_tab1,  by = c('Year', 'Species', 'Station'))
+anti_join(df_4_5pass, df_tab1,  by = c('Year', 'Species', 'Station'))
 
 
 
@@ -319,8 +319,6 @@ p <- ggplot(
   facet_grid(Year ~ Station)
 
 p
-#summarise(min = min(Sweep))
-# case_when is vectorized if-else: so when Sweep ==1, spc is 0, when Sweep ==2 & there is a Sweep ==1, abundance, else -1, when Sweep ==3, if there is a Sweep ==1, sum Sweep 1 & 2, else -2, etc.
 
 # sum catches by year and species - from Pam_data.R
 ## DEPRECATE? - need to check this - just commenting out for now
