@@ -96,7 +96,7 @@ df_sum <- bind_rows(df_sum, df_tmp) |>
   arrange(Year, Species, Station, Sweep)
 str(df_sum, give.attr = F)
 #View(df_sum)
-write.csv(df_sum, "derived_data/df_sum.csv")
+#write.csv(df_sum, "derived_data/df_sum.csv")
 
 # now for when Sweep == 1 is True but there is a missing sweep - don't need this bc you are only using the first value but it will make the spc graphs a bit hard to interpret
 # test <- df_sum |>
@@ -148,7 +148,7 @@ p <- ggplot(
 p
 
 #write.csv(df_sum[df_sum$Species == "AS" & df_sum$Year == 2016,], 
-      "derived_data/spc_example.csv")
+      "derived_data/spc_example.csv"
 plotly::ggplotly(p, tooltip = "text")
 
 # summary stats ----
@@ -196,14 +196,16 @@ temp <- df_all |>
   summarize(count = n()) |>
   pivot_wider(names_from = Sweep, values_from = count, values_fill = 0)
 
-str(temp)
+str(temp, give.attr = F)
 
 # tabulate by Year:Species:Station and so that catches are individual columns - required for FSA::removal
 
 # NOTE: WHEN USING:
 ### filter(length(Sweep) > 1 & Sweep <= 3) - this give sites where there were at least 2 sweeps but excludes 4 and 5 - this is inappropriate for any analysis involving a catchability estimate.  
 ### filter(Sweep <= 3)would be appropriate for using T
-df_tab1 <- df_sum |>
+### filter(!(is.na(`2`) & is.na(`3`))) - without this, you still get one catch value
+df_tab1 
+temp <- df_sum |>
   group_by(Year, Species, Station) |>
   #filter(Sweep <=3 & length(Sweep) > 1 | is.na(Sweep == 2)) |>
   #filter(Sweep <= 3)
@@ -211,31 +213,50 @@ df_tab1 <- df_sum |>
   #& !is.null(Sweep == 2) | length(Sweep) > 1 & !is.null(Sweep == 3)) |>
   ungroup() |>
   pivot_wider(id_cols = c(Year, Species, Station), 
-              names_from = Sweep, values_from = abun) #|> #bio.sum abun
+              names_from = Sweep, values_from = abun) |> #bio.sum abun
   filter(!(is.na(`2`) & is.na(`3`))) 
 df_tab1[df_tab1$Species == "BT" & df_tab1$Year == 1996,]
 
 df_tab1 |> print(n = Inf)
 
+# temp is same as df_tab1 but without the last filter
+## the query above does not get rid of stations with captures on Sweep 1 (or 2 or 3) & 4 or 5 (all three have captures on sweep 3)
+anti_join(temp, df_tab1,  by = c('Year', 'Species', 'Station'))
+
+
+
 # sum by year and species
-df_tab1 |>
+df_tab2 <- df_sum |>
+  group_by(Year, Species, Station) |>
+  pivot_wider(id_cols = c(Year, Species, Station), 
+              names_from = Sweep, values_from = abun) #bio.sum abun
+str(df_tab2, give.attr = F)
+
+# this includes the three from the anti_join above plus 13 more sites with only catches on the first sweep - this adds up to 140 so all good.
+anti_join(df_tab2, df_tab1, by = c('Year', 'Species', 'Station'))
+
+# sum catches by year and species
+df_tab2 |>
   group_by(Year, Species) |>
   summarise(sum_c1 = sum(`1`, na.rm = T),
             sum_c2 = sum(`2`, na.rm = T),
             sum_c3 = sum(`3`, na.rm = T)
   )
 
-# sum catches by year
-df_tab1 |>
+# sum catches by species for 3 passes - both of this and the below sum to 2547 which is the sum of df_all
+df_tab2 |>
   group_by(Species) |>
   summarise(sum_c1 = sum(`1`, na.rm = T),
             sum_c2 = sum(`2`, na.rm = T),
             sum_c3 = sum(`3`, na.rm = T)
   )
 
-df_sum |> filter(Sweep ==4 | Sweep ==5) |> summarise(sum = sum(abun))
+df_sum |> group_by(Species) |> filter(Sweep ==4 | Sweep ==5) |> summarise(sum = sum(abun))
 
-# sum by catch for Year and Species
+df_tab2 |> filter(`1` == 0)
+df_tab1 |> filter(`1` == 0)
+
+# sum by catch for Year and Species 3 passes - this sum so 2495 which matches Excel
 df_tab_T <- df_sum |>
   group_by(Year, Species) |>
   filter(Sweep <= 3) |>
@@ -246,7 +267,7 @@ df_tab_T <- df_sum |>
               values_from = T) 
 df_tab_T # this is right
 
-# this is a summation of total sites and catches by year and species
+# as above but summation of total sites and catches by year and species - but this is only for the site where fish were caught
 df_tab_T <- df_sum |>
   group_by(Year, Species) |>
   filter(Sweep <= 3) |>
@@ -260,14 +281,46 @@ df_tab_T
 str(df_tab_T, give.attr = F)
 #write.csv(df_tab_T[, c(1, 6, 2, 7, 3, 8, 4, 9, 5)], "derived_data/df_tab_T.csv")
 
+# pool ----
 # pool by Year and Station - this is for the Cote method
-df_tab_pool <- df_tab1 |>
+df_tab_pool <- df_tab2 |>
   group_by(Year, Station) |>
   summarise(`1` = sum(`1`, na.rm = T), 
             `2` = sum(`2`, na.rm = T), 
-            `3` = sum(`3`, na.rm = T))
+            `3` = sum(`3`, na.rm = T),
+            `4` = sum(`3`, na.rm = T),
+            `5` = sum(`3`, na.rm = T))
 df_tab_pool |> print(n = Inf)
 
+df_tab_pool_spc <- df_sum |>
+  group_by(Year, Station, Sweep) |>
+  summarise(bio.sum = sum(bio.sum), abun = sum(abun)) |>
+  mutate(spc = case_when(
+    Sweep == 1 ~ 0,
+    Sweep == 2 ~ abun[Sweep ==1],
+    Sweep == 3 ~ sum(c(abun[Sweep == 1 | Sweep == 2])),
+    Sweep == 4 ~ sum(c(abun[Sweep == 1 | Sweep == 2 | Sweep == 3])),
+    Sweep == 5 ~ sum(c(abun[Sweep == 1 | Sweep == 2 | Sweep == 3 | Sweep == 4]))
+))
+df_tab_pool_spc
+
+p <- ggplot(
+  df_tab_pool_spc,
+  aes(x = spc, y = abun, 
+      group = Station, fill = Station,
+      text = paste("SPC: ", spc, "\n",
+                   "Abund: ", abun, "\n",
+                   "Stn: ", Station, "\n",
+                   "Sweep: ", Sweep,
+                   sep = "")
+  )) +
+  geom_point() +
+  geom_path() +
+  facet_grid(Year ~ Station)
+
+p
+#summarise(min = min(Sweep))
+# case_when is vectorized if-else: so when Sweep ==1, spc is 0, when Sweep ==2 & there is a Sweep ==1, abundance, else -1, when Sweep ==3, if there is a Sweep ==1, sum Sweep 1 & 2, else -2, etc.
 
 # sum catches by year and species - from Pam_data.R
 ## DEPRECATE? - need to check this - just commenting out for now
