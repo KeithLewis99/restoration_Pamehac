@@ -12,6 +12,7 @@ df_sum <- read.csv("derived_data/df_sum.csv")
 df_tab_T <- read.csv("derived_data/df_tab_T.csv")
 df_sum_subset <- read.csv("derived_data/spc_example.csv")
 df_out <- read.csv("derived_data/FSA_output.csv")
+df_tab3 <- read.csv("derived_data/df_tab3.csv")
 
 library(ggplot2)
 library(dplyr)
@@ -35,10 +36,30 @@ I reorganized for my own needs.  I have recreated all the figures although there
 
 I think that this is OK for analytical purposes but there may be troubles with the tabulation.
 
-# Data
-See the Rose Blanche code for explanations on what I think the AMEC code does and my concerns, i.e., how to use the delta method for tehse types of data as well as how the initial summaries were naively done.  
+
+## Data {.tabset}
+
+### Data
+See the Rose Blanche code for explanations on what I think the AMEC code does and my concerns, i.e., how to use the delta method for these types of data as well as how the initial summaries were naively done.  
 BUT......the really, really, really good thing for Pamehac is that there is a file "output_pamehac_by_station.csv" that has all of the data as derived from the AMEC functions but in raw form!!!  So, I have created code in Pam_data_new.R to bring in all the files together.  From there, one can do any type of depletion analysis.
 
+### map
+```{r, echo = F}
+tmp <- read.csv("data/waypoints.csv")
+library(leaflet)
+leaflet()%>%
+   setView(lng = -56.07,lat=48.91,zoom=11)%>%addTiles()%>%
+   addCircleMarkers(data=tmp, lng=tmp$west, lat=tmp$north,
+                    popup = ~site,
+                    label = ~site,
+                    radius = 6,
+                    color = 'black',
+                    fillColor = 'blue',
+                    stroke = TRUE,
+                    weight = 1,
+                    fillOpacity = 0.5) 
+
+```
 
 # Abundance Estimates
 ## Why are some CIs wide
@@ -112,6 +133,22 @@ Lecture10: https://rushinglab.github.io/WILD6900/articles/Lecture10/Lecture10.ht
 
 Rivera 2021 - a review: very general but with no key insights.  It does provide a nice history of the field.  Almost all depletion can be treated as a CMR analysis but with recapture set to zero.
 
+### Scruton and Gibson
+See Clarke and Curtis tab.  They advised me to look up Scruton and Gibson [-@scruton1995quantitative] which is an overview electrofishing in NL based on 1993 workshop.
+
+- Summary of Papers  
+	- Gibson - Freshwaer River, NE Trepassey River, Highlands -  move upstream (Gibson references)  
+	- Bourgeois -  Lloyds Section III and II, King Georve IV Lake - move upstream in 1987-88 but then move downstream  
+	- Scruton - West Salmon River, Dog Pond, Seal Cove - move upstream - calls it the fixed effort (successive) removal method; thanks Bourgois for advice but not for field work  
+	- Mullins and Lowe - Humber River, Western Arm Brook, Pinchgut Brook - move downstream  
+	- Warren advocates for Bayesian approach!!!!!!  
+	
+- Note  	
+  - Pamehac is mentioned three times by Scruton but not in relation to electrofishing, at least not directly
+  - Scruton et al. 1998 references this paper for the methods
+
+So there is a discrepancy between what Clakre and Curtis remember and what is in Scruton et al [-@scruton1998pamehac]. Spoke to Keith Clarke about this on 2024-10-25.  He said he's not surprised that there is a discrepancy and that differences in methodology may have been glossed over.  But he's sure that Bourgeois had something to do with this.  
+
 
 ## What have I learned:
 Assumptions [@cowx1983review]: 3 standard and two more:    
@@ -135,11 +172,18 @@ See What I have learned (WHIL): data issues and also data summaries below.
 
 
 ## WHIL: data issues {.tabset}
-### low n
+
+### data summaries
 ```{r}
 nrow(df_all) # number of fish caught
-nrow(df_sum) # number of sites sampled even if no fish
-nrow(df_out) # number of site:years with fish
+sum(rowSums(!is.na(df_tab3[,4:8]))) # number of sites sampled assuming 5 passes in 1990, 1991, 1996 and 3 in 1992 and 2016, including sweeps with abun == 0
+nrow(df_tab3) # number of site:species:years including sweeps with abun == 0; assumes previous is true
+nrow(df_out) # number of site:species:years that can be used in FSA
+```
+
+### low n
+```{r}
+
 nrow(df_out |> filter(T < 30)) # 97 of 124
 nrow(df_out |> filter(T < 20)) # 85 of 124
 nrow(df_out |> filter(T < 10)) # 57 of 124
@@ -236,7 +280,7 @@ Suggested:
 - possibility of just going with counts?  
 
 
-He shared concerns about pooling, i.e,. there are differences in size, shape, behaviour, and habitat (and also the time of year and differences in electrofishers).  He was especially concerned with flow because it probably interacts with all of the previous variables because it affects the distribution of the fish but also affects sampling.  Experience of the crews is very important too.
+He shared concerns about pooling (see findings and solutions), i.e,. there are differences in size, shape, behaviour, and habitat (and also the time of year and differences in electrofishers).  He was especially concerned with flow because it probably interacts with all of the previous variables because it affects the distribution of the fish but also affects sampling.  Experience of the crews is very important too.
 
 We discussed collaboration.  
 
@@ -281,6 +325,8 @@ A proposal for a tiered, measured approach (i.e., pick your poison):
  
 Or, Just use T: see Clarke and Curtis meeting above. The thing is that if p > 0.5, then you get 87.5% of the fish.
 
+### On pooling
+I think I have always been a bit distrustful of the pooling approach for the reasons Scott and Kristin mentioned: different species, sizes, behaviours, habitats, flows, years, fishing crews, and time of year all suggest different catchabilities and that throwing everything in the same pot, and then multiplying the total by the proportion (without the delta method)  will somehow help. However, it did make sense to look at this just in case, so I did.  Pooling definitely helps with samples size and with spc.  However, there are still many cases when n < 30 (19/45 rows!) and about 12/45 where spc looks bad and 4/45 where GF > $GF_{crit}$ (I didn't check to see how many were in common).  So, while this improves things from the FSA:removal standpoint, we would still have lots of worts to explain plus how catchability is equal given all the above and then, delta methoding things appropriately.  Further, Scruton and Gibson [-scruton1995quantitative] explicitly recommend against this (pg. 109, 119 in pdf). I think let's give it a rest.
 
 ## Data summaries {.tabset}
 
