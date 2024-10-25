@@ -76,15 +76,15 @@ str(df_sum, give.attr = F)
 
 
 # in the original data, when no fish is caught, there is no row.  Therefore, in order to add a Sweep == 1 where abundance == 0, need a subset where 1st sweep != 0; it didn't need to be minimum but then its consistent
-test <- df_sum |>
+tmp <- df_sum |>
   group_by(Year, Species, Station) |>
   filter(!any(Sweep == 1)) |>
   slice_min(Sweep)
 
-#View(test)
+#View(tmp)
 
 # create a df from above, remove values, and add Sweep ==1 with bio.sum/abun = 0 and spc == NA; then bind
-df_tmp <- test[1:nrow(test),]
+df_tmp <- tmp[1:nrow(tmp),]
 df_tmp[, c("Sweep", "bio.sum", "abun", "spc")] <- NA
 df_tmp$Sweep[1:nrow(df_tmp[])] <- 1
 df_tmp$bio.sum[1:nrow(df_tmp[])] <- 0
@@ -173,7 +173,7 @@ df_sum |>
 with(df_all, table(Station, Species))
 with(df_all, table(Station, Sweep, Species))
 with(df_all, table(Station, Sweep, Species, Year))
-with(df_all[df_all$Year == 1996,], table(Station, Sweep, Species, Year))
+with(df_all[df_all$Year == 2016,], table(Station, Sweep, Species, Year))
 
 
 ## number of sweeps per station
@@ -231,9 +231,12 @@ df_tab2 <- df_sum |>
   pivot_wider(id_cols = c(Year, Species, Station), 
               names_from = Sweep, values_from = abun) #bio.sum abun
 str(df_tab2, give.attr = F)
+#View(df_tab2)
+
 
 # this includes the three from the anti_join above plus 13 more sites with only catches on the first sweep - this adds up to 140 so all good.
-anti_join(df_tab2, df_tab1, by = c('Year', 'Species', 'Station'))
+df_aj2 <- anti_join(df_tab2, df_tab1, by = c('Year', 'Species', 'Station'))
+
 
 # sum catches by year and species
 df_tab2 |>
@@ -280,6 +283,24 @@ df_tab_T <- df_sum |>
 df_tab_T
 str(df_tab_T, give.attr = F)
 #write.csv(df_tab_T[, c(1, 6, 2, 7, 3, 8, 4, 9, 5)], "derived_data/df_tab_T.csv")
+
+# this summary is for all sites that were fished irregardless of whether they had fish or not.  The assumption here is that there were 5 passes in 1990, 1991, 1996 but three in 1992 and 2016.  Scruton says minimum of 4 passes in 1990-1996 but if this is the case, 1992 had none.  To determine if 4 or 5 would require returning to original data - not sure if this is worth it.  
+df_tab3 <- 
+  df_tab2 |>
+  mutate_at(c(5, 6), ~replace_na(.,0)) |>
+  mutate(`4` = case_when(
+    Year == 1990 | Year == 1991 | Year == 1996 
+    ~ ifelse(is.na(`4`), 0 , `4`))) |>
+  mutate(`5` = case_when(
+    Year == 1990 | Year == 1991 | Year == 1996 
+    ~ ifelse(is.na(`5`), 0 , `5`))) |> 
+  print(n = 140)
+#View(test)
+str(df_tab3, give.attr = F)
+nrow(df_tab3)
+View(df_tab3 |> filter(!is.na(`1`)) |> count(`1`))
+sum(rowSums(!is.na(df_tab3[,4:8])))
+write.csv(df_tab3, "derived_data/df_tab3.csv")
 
 # pool ----
 # pool by Year and Station - this is for the Cote method
