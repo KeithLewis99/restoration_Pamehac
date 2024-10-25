@@ -1,8 +1,12 @@
-Proceed with T.
-Find Gibson and Scruton references on changes in Pamehac
-Why does df_tab1 make a distinction between sites with only Sweep 1, but then has sites hwere Sweeps 2 and 3 were NA??
-Need a real total for Sites:Years:species
-Test pooling
+Retabulate all to take into account NA could mean no fish or no effect.  Assume that 5 passes were made in all streams 1990, 1991, 1996 - need to find out if this is the case as some of the language in Scruton and Gibson suggests otherwise.  Scruton et al. 1998 says minimum of 4 passes.  
+Proceed with T
+
+Kristin - binders to figure out location of dams and electrofishing
+Neil - location of dams
+ - 
+I think that many of the conclusions about electrofishing should be consisdered Pamehac only.  The other sites may 'behave' better.  I also need to follow up on the suggestion by Scott Reid that catchability estimates are something that a lit review would provide valuable info on and this could form the basis for a strong prior.
+
+Scale by area if needed
 All of the above before proceeding with tabulation and comparisions
 
 Good reference:
@@ -15,6 +19,7 @@ Then, create some nice tables like in notes (year x species-age wiht sites, tota
 Also, tabulations of T by year and species - done but get into a nice table; done; reorg so colum titles look nice in test tab: done
 Looked at 5 sweeps and talk to Curtis/Clarke: done
 
+Need a real total for Sites:Years:species - got this in df_tab2 which includes sites with only captures in sweep 1
 
 original run
 jagsfit$BUGSoutput$DIC
