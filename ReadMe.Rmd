@@ -45,6 +45,13 @@ I think that this is OK for analytical purposes but there may be troubles with t
 See the Rose Blanche code for explanations on what I think the AMEC code does and my concerns, i.e., how to use the delta method for these types of data as well as how the initial summaries were naively done.  
 BUT......the really, really, really good thing for Pamehac is that there is a file "output_pamehac_by_station.csv" that has all of the data as derived from the AMEC functions but in raw form!!!  So, I have created code in Pam_data_new.R to bring in all the files together.  From there, one can do any type of depletion analysis.
 
+### Files
+- Pam_data.R - bring in data from Kristin's files  
+- Pam_data_new.R -  the purpose of this file is to take what was done in scratch pad and make it available for general use for Carle STrub, unmarked, and Bayesian analyses  
+- Pam_abun_bio.R - this is to do the Carle Strub estimates and get T (total Catch) as well as diagnostics - this has the "out" df - need to combine with biomass 
+- Pam_analyses.R - GLMM and diagnostics
+- Pam_figs.R - any figures
+
 ### map
 ```{r, echo = F}
 tmp <- read.csv("data/waypoints.csv")
@@ -265,6 +272,7 @@ abline(h=90)
 ```
 
 
+Perhaps graph the 4-5 pass sites - its a key bit of evidences
 
 ## Consults {.tabset}
 ### Scott Reid
