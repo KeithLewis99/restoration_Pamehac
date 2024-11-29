@@ -2,7 +2,7 @@
 
 
 # source ----
-source("Pam_data.R")
+source("Pam_abun_bio.R")
 
 # See Seal Cove code for original work and thoughts on this approach
 # See ReadMe for thoughts on Pamehac. 
@@ -19,9 +19,9 @@ library(cowplot)
 
 # data ----
 str(dft, give.attr=FALSE)
-dft_BT <- dft[dft$Species == "BT",]
-dft_BT$int <- interaction(dft_BT$type, dft_BT$time)
-plot(density(dft_BT$bm))
+df_aBT <- df_a[df_a$Species == "BT",]
+df_aBT$int <- interaction(df_aBT$type, df_aBT$time)
+plot(density(df_aBT$bm))
 summary(dft_BT$bm)
 
 
