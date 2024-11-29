@@ -207,14 +207,14 @@ str(df_4_5pass, give.attr = F)
 
 df_tab1 <- df_sum |>
   group_by(Year, Species, Station) |>
-  #filter(Sweep <=3 & length(Sweep) > 1 | is.na(Sweep == 2)) |>
-  #filter(Sweep <= 3)
   filter(length(Sweep) > 1 & Sweep <= 3) |>
-  #& !is.null(Sweep == 2) | length(Sweep) > 1 & !is.null(Sweep == 3)) |>
   ungroup() |>
-  pivot_wider(id_cols = c(Year, Species, Station), 
-              names_from = Sweep, values_from = abun) |> #bio.sum abun
-  filter(!(is.na(`2`) & is.na(`3`))) 
+  # pivot_wider(id_cols = c(Year, Species, Station), 
+  #             names_from = Sweep, values_from = abun) |> 
+  pivot_wider(id_cols = c(Year, Species, Station),
+              names_from = Sweep, values_from = c(abun, bio.sum)) |> #bio.sum abun
+#  filter(!(is.na(`2`) & is.na(`3`))) 
+  filter(!(is.na(`abun_2`) & is.na(`abun_3`))) 
 df_tab1[df_tab1$Species == "BT" & df_tab1$Year == 1996,]
 
 df_tab1 |> print(n = Inf)
@@ -257,7 +257,7 @@ df_tab2 |>
 df_sum |> group_by(Species) |> filter(Sweep ==4 | Sweep ==5) |> summarise(sum = sum(abun))
 
 df_tab2 |> filter(`1` == 0)
-df_tab1 |> filter(`1` == 0)
+df_tab1 |> filter(abun_1 == 0)
 
 # sum by catch for Year and Species 3 passes - this sum so 2495 which matches Excel
 df_tab_T <- df_sum |>
@@ -298,7 +298,7 @@ df_tab3 <-
 #View(test)
 str(df_tab3, give.attr = F)
 nrow(df_tab3)
-View(df_tab3 |> filter(!is.na(`1`)) |> count(`1`))
+#View(df_tab3 |> filter(!is.na(`1`)) |> count(`1`))
 sum(rowSums(!is.na(df_tab3[,4:8])))
 write.csv(df_tab3, "derived_data/df_tab3.csv")
 
@@ -353,5 +353,35 @@ p
 #   pivot_wider(names_from = Station, values_from = abundance.caught) |>
 #   arrange(Species) |>
 #   print(n = Inf)
+
+
+# for analysis
+tmp1 <- 
+  df_tab1 |>
+  group_by(Year, Species, Station) |>
+  pivot_longer(
+    cols = starts_with("abun"),
+    values_to = "abun") |>
+  summarize(abun = sum(abun, na.rm = T))
+
+tmp2 <- 
+  df_tab1 |>
+  group_by(Year, Species, Station) |>
+  pivot_longer(
+    cols = starts_with("bio"),
+    values_to = "bio") |>
+  summarize(bio = sum(bio, na.rm = T))
+
+# df_a for analysis
+df_a <- full_join(tmp1, tmp2, by = c("Year", "Species", "Station"))
+df_a |> print(n = Inf)
+
+df_a$Time <- NA
+
+df_a <- df_a |>
+  mutate(Time = if_else(Year == 1990, "before", "after"))
+str(df_glmm, give.attr=FALSE)  
+
+
 
 # END ----
