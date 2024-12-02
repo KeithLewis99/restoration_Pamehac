@@ -4,6 +4,8 @@ source("Pam_data_new.R")
 ### CS ----
 library(FSA)
 #res_list <- apply(df_tab1[c(1:2, 4:10), c(4:6)], MARGIN=1, FUN = removal, method = "CarleStrub") # 
+#res_list <- apply(df_tab1[c(1:2, 4:10), c(4:5)], MARGIN=1, FUN = removal, method = "Seber2") # 
+
 res_list <- apply(df_tab1[, c(4:6)], MARGIN=1, FUN = removal, method = "CarleStrub") # takes NA's
 
 
