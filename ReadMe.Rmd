@@ -242,7 +242,11 @@ df_all |>
   filter(pass_no == 5) |> 
   group_by(Year, Species, Station, Sweep) |>
   summarize(count = n()) |>
-  pivot_wider(names_from = Sweep, values_from = count, values_fill = 0)
+  pivot_wider(names_from = Sweep, values_from = count, values_fill = 0) |>
+  mutate(percent4_5 = (sum(`4`, `5`)/sum(`1`, `2`, `3`)*100), 
+         percent4 = (sum(`4`)/sum(`1`, `2`, `3`)*100),
+         diff = sum(`1`, `2`, `3`) - sum(`1`, `2`, `3`, `4`)
+         )
 ```
 
 ### p v T
