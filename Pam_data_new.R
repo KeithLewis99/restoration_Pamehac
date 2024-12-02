@@ -19,7 +19,7 @@ str(ls_pam[1])
 # standardize names
 names(ls_pam) <- c("1990", "1991", "1992", "1996", "2016")
 
-# change 1990# change 1990# change 1990 to character variable 
+# change 1990 to character variable 
 ls_pam[["1990"]]$Station <- as.character(ls_pam[["1990"]]$Station)
 
 # create either a large dataframe and then do some summaries
@@ -148,7 +148,7 @@ p <- ggplot(
 p
 
 #write.csv(df_sum[df_sum$Species == "AS" & df_sum$Year == 2016,], 
-      "derived_data/spc_example.csv"
+      #"derived_data/spc_example.csv"
 plotly::ggplotly(p, tooltip = "text")
 
 # summary stats ----
