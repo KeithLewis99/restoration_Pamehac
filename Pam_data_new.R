@@ -175,6 +175,11 @@ with(df_all, table(Station, Sweep, Species))
 with(df_all, table(Station, Sweep, Species, Year))
 with(df_all[df_all$Year == 2016,], table(Station, Sweep, Species, Year))
 
+unique(df_tab1$Station)
+df_tab1 |>
+  group_by(Station, Species, Year) |>
+  filter(Station %in% c("5", "5A", "5B", "8", "8A")) |> 
+  print(n = Inf)
 
 ## number of sweeps per station
 df_sum |>
@@ -355,7 +360,7 @@ p
 #   print(n = Inf)
 
 
-# for analysis
+# for analysis ----
 tmp1 <- 
   df_tab1 |>
   group_by(Year, Species, Station) |>
@@ -376,11 +381,34 @@ tmp2 <-
 df_a <- full_join(tmp1, tmp2, by = c("Year", "Species", "Station"))
 df_a |> print(n = Inf)
 
-df_a$Time <- NA
+df_a$time <- NA
+df_a$type <- NA
 
 df_a <- df_a |>
-  mutate(Time = if_else(Year == 1990, "before", "after"))
-str(df_glmm, give.attr=FALSE)  
+  mutate(time = if_else(Year == 1990, "before", "after")) |>
+  mutate(type = if_else(Station == "6"|Station == "7", "above", "below"))
+
+
+str(df_a, give.attr=FALSE)  
+#1 = 269
+#2 = 188
+#3 = 137
+#4  = 160
+#5  = 100 
+#5A = 108
+#6  = 84
+#7  = 96
+#8 = 111
+#8A = 103
+station <- c("1", "2", "3", "4", "5", "5A", "6", "7", "8", "8A")
+area <- c(269, 188, 137, 160, 100, 108, 84, 96, 111, 103)
+
+df_area <- data.frame(station, area)
+
+df_a <- left_join(df_a, df_area, by = c("Station" = "station"))
+df_a <- df_a |>
+  group_by(Year, Species, Station) |>
+  mutate(abun.stand = abun/area, bio.stand = bio/area)
 
 
 
