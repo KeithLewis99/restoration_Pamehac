@@ -175,11 +175,6 @@ with(df_all, table(Station, Sweep, Species))
 with(df_all, table(Station, Sweep, Species, Year))
 with(df_all[df_all$Year == 2016,], table(Station, Sweep, Species, Year))
 
-unique(df_tab1$Station)
-df_tab1 |>
-  group_by(Station, Species, Year) |>
-  filter(Station %in% c("5", "5A", "5B", "8", "8A")) |> 
-  print(n = Inf)
 
 ## number of sweeps per station
 df_sum |>
@@ -223,6 +218,12 @@ df_tab1 <- df_sum |>
 df_tab1[df_tab1$Species == "BT" & df_tab1$Year == 1996,]
 
 df_tab1 |> print(n = Inf)
+
+df_tab1 |>
+  group_by(Station, Species, Year) |>
+  filter(Station %in% c("5", "5A", "5B", "8", "8A")) |> 
+  print(n = Inf)
+unique(df_tab1$Station)
 
 # temp is same as df_tab1 but without the last filter
 ## the query above does not get rid of stations with captures on Sweep 1 (or 2 or 3) & 4 or 5 (all three have captures on sweep 3)
@@ -387,6 +388,8 @@ df_a$type <- NA
 df_a <- df_a |>
   mutate(time = if_else(Year == 1990, "before", "after")) |>
   mutate(type = if_else(Station == "6"|Station == "7", "above", "below"))
+df_a$time <- as.factor(df_a$time)
+df_a$type <- as.factor(df_a$type)
 
 
 str(df_a, give.attr=FALSE)  
@@ -408,8 +411,13 @@ df_area <- data.frame(station, area)
 df_a <- left_join(df_a, df_area, by = c("Station" = "station"))
 df_a <- df_a |>
   group_by(Year, Species, Station) |>
-  mutate(abun.stand = abun/area, bio.stand = bio/area)
+  mutate(abun.stand = abun/area, bio.stand = bio/area) |>
+  filter(!Station %in% c("5B", "5A", "8A", "9"))  # what about "5A", "8A", and "9"
 
 
+unique(df_a$Station)
 
+
+df_loc <- read.csv("data/waypoints.csv")
+str(df_loc)
 # END ----
