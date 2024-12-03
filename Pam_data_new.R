@@ -1,4 +1,6 @@
 # the purpose of this file is to take what was done in scratch pad and make it available for general use for Carle STrub, unmarked, and Bayesian analyses
+# Source ----
+source("Pam_fun.R")
 
 # library ----
 library(tidyr)
@@ -412,12 +414,35 @@ df_a <- left_join(df_a, df_area, by = c("Station" = "station"))
 df_a <- df_a |>
   group_by(Year, Species, Station) |>
   mutate(abun.stand = abun/area, bio.stand = bio/area) |>
-  filter(!Station %in% c("5B", "5A", "8A", "9"))  # what about "5A", "8A", and "9"
+  filter(!Station %in% c("5B", "9"))  # what about "5A", "8A", and "9"
 
 
 unique(df_a$Station)
 
 
+# lat_long ----
 df_loc <- read.csv("data/waypoints.csv")
+station_way <- c("4", "7b", "6b", "7", "12", "3b", "3", "5A", "5b", "5", "6", "8A", "8", "1", "2")
+df_loc <- cbind(df_loc, station_way)
 str(df_loc)
+
+
+
+df_a <- left_join(df_a, df_loc, by = c("Station" = "station_way"))
+
+
+# summaries ----
+
+df_sumBT <- tab_type(df_a, "BT", abun.stand)
+df_baciBT <- tab_baci(df_a, "BT", abun.stand)
+
+df_sumAS <- tab_type(df_a, "AS", abun.stand)
+df_baciAS <- tab_baci(df_a, "AS", abun.stand)
+
+tab_type(df_a, "BTYOY", abun.stand)
+tab_baci(df_a, "BTYOY", abun.stand)
+
+tab_type(df_a, "ASYOY", abun.stand)
+tab_baci(df_a, "ASYOY", abun.stand)
+
 # END ----
