@@ -1,16 +1,16 @@
 Pamehac:
 
-Retabulate all to take into account NA could mean no fish or no effect.  Assume that 5 passes were made in all streams 1990, 1991, 1996 - need to find out if this is the case as some of the language in Scruton and Gibson suggests otherwise.  Scruton et al. 1998 says minimum of 4 passes.  
+ToDo: 
+Retabulate all to take into account NA could mean no fish or no effect.  Assume that 5 passes were made in all streams 1990, 1991, 1996 - need to find out if this is the case as some of the language in Scruton and Gibson suggests otherwise.  Scruton et al. 1998 says minimum of 4 passes. CHECK THIS!!! 
 
 All of the above before proceeding with tabulation and comparisions
-Consolidate sites (5 and 8)??  What about 9?? Eliminate "5B"
+Consolidate sites (5 and 8)??  What about 9?? Eliminate "5B" - waiting on Kristin to reply.  Have moved ahead with making the code.  
 
 Kristin - binders to figure out location of dams and electrofishing - not sure if this is needed.
 
- - 
-Get the sites below the stream diversion - emial sent to Kristin. - not sure if this is needed.
 
- 
+
+Note:  
 I think that many of the conclusions about electrofishing should be consisdered Pamehac only.  The other sites may 'behave' better.  I also need to follow up on the suggestion by Scott Reid that catchability estimates are something that a lit review would provide valuable info on and this could form the basis for a strong prior.
 
 
@@ -29,3 +29,4 @@ Neil - location of dams - its just the diversion below Station 8
 Proceed with T - see ReadMe for discussion
 # Scale by pool size for analyses as required
 Also, need to do a summary of why going with T and not all the other approaches
+Get the sites below the stream diversion - emial sent to Kristin. - not sure if this is needed.

@@ -38,6 +38,7 @@ I reorganized for my own needs.  I have recreated all the figures although there
 
 I think that this is OK for analytical purposes but there may be troubles with the tabulation.
 
+I also changed the north (latitude) on "Pam5a bottom" from 8.894....to 48.894 as this is clearly a typo.
 
 ## Data {.tabset}
 
