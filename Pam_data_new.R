@@ -100,7 +100,7 @@ df_sum <- bind_rows(df_sum, df_tmp) |>
   arrange(Year, Species, Station, Sweep)
 str(df_sum, give.attr = F)
 #View(df_sum)
-write.csv(df_sum, "derived_data/df_sum.csv")
+#write.csv(df_sum, "derived_data/df_sum.csv")
 
 # now for when Sweep == 1 is True but there is a missing sweep - don't need this bc you are only using the first value but it will make the spc graphs a bit hard to interpret
 # test <- df_sum |>
@@ -387,6 +387,16 @@ df_a <- full_join(tmp1, tmp2, by = c("Year", "Species", "Station"))
 df_a |> print(n = Inf)
 
 ## zeros ----
+### This yields 168 rows (5-Years x 4-Species x 10 Stations) - (8 Station:Years where no fish were caught x 4 Speices) - these are structural "zeros" and therefore, don't need to be in teh analysis.
+df_a <- df_a |> 
+  group_by(Station) |>
+  complete(Year, Species) |>
+  mutate_at(c("abun", "bio"), ~replace_na(.,0))
+str(df_a, give.attr = F)
+
+# to chek that the expansion using "complete" worked
+#df_a |> filter(Year == 1990 & Station == 4)
+
 
 ## variables ----
 df_a$time <- NA
@@ -434,7 +444,7 @@ str(df_loc)
 
 
 df_a <- left_join(df_a, df_loc, by = c("Station" = "station_way"))
-write.csv(df_a, "derived_data/df_a.csv")
+#write.csv(df_a, "derived_data/df_a.csv")
 
 # summaries ----
 
