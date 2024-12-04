@@ -387,16 +387,29 @@ df_a <- full_join(tmp1, tmp2, by = c("Year", "Species", "Station"))
 df_a |> print(n = Inf)
 
 ## zeros ----
-### This yields 168 rows (5-Years x 4-Species x 10 Stations) - (8 Station:Years where no fish were caught x 4 Speices) - these are structural "zeros" and therefore, don't need to be in teh analysis.
+### This yields 175 rows (5-Years x 4-Species x 12 Stations = 240)  - (11 Station:Years where no fish were caught x 4 Speices = 44) - these are structural "zeros" and therefore, don't need to be in teh analysis.
+## Station 3 has 2 years with no fish, Stn 4 has 1, Stn 5A has 2 and Stn 8A has 3 = 8.  Further, Stn 9 has 3 Years but will probably not be included in the analysis.
+## But, 8A's only two years,BTYOY is not included???? (-2)
+## But 5B has only fish in 1991  and only BTYOY (= -19). 
+## to check, open csv below and create a pivot table (row == Year & Species, Column == Station, cell = count(abun))
 df_a <- df_a |> 
-  group_by(Station) |>
-  complete(Year, Species) |>
-  mutate_at(c("abun", "bio"), ~replace_na(.,0))
-str(df_a, give.attr = F)
+  ungroup() |>
+  complete(Year, Species, Station) |>
+  filter(!(Year == 1990 & Station %in% c(3, 9, "5A", "5B", "8A")) &
+           !(Year == 1991 & Station %in% c(3, 4, "8A")) &
+           !(Year == 1992 & Station %in% c("5A", "5B", "8A")) &
+           !(Year == 1996 & Station %in% c("5B", 9)) &
+           !(Year == 2016 & Station %in% c("5B", 9))
+         ) |>
+           mutate_at(c("abun", "bio"), ~replace_na(.,0))
 
-# to chek that the expansion using "complete" worked
-#df_a |> filter(Year == 1990 & Station == 4)
+#write.csv(df_a, "derived_data/df_a1.csv")
 
+# to check that the expansion using "complete" worked
+unique(df_a$Station)
+df_a |> filter(Year == 1996 & Station == "8A")
+df_a |> filter(Station == "5B")
+df_a |> filter(Station == "9")
 
 ## variables ----
 df_a$time <- NA
@@ -410,6 +423,9 @@ df_a$type <- as.factor(df_a$type)
 
 
 str(df_a, give.attr=FALSE)  
+
+
+## area ----
 #1 = 269
 #2 = 188
 #3 = 137
@@ -420,7 +436,7 @@ str(df_a, give.attr=FALSE)
 #7  = 96
 #8 = 111
 #8A = 103
-## area ----
+
 station <- c("1", "2", "3", "4", "5", "5A", "6", "7", "8", "8A")
 area <- c(269, 188, 137, 160, 100, 108, 84, 96, 111, 103)
 
@@ -432,7 +448,6 @@ df_a <- df_a |>
   mutate(abun.stand = abun/area, bio.stand = bio/area) |>
   filter(!Station %in% c("5B", "9"))  # what about "5A", "8A", and "9"
 
-
 unique(df_a$Station)
 
 
@@ -442,9 +457,8 @@ station_way <- c("4", "7b", "6b", "7", "12", "3b", "3", "5A", "5b", "5", "6", "8
 df_loc <- cbind(df_loc, station_way)
 str(df_loc)
 
-
 df_a <- left_join(df_a, df_loc, by = c("Station" = "station_way"))
-#write.csv(df_a, "derived_data/df_a.csv")
+#write.csv(df_a, "derived_data/df_a2.csv")
 
 # summaries ----
 
