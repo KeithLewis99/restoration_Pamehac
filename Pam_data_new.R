@@ -27,20 +27,22 @@ ls_pam[["1990"]]$Station <- as.character(ls_pam[["1990"]]$Station)
 # create either a large dataframe and then do some summaries
 # as above, create summaries for FSA
 df_all <- bind_rows(ls_pam)
+unique(df_all$Station)
 
 # standardize data across years
 ##
-## remove SITE
+## remove SITE from df_all$Station
 for(i in seq_along(df_all$Station)){
   df_all$Station[i] <- gsub("SITE\\s", paste0("\\6"), df_all$Station[i])
 }
-## remove "space"
+## remove "space" from df_all$Station
 unique(df_all$Station)
 for(i in seq_along(df_all$Station)){
   df_all$Station[i] <- gsub("*\\s", paste0("\\1"), df_all$Station[i])
 }
 unique(df_all$Station)
 
+unique(df_all$Species)
 ## remove "space" for Species
 for(i in seq_along(df_all$Species)){
   df_all$Species[i] <- gsub("*\\s", paste0("\\1"), df_all$Species[i])
@@ -98,7 +100,7 @@ df_sum <- bind_rows(df_sum, df_tmp) |>
   arrange(Year, Species, Station, Sweep)
 str(df_sum, give.attr = F)
 #View(df_sum)
-#write.csv(df_sum, "derived_data/df_sum.csv")
+write.csv(df_sum, "derived_data/df_sum.csv")
 
 # now for when Sweep == 1 is True but there is a missing sweep - don't need this bc you are only using the first value but it will make the spc graphs a bit hard to interpret
 # test <- df_sum |>
@@ -188,7 +190,7 @@ df_sum |>
 # 4-5 passes
 df_all$pass_no <-NA
 
-# summarize just 4-5-pass sites and had fish
+# summarize just 4-5-pass sites that had fish
 df_4_5pass <- df_all |>
   group_by(Year, Species, Station) |>
   mutate(pass_no = ifelse(max(Sweep )<=3, 3, 5)) |>
@@ -308,7 +310,7 @@ str(df_tab3, give.attr = F)
 nrow(df_tab3)
 #View(df_tab3 |> filter(!is.na(`1`)) |> count(`1`))
 sum(rowSums(!is.na(df_tab3[,4:8])))
-write.csv(df_tab3, "derived_data/df_tab3.csv")
+#write.csv(df_tab3, "derived_data/df_tab3.csv")
 
 # pool ----
 # pool by Year and Station - this is for the Cote method
@@ -384,6 +386,9 @@ tmp2 <-
 df_a <- full_join(tmp1, tmp2, by = c("Year", "Species", "Station"))
 df_a |> print(n = Inf)
 
+## zeros ----
+
+## variables ----
 df_a$time <- NA
 df_a$type <- NA
 
@@ -405,6 +410,7 @@ str(df_a, give.attr=FALSE)
 #7  = 96
 #8 = 111
 #8A = 103
+## area ----
 station <- c("1", "2", "3", "4", "5", "5A", "6", "7", "8", "8A")
 area <- c(269, 188, 137, 160, 100, 108, 84, 96, 111, 103)
 
@@ -420,16 +426,15 @@ df_a <- df_a |>
 unique(df_a$Station)
 
 
-# lat_long ----
+## lat_long ----
 df_loc <- read.csv("data/waypoints.csv")
 station_way <- c("4", "7b", "6b", "7", "12", "3b", "3", "5A", "5b", "5", "6", "8A", "8", "1", "2")
 df_loc <- cbind(df_loc, station_way)
 str(df_loc)
 
 
-
 df_a <- left_join(df_a, df_loc, by = c("Station" = "station_way"))
-
+write.csv(df_a, "derived_data/df_a.csv")
 
 # summaries ----
 
@@ -439,10 +444,10 @@ df_baciBT <- tab_baci(df_a, "BT", abun.stand)
 df_sumAS <- tab_type(df_a, "AS", abun.stand)
 df_baciAS <- tab_baci(df_a, "AS", abun.stand)
 
-tab_type(df_a, "BTYOY", abun.stand)
-tab_baci(df_a, "BTYOY", abun.stand)
+df_sumBTYOY <- tab_type(df_a, "BTYOY", abun.stand)
+df_baciBTYOY <- tab_baci(df_a, "BTYOY", abun.stand)
 
-tab_type(df_a, "ASYOY", abun.stand)
-tab_baci(df_a, "ASYOY", abun.stand)
+df_sumASYOY <- tab_type(df_a, "ASYOY", abun.stand)
+df_baciASYOY <- tab_baci(df_a, "ASYOY", abun.stand)
 
 # END ----
