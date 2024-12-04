@@ -3,6 +3,8 @@ Pamehac:
 ToDo: 
 Retabulate all to take into account NA could mean no fish or no effect.  Assume that 5 passes were made in all streams 1990, 1991, 1996 - need to find out if this is the case as some of the language in Scruton and Gibson suggests otherwise.  Scruton et al. 1998 says minimum of 4 passes. CHECK THIS!!! 
 
+Check AS diagnostics before proceeding
+
 All of the above before proceeding with tabulation and comparisions
 Consolidate sites (5 and 8)??  What about 9?? Eliminate "5B" - waiting on Kristin to reply.  Have moved ahead with making the code.  
 
