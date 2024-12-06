@@ -1,15 +1,16 @@
 Pamehac:
 
 ToDo: 
-Retabulate all to take into account NA could mean no fish or no effect.  Assume that 5 passes were made in all streams 1990, 1991, 1996 - need to find out if this is the case as some of the language in Scruton and Gibson suggests otherwise.  Scruton et al. 1998 says minimum of 4 passes. CHECK THIS!!! 
+## zeros - This needs to be checked at Seal Cove!!!!!
 
-Check AS diagnostics before proceeding
-
-All of the above before proceeding with tabulation and comparisions
 Consolidate sites (5 and 8)??  What about 9?? Eliminate "5B" - waiting on Kristin to reply.  Have moved ahead with making the code.  
+Check AS diagnostics before proceeding
+Reconcile with Scruton - WTF did he do???  See if Kristin got similar numbers
 
 Kristin - binders to figure out location of dams and electrofishing - not sure if this is needed.
 
+I asked Clarke about something Scruton may have done that may have been a little shady - he said he wasn't surprised but I can't remember what it was. 
+Check numbers against Scruton without zeros
 
 
 Note:  
@@ -32,3 +33,8 @@ Proceed with T - see ReadMe for discussion
 # Scale by pool size for analyses as required
 Also, need to do a summary of why going with T and not all the other approaches
 Get the sites below the stream diversion - emial sent to Kristin. - not sure if this is needed.
+
+
+Assume that 5 passes were made in all streams 1990, 1991, 1996 - need to find out if this is the case as some of the language in Scruton and Gibson suggests otherwise.  Scruton et al. 1998 says minimum of 4 passes. CHECK THIS!!! Based on the data that I have, there were 18 cases where there were > 3 passes (all in 1990, 1991, 1996).  There were none in 1992 (not sure why) and Clarke said that by 2015, it was decided that > 3 passes was a waste of time.
+
+Retabulate all to take into account NA could mean no fish or no effort.  NA means no fish at a Station where some fish were caught during a Sweep per species per year.  A blank line means that no fish of a given species were caught at that station in a given year.  df_a should account for this: if there was no effort, then there should be no row.  But if there was effort and there was a zero, then we need a row to account for this.  This is why we have hurdle models.
