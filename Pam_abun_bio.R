@@ -5,9 +5,7 @@ source("Pam_data_new.R")
 library(FSA)
 #res_list <- apply(df_tab1[c(1:2, 4:10), c(4:6)], MARGIN=1, FUN = removal, method = "CarleStrub") # 
 #res_list <- apply(df_tab1[c(1:2, 4:10), c(4:5)], MARGIN=1, FUN = removal, method = "Seber2") # 
-
 res_list <- apply(df_tab1[, c(4:6)], MARGIN=1, FUN = removal, method = "CarleStrub") # takes NA's
-
 
 # this works but only when three catches so maybe that is fine - filter above on this.
 out <- as.data.frame(matrix(NA, length(res_list), 11))
@@ -155,15 +153,17 @@ p
 
 
 # density of total catch
-plot(density(out_pool$T))
-
-
-p <- ggplot(out_pool, aes(x = T, y = No)) +
-  geom_point()
-p
+# plot(density(out_pool$T))
+# 
+# 
+# p <- ggplot(out_pool, aes(x = T, y = No)) +
+#   geom_point()
+# p
 
 # tabulations ----
 table(out$year, out$spp, out$T)
+table(out$year, out$spp)
+
 
 
 
