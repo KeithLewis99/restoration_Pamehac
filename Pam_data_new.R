@@ -385,12 +385,14 @@ tmp2 <-
 # df_a for analysis
 df_a <- full_join(tmp1, tmp2, by = c("Year", "Species", "Station"))
 df_a |> print(n = Inf)
-
+str(df_a, give.attr = F)
+#write.csv(df_a, "derived_data/df_a1.csv")
 ## zeros ----
+
 ### This yields 175 rows (5-Years x 4-Species x 12 Stations = 240)  - (11 Station:Years where no fish were caught x 4 Speices = 44) - these are structural "zeros" and therefore, don't need to be in teh analysis.
-## Station 3 has 2 years with no fish, Stn 4 has 1, Stn 5A has 2 and Stn 8A has 3 = 8.  Further, Stn 9 has 3 Years but will probably not be included in the analysis.
-## But, 8A's only two years,BTYOY is not included???? (-2)
-## But 5B has only fish in 1991  and only BTYOY (= -19). 
+## Station 3 has 2 years with no fish, Stn 4 has 1, Stn 5A has 2 and Stn 8A has 3 = 8.  Further, Stn 9 has 3 Years but will probably not be included in the analysis 8+ 3 = 11.
+## But, 8A's only two years,BTYOY & ASYOY is not included???? (-2)
+## But 5B has only fish in 1991  and only BTYOY (= 4). So 240 - (4*15) = 180 
 ## to check, open csv below and create a pivot table (row == Year & Species, Column == Station, cell = count(abun))
 df_a <- df_a |> 
   ungroup() |>
@@ -402,8 +404,8 @@ df_a <- df_a |>
            !(Year == 2016 & Station %in% c("5B", 9))
          ) |>
            mutate_at(c("abun", "bio"), ~replace_na(.,0))
-
-#write.csv(df_a, "derived_data/df_a1.csv")
+str(df_a, give.attr = F)
+#write.csv(df_a, "derived_data/df_a2.csv")
 
 # to check that the expansion using "complete" worked
 unique(df_a$Station)
@@ -421,11 +423,12 @@ df_a <- df_a |>
 df_a$time <- as.factor(df_a$time)
 df_a$type <- as.factor(df_a$type)
 
-
 str(df_a, give.attr=FALSE)  
 
 
 ## area ----
+### from Pamehac_2016_efishing.xlsx but this differs from Pamehac_1996_bystation.xlsx - see also Pamehac_*_by_station.csv for 1990, 1991, and 1992.
+#### folder "C:\Users\lewiske\Documents\CAFE\projects\restoration\PamehacDepletion\data\year_summaries"
 #1 = 269
 #2 = 188
 #3 = 137
@@ -438,15 +441,18 @@ str(df_a, give.attr=FALSE)
 #8A = 103
 
 station <- c("1", "2", "3", "4", "5", "5A", "6", "7", "8", "8A")
-area <- c(269, 188, 137, 160, 100, 108, 84, 96, 111, 103)
-
-df_area <- data.frame(station, area)
+area_2016 <- c(269, 188, 137, 160, 100, 108, 84, 96, 111, 103)
+area_1990 <- c(102, 100, NA, 100, 220, NA, 100, 102, 286, NA)
+area_1991 <- c(98, 108, NA, NA, 252, 123, 101, 119, 115, NA) # 5B = 80, 9 = 113
+area_1992 <- c(218, 124, 233, 176, 213, NA, 116, 115, 198, NA) # 9 = 190
+area_1996 <- c(131, 101, 109, 102, 115, 131, 125, 105, 111, 104)
+df_area <- data.frame(station, area_1990, area_1991, area_1992, area_1996, area_2016)
 
 df_a <- left_join(df_a, df_area, by = c("Station" = "station"))
 df_a <- df_a |>
   group_by(Year, Species, Station) |>
-  mutate(abun.stand = abun/area, bio.stand = bio/area) |>
-  filter(!Station %in% c("5B", "9"))  # what about "5A", "8A", and "9"
+  mutate(abun.stand = abun/area_2016, bio.stand = bio/area_2016) |>
+  filter(!Station %in% c("5B", "9"))  # remove 5B and 9 for good  BUT what about "5A", "8A", and "9"
 
 unique(df_a$Station)
 
@@ -458,7 +464,8 @@ df_loc <- cbind(df_loc, station_way)
 str(df_loc)
 
 df_a <- left_join(df_a, df_loc, by = c("Station" = "station_way"))
-#write.csv(df_a, "derived_data/df_a2.csv")
+str(df_a, give.attr=F)
+#write.csv(df_a, "derived_data/df_a3.csv")
 
 # summaries ----
 
@@ -467,6 +474,8 @@ df_baciBT <- tab_baci(df_a, "BT", abun.stand)
 
 df_sumAS <- tab_type(df_a, "AS", abun.stand)
 df_baciAS <- tab_baci(df_a, "AS", abun.stand)
+df_bio_sumAS <- tab_type(df_a, "AS", bio.stand)
+df_bio_baciAS <- tab_baci(df_a, "AS", bio.stand)
 
 df_sumBTYOY <- tab_type(df_a, "BTYOY", abun.stand)
 df_baciBTYOY <- tab_baci(df_a, "BTYOY", abun.stand)
