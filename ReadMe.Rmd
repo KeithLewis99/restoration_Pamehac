@@ -33,12 +33,21 @@ Got a zip file from Kristin Loughlin with no folders but files as follows:
 
 I reorganized for my own needs.  I have recreated all the figures although there are still questions, especially about the confidence intervals so basically, I learved how to do Carle Strub and many other estimates of abundance.
 
-## Missing values
+## Missing values (SOME OF THIS HAS CHANGED)
 2024-10-23: checked that df_all, df_sum, df_tab1, and out all add up.  df_all and df_sum are fine.  df_tab1 can differ from the less refined dataframes because df_tab1 includes only Sweep 1 to Sweep3, i.e., it eliminates sites with only captures on Sweep 1 but the last line (filter) eliminated sites with with captures on Sweep 1 (or 2 or 3) & 4 or 5 (all three have captures on sweep 3).  So, I added df_tab2 for the tabulations because it represents all 140 sites.  Also, df_tab_T presents the data as in the table below (see tab "samples and catches by year"). There are also 17 sites with zeros in the first sweep.
 
 I think that this is OK for analytical purposes but there may be troubles with the tabulation.
 
 I also changed the north (latitude) on "Pam5a bottom" from 8.894....to 48.894 as this is clearly a typo.
+
+## SCruton ----
+Using R, I have been unable to replicate the Scruton et al. 1998 numbers in Figure 2 and 3. However, when I use Excel and the Pamehac_[year]_by_type.csv (did 1990 and 1996), a near perfect match occurs for all of the Above stations when I count them, divide by Area and multiply by 100 (#/A)*100.  This also seems to work for the Salmon on the Below sites but not the Trout (no idea why - I tried with ).  
+
+I think SCruton pooled the above and below sites and then scaled them by area.  However, this did not work at all for biomass.  But it appears that some of the tye
+
+I checked Pamehac_1996_by_type.csv by Pamehac1996_by_station.csv and found a discrepancy in the counts - it seems that in the by_type.csv file, that a lot of BTYOY have been changed to BT.  No idea why this is the case but probably explains why I got different numbers.
+
+But I cannot figure out how he got his biomass estimates as they are often much lower than mine.  Tried raw numbers/area and mean_weight*raw_number/area - same number.    Also, did with estimated No.  Sometimes off by a factor of 10 in 1991.  1996 is closer but still far off the mark.
 
 ## Data {.tabset}
 
