@@ -29,20 +29,22 @@ ls_pam[["1990"]]$Station <- as.character(ls_pam[["1990"]]$Station)
 df_all <- bind_rows(ls_pam)
 unique(df_all$Station)
 
-# standardize data across years
-##
+## CLEAN UP ----
+## standardize data across years
 ## remove SITE from df_all$Station
+
 for(i in seq_along(df_all$Station)){
   df_all$Station[i] <- gsub("SITE\\s", paste0("\\6"), df_all$Station[i])
 }
+
 ## remove "space" from df_all$Station
 unique(df_all$Station)
 for(i in seq_along(df_all$Station)){
   df_all$Station[i] <- gsub("*\\s", paste0("\\1"), df_all$Station[i])
 }
 unique(df_all$Station)
-
 unique(df_all$Species)
+
 ## remove "space" for Species
 for(i in seq_along(df_all$Species)){
   df_all$Species[i] <- gsub("*\\s", paste0("\\1"), df_all$Species[i])
@@ -80,7 +82,7 @@ str(df_sum, give.attr = F)
 
 
 # in the original data, when no fish is caught, there is no row.  Therefore, in order to add a Sweep == 1 where abundance == 0, need a subset where 1st sweep != 0; it didn't need to be minimum but then its consistent
-tmp <- df_sum |>
+df_tmp <- df_sum |>
   group_by(Year, Species, Station) |>
   filter(!any(Sweep == 1)) |>
   slice_min(Sweep)
@@ -88,7 +90,7 @@ tmp <- df_sum |>
 #View(tmp)
 
 # create a df from above, remove values, and add Sweep ==1 with bio.sum/abun = 0 and spc == NA; then bind
-df_tmp <- tmp[1:nrow(tmp),]
+#df_tmp <- tmp[1:nrow(tmp),]
 df_tmp[, c("Sweep", "bio.sum", "abun", "spc")] <- NA
 df_tmp$Sweep[1:nrow(df_tmp[])] <- 1
 df_tmp$bio.sum[1:nrow(df_tmp[])] <- 0
@@ -211,15 +213,18 @@ str(df_4_5pass, give.attr = F)
 
 df_tab1 <- df_sum |>
   group_by(Year, Species, Station) |>
-  filter(length(Sweep) > 1 & Sweep <= 3) |>
+  filter(length(Sweep) >= 1 & Sweep <= 3) |>
   ungroup() |>
   # pivot_wider(id_cols = c(Year, Species, Station), 
   #             names_from = Sweep, values_from = abun) |> 
   pivot_wider(id_cols = c(Year, Species, Station),
-              names_from = Sweep, values_from = c(abun, bio.sum)) |> #bio.sum abun
+              names_from = Sweep, values_from = c(abun, bio.sum), values_fill = 0) #bio.sum abun
 #  filter(!(is.na(`2`) & is.na(`3`))) 
-  filter(!(is.na(`abun_2`) & is.na(`abun_3`))) 
+  #filter(!(is.na(`abun_2`) & is.na(`abun_3`))) 
+ # mutate_at(c(4:9), ~replace_na(.,0))
 df_tab1[df_tab1$Species == "BT" & df_tab1$Year == 1996,]
+df_tab1[df_tab1$Species == "AS" & df_tab1$Year == 1990,]
+df_sum[df_sum$Species == "AS" & df_sum$Year == 1990,]
 
 df_tab1 |> print(n = Inf)
 
@@ -281,7 +286,7 @@ df_tab_T <- df_sum |>
 df_tab_T # this is right
 
 # as above but summation of total sites and catches by year and species - but this is only for the site where fish were caught
-df_tab_T <- df_sum |>
+df_tab_T1 <- df_sum |>
   group_by(Year, Species) |>
   filter(Sweep <= 3) |>
   summarize(T = sum(abun),
@@ -290,7 +295,7 @@ df_tab_T <- df_sum |>
   pivot_wider(id_cols = c(Year), 
               names_from = Species, 
               values_from = c(T, n)) 
-df_tab_T
+df_tab_T1
 str(df_tab_T, give.attr = F)
 #write.csv(df_tab_T[, c(1, 6, 2, 7, 3, 8, 4, 9, 5)], "derived_data/df_tab_T.csv")
 
@@ -367,6 +372,7 @@ p
 
 # for analysis ----
 tmp1 <- 
+#  df_tab1 |>
   df_tab1 |>
   group_by(Year, Species, Station) |>
   pivot_longer(
@@ -447,12 +453,20 @@ area_1991 <- c(98, 108, NA, NA, 252, 123, 101, 119, 115, NA) # 5B = 80, 9 = 113
 area_1992 <- c(218, 124, 233, 176, 213, NA, 116, 115, 198, NA) # 9 = 190
 area_1996 <- c(131, 101, 109, 102, 115, 131, 125, 105, 111, 104)
 df_area <- data.frame(station, area_1990, area_1991, area_1992, area_1996, area_2016)
+year <- c(1990, 1991, 1992, 1996, 2016)
+years <- rep(year, 10)
 
-df_a <- left_join(df_a, df_area, by = c("Station" = "station"))
+
+df_area <- df_area |>
+  pivot_longer(
+  cols = starts_with("area"),
+  values_to = "area") |>
+  bind_cols(year = years)
+
+df_a <- left_join(df_a, df_area[,-2], by = c("Station" = "station", "Year" = "year"))
 df_a <- df_a |>
   group_by(Year, Species, Station) |>
-  mutate(abun.stand = abun/area_2016, bio.stand = bio/area_2016) |>
-  filter(!Station %in% c("5B", "9"))  # remove 5B and 9 for good  BUT what about "5A", "8A", and "9"
+  mutate(abun.stand = abun/area, bio.stand = bio/area) #
 
 unique(df_a$Station)
 
@@ -463,7 +477,8 @@ station_way <- c("4", "7b", "6b", "7", "12", "3b", "3", "5A", "5b", "5", "6", "8
 df_loc <- cbind(df_loc, station_way)
 str(df_loc)
 
-df_a <- left_join(df_a, df_loc, by = c("Station" = "station_way"))
+df_a <- left_join(df_a, df_loc, by = c("Station" = "station_way")) |>
+  filter(!Station %in% c("5B", "9"))  # remove 5B and 9 for good  BUT what about "5A", "8A", and "9"
 str(df_a, give.attr=F)
 #write.csv(df_a, "derived_data/df_a3.csv")
 
