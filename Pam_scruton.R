@@ -3,8 +3,47 @@ source("Pam_data_new.R")
 
 ### CS ----
 library(FSA)
+
+# # pool above and below by species
+df_tab1a <- df_tab1 |>
+  mutate(type = if_else(Station == "6"|Station == "7", "above", "below")) |>
+  group_by(Year, Species, type) |>
+  summarise(sum_abun1 = sum(abun_1),
+            sum_abun2 = sum(abun_2),
+            sum_abun3 = sum(abun_3))
+
+df_tab1a
+
+# pool above and below - salmonids
+df_tab1b <- df_tab1 |>
+  mutate(type = if_else(Station == "6"|Station == "7", "above", "below")) |>
+  group_by(Year, type) |>
+  summarise(sum_abun1 = sum(abun_1),
+            sum_abun2 = sum(abun_2),
+            sum_abun3 = sum(abun_3))
+
+df_tab1b
+
+
+df_area_sum <- df_area |> mutate(type = if_else(station == "6"|station == "7", "above", "below")) |>
+  group_by(year, type) |>
+  summarise(sum_area = sum(area, na.rm = TRUE))
+
+df_tab1 <- left_join(df_tab1, df_area, by = c("Year" = "year", "Station" = "station"))
+
+df_tab1a <- left_join(df_tab1a, df_area_sum, by = c("Year" = "year", "type" = "type"))
+  
+df_tab1b <- left_join(df_tab1b, df_area_sum, by = c("Year" = "year", "type" = "type"))
+
 # microfish
+# by station and species
 res_list <- apply(df_tab1[, c(4:6)], MARGIN=1, FUN = removal, method = "Burnham") # takes NA's
+
+# pool above and below by species
+res_list <- apply(df_tab1a[, c(4:6)], MARGIN=1, FUN = removal, method = "Burnham") # takes NA's
+
+# pool above and below - salmonids
+res_list <- apply(df_tab1b[, c(3:5)], MARGIN=1, FUN = removal, method = "Burnham") # takes NA's
 
 # this works but only when three catches so maybe that is fine - filter above on this.
 out <- as.data.frame(matrix(NA, length(res_list), 11))
@@ -34,13 +73,55 @@ for(i in seq_along(res_list)){
   }
 }
 
-x <- df_tab3 # df_tab1
+x <- df_tab3
+x <- df_tab1
+x <- df_tab1a
+x <- df_tab1b
 # bind year, species and station to res_list
 out <- cbind(year = x$Year, 
              spp = x$Species, 
-             sta = x$Station, 
+            # sta = x$Station,
+            area = x$sum_area,
+            # area = x$area,
+             type = x$type,
              out)
+# df_tab1 
+out1 <- out |> 
+  group_by(year, spp, sta) |>
+  mutate(NO_stand = No/area*100)
+out1[out1$year == 1996, c(1:7, 9, 11, 16)]
 
+# df_tab1a
+out1 <- out |> 
+  group_by(year, spp, type) |>
+  mutate(NO_stand = No/area*100, 
+         T_stand = T/area*100)
+
+out1[, c(1:4, 9, 11, 16)]  
+View(out1[, c(1:7, 9, 11, 16)] |> arrange(spp, type, year)) 
+View(out1[, c(1:4, 9, 11, 16)] |> arrange(spp, type, year)) 
+write.csv(out1[, c(1:7, 9, 11, 16)], "out1.csv")
+
+
+ggplot(out1, aes(x = year, NO_stand, group = type, fill = type)) + geom_col(position = position_dodge()) + facet_wrap(~spp)
+
+ggplot(out1, aes(x = year, T_stand, group = type, fill = type)) + geom_col(position = position_dodge()) + facet_wrap(~spp)
+
+# plot out1 with variables year and T_stand with geom_col but filter out year 2016
+out1 |> 
+  filter(year < 2016) |>
+  ggplot(aes(x = year, NO_stand, group = type, fill = type)) + geom_col(position = position_dodge()) + facet_wrap(~spp)
+
+out1 |> 
+  filter(year < 2016) |>
+ggplot(aes(x = year, T_stand, group = type, fill = type)) + geom_col(position = position_dodge()) + facet_wrap(~spp)
+
+# df_tab1b
+out1 <- out |> 
+  group_by(year, type) |>
+  mutate(NO_stand = No/area*100)
+
+out1[, c(1:3, 8, 10, 15)]  
 str(out, give.attr=F)
 
 #View(out)
@@ -75,6 +156,13 @@ ggplot(out_sum, aes(x = year, meanNo, group = type, fill = type)) + geom_col(pos
 #out$bio <- NA
 str(out, give.attr = F)
 str(df_a, give.attr = F)
+
+#library(tidyr)
+pivot_wider(out[out$year == 1991, c(2:3, 10)], names_from = "sta", values_from = c("No"))
+
+df_area |> filter(year == 1991)
+
+
 
 # attempt II ----
 # tmp3 <- df_a |>
@@ -154,5 +242,15 @@ tmp8 |>
   #filter(Species == "AS") |>
   ggplot(aes(x = Year, density, group = type, fill = type)) + geom_col(position = position_dodge()) + facet_wrap(~Species)
 
+# with by_type ----
+removal(c(10, 10, 3), method = "Burnham")$est
+removal(c(10, 10, 3), method = "Burnham", CIMicroFish = TRUE)$est
+removal(c(10, 10, 3), method = "CarleStrub")$est
+
+27/230*100 # this gets closer to Scruton's values but still way, way off  (11.7 v. 20+'
+
+
+removal(c(30, 10, 3), method = "Burnham")$est
+removal(c(30, 10, 3), method = "CarleStrub")$est
 
 # END ----
