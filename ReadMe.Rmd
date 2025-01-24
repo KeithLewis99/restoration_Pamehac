@@ -8,7 +8,7 @@ output:
 bibliography: refs/references.bib
 ---
 
-```{r, echo = F, message = F}
+```{r, import data, echo = F, message = F}
 df_all <- read.csv("derived_data/df_all.csv")
 df_sum <- read.csv("derived_data/df_sum.csv")
 df_tab_T <- read.csv("derived_data/df_tab_T.csv")
@@ -40,7 +40,7 @@ I think that this is OK for analytical purposes but there may be troubles with t
 
 I also changed the north (latitude) on "Pam5a bottom" from 8.894....to 48.894 as this is clearly a typo.
 
-## SCruton ----
+## Scruton
 Using R, I have been unable to replicate the Scruton et al. 1998 numbers in Figure 2 and 3. However, when I use Excel and the Pamehac_[year]_by_type.csv (did 1990 and 1996), a near perfect match occurs for all of the Above stations when I count them, divide by Area and multiply by 100 (#/A)*100.  This also seems to work for the Salmon on the Below sites but not the Trout (no idea why - I tried with ).  
 
 I think SCruton pooled the above and below sites and then scaled them by area.  However, this did not work at all for biomass.  But it appears that some of the tye
@@ -48,6 +48,21 @@ I think SCruton pooled the above and below sites and then scaled them by area.  
 I checked Pamehac_1996_by_type.csv by Pamehac1996_by_station.csv and found a discrepancy in the counts - it seems that in the by_type.csv file, that a lot of BTYOY have been changed to BT.  No idea why this is the case but probably explains why I got different numbers.
 
 But I cannot figure out how he got his biomass estimates as they are often much lower than mine.  Tried raw numbers/area and mean_weight*raw_number/area - same number.    Also, did with estimated No.  Sometimes off by a factor of 10 in 1991.  1996 is closer but still far off the mark.
+
+In Jan 2025, I found a couple of things.  First, I tried: - scaling by area, 
+- using FSA numbers scaled by area, 
+- the previous with zeros,  
+- the previous with zeros with 5 and 8 averaged  
+- see back of Scurton et al. paper for notes (2025-01-21)  
+
+None of the above match Scruton.  
+
+Found the file "Comparison_Pamehac_Scrutonetal1998_paper.xlsx.  This is a comparison of the estimates from Scruton and Loughlin (using Cote's code) and they differ, sometimes a lot.  There is a summary table that I can reproduce but as there are no codes, its not clear where Kristin got it and the numbers in the summary table do not match the less summarized data.  
+
+
+So there is a discrepancy between what Clakre and Curtis remember and what is in Scruton et al [-@scruton1998pamehac], i.e., the number of passes and whether the fish were driven to the nets. Spoke to Keith Clarke about this on 2024-10-25.  He said he's not surprised that there is a discrepancy and that differences in methodology may have been glossed over.  But he's sure that Bourgeois had something to do with this.  
+
+I also found that the salmonid estimates in Fig 2 and 3 are supposed to be for juvenile but for density, the values in BT/AS/YOY do not equate to the salmonids figures.  I also cannot replicate his results in anyway.  This is especially worrisome for BT density - SCruton seems to have the raw and unscaled values plotted but not for the other years.  I spoke to Clarke about this and apparently, this paper was for a conference and he was not surprised if mistakes are made.  So, he said to proceed and not worry about replicating Scruton's values.  STill need to talk to Kristin about this.
 
 ## Data {.tabset}
 
@@ -63,7 +78,7 @@ BUT......the really, really, really good thing for Pamehac is that there is a fi
 - Pam_figs.R - any figures
 
 ### map
-```{r, echo = F}
+```{r, map, echo = F}
 tmp <- read.csv("data/waypoints.csv")
 library(leaflet)
 leaflet()%>%
@@ -166,7 +181,9 @@ See Clarke and Curtis tab.  They advised me to look up Scruton and Gibson [-@scr
   - Pamehac is mentioned three times by Scruton but not in relation to electrofishing, at least not directly
   - Scruton et al. 1998 references this paper for the methods
 
-So there is a discrepancy between what Clakre and Curtis remember and what is in Scruton et al [-@scruton1998pamehac]. Spoke to Keith Clarke about this on 2024-10-25.  He said he's not surprised that there is a discrepancy and that differences in methodology may have been glossed over.  But he's sure that Bourgeois had something to do with this.  
+
+
+
 
 
 ## What have I learned:
@@ -367,12 +384,11 @@ with(df_all, table(Station, Sweep, Species, Year))
 
 
 ### samples & catch by year
-```{r, echo=F}
-# the first column is the row numbers - need to fix this
+```{r, message=FALSE}
 library(kableExtra)
 library(magrittr)
 kbl(df_tab_T, 
-    col.names = c('x', 'Year', 'n', 'T', 'n', 'T', 'n', 'T', 'n', 'T'),
+    col.names = c('row_num', 'Year', 'n', 'T', 'n', 'T', 'n', 'T', 'n', 'T'),
     align = 'c') |>
   kable_paper() |>
   # |>
