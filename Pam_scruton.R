@@ -1,10 +1,14 @@
-# How TF did Scruton get the numbers he did in the 1998 paper
-source("Pam_data_new.R")
+# this file is to try and determine WTF did Scruton to get the numbers he did in the 1998 paper
+## I was not successful in reproducing these values - see ReadMe.
 
-### CS ----
+# Start ----
+source("Pam_data_new.R")
 library(FSA)
 
-# # pool above and below by species
+# create data sets ----
+## to run through FSA::removal
+
+# pool above and below by species
 df_tab1a <- df_tab1 |>
   mutate(type = if_else(Station == "6"|Station == "7", "above", "below")) |>
   group_by(Year, Species, type) |>
@@ -24,22 +28,27 @@ df_tab1b <- df_tab1 |>
 
 df_tab1b
 
-
+# create area data set
 df_area_sum <- df_area |> mutate(type = if_else(station == "6"|station == "7", "above", "below")) |>
   group_by(year, type) |>
   summarise(sum_area = sum(area, na.rm = TRUE))
 
+## bind area ----
+### join data sets to area to scale estimates
 df_tab1 <- left_join(df_tab1, df_area, by = c("Year" = "year", "Station" = "station"))
 
 df_tab1a <- left_join(df_tab1a, df_area_sum, by = c("Year" = "year", "type" = "type"))
   
 df_tab1b <- left_join(df_tab1b, df_area_sum, by = c("Year" = "year", "type" = "type"))
 
-# microfish
-# by station and species
+
+# removal estimates 
+
+## microfish
+## by station and species
 res_list <- apply(df_tab1[, c(4:6)], MARGIN=1, FUN = removal, method = "Burnham") # takes NA's
 
-# pool above and below by species
+# pool above and below stations by species
 res_list <- apply(df_tab1a[, c(4:6)], MARGIN=1, FUN = removal, method = "Burnham") # takes NA's
 
 # pool above and below - salmonids
@@ -73,6 +82,10 @@ for(i in seq_along(res_list)){
   }
 }
 
+
+# output ----
+## output of removal estimates for different data sets above
+### may need to tweak these a bit to get them to work
 x <- df_tab3
 x <- df_tab1
 x <- df_tab1a
@@ -80,10 +93,10 @@ x <- df_tab1b
 # bind year, species and station to res_list
 out <- cbind(year = x$Year, 
              spp = x$Species, 
-            # sta = x$Station,
-            area = x$sum_area,
-            # area = x$area,
-             type = x$type,
+             sta = x$Station,
+            # area = x$sum_area,
+             #area = x$area,
+#             type = x$type,
              out)
 # df_tab1 
 out1 <- out |> 
@@ -242,7 +255,10 @@ tmp8 |>
   #filter(Species == "AS") |>
   ggplot(aes(x = Year, density, group = type, fill = type)) + geom_col(position = position_dodge()) + facet_wrap(~Species)
 
+
+
 # with by_type ----
+## just want to compare how the different approaches work with the same data set
 removal(c(10, 10, 3), method = "Burnham")$est
 removal(c(10, 10, 3), method = "Burnham", CIMicroFish = TRUE)$est
 removal(c(10, 10, 3), method = "CarleStrub")$est
