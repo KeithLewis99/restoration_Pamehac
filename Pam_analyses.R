@@ -55,7 +55,7 @@ summary(bt.glmm1)
 ### PLOTS/RESULTS WITH AND WITHOUT DISPERSION FOR THE GLMMTMB.  
 bt.glmm2 <- glmmTMB(
   abun.stand ~ type*time + (1 | Year), #+ (1 | Station),
-  family=ziGamma(link="log"), ziformula = ~,
+  family=ziGamma(link="log"), ziformula = ~1,
   REML = TRUE,
   data = df_aBT
 )
@@ -127,6 +127,9 @@ spatialAutoCorrGG_fun(bt.biomass.all)
 summary(bt.glmm2)
 mean_by_site(df_sumBT, "d")
 baci.plot(df_baciBT, "d")
+confint(bt.glmm2)
+
+
 
 
 ## AS ----
@@ -155,7 +158,7 @@ summary(as.glmm1)
 ### glmmTMB to glm.  The estimates are virtually identical but the Std. Errors are much smaller for glmmTMB.
 ### PLOTS/RESULTS WITH AND WITHOUT DISPERSION FOR THE GLMMTMB.  
 as.glmm2 <- glmmTMB(
-  abun.stand ~ type*time + (1 | Year), #+ (1 | Station),
+  abun.stand ~ time*type + (1 | Year), #+ (1 | Station),
   family=ziGamma(link="log"), ziformula = ~1,
   REML = TRUE,
   data = df_aAS
@@ -220,6 +223,8 @@ spatialAutoCorrGG_fun(as.biomass.all)
 summary(as.glmm2)
 mean_by_site(df_sumAS, "d")
 baci.plot(df_baciAS, "d")
+confint(as.glmm2)
+
 
 
 # Biomass ----
@@ -233,7 +238,8 @@ with(df_aAS, table(bio, Year))
 as_bio.glmm1 <- glmmTMB(
   bio.stand ~ type*time + (1 | Year), #+ (1 | Station),
   dispformula = ~ int,
-  family=ziGamma(link="log"), ziformula = ~1,
+  family=ziGamma(link="log"), 
+  ziformula = ~1,
   REML = TRUE,
   data = df_aAS
 )
@@ -307,6 +313,7 @@ spatialAutoCorrGG_fun(as_bio.biomass.all)
 summary(as_bio.glmm2)
 mean_by_site(df_sumAS, "b")
 baci.plot(df_baciAS, "b")
+confint(as_bio.glmm2)
 
 # use this to compare to Scruton et al. 1998
 tmp <- df_a |> group_by(Year, Species, type) |> filter(bio.stand > 0) |> summarise(mean_bio = mean(bio.stand)) 
@@ -318,4 +325,7 @@ tmp <- df_a |> group_by(Year, Species, type) |> summarise(mean_bio = mean(bio.st
 
 ggplot(tmp, aes(x = Year, y = mean_bio, group = type, fill = type)) + geom_col(position = position_dodge(width = 0.9)) +
   facet_wrap(~Species)
+
+
+
 # END ----

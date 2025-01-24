@@ -138,9 +138,9 @@ for(i in seq_along(dft$Year)){
   }
 }
 str(dft, give.attr=FALSE)
-dft$time
+#dft$time
 
-View(dft)
+#View(dft)
 
 ## dfd - dataframe for delta method
 dfd <- dft |>

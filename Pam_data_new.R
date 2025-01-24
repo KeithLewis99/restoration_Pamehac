@@ -55,7 +55,7 @@ unique(df_all$Species)
 
 
 # sum previous catch ----
-## first, create a table for T
+## first, create a table for T (total catch)
 df_sum <- df_all |>
   group_by(Year, Species, Station, Sweep) |>
   summarise(bio.sum = sum(Weight.g), abun = n()) 
@@ -118,7 +118,8 @@ str(df_sum, give.attr = F)
 ### year by spp
 
 p <- ggplot(
-  df_sum |> filter(Species == "AS"|Species == "ASYOY"),
+#  df_sum |> filter(Species == "AS"|Species == "ASYOY"),
+  df_sum |> filter(Species == "BT"|Species == "BTYOY"),
   aes(x = spc, y = abun, 
       group = Station, fill = Station,
       text = paste("SPC: ", spc, "\n",
