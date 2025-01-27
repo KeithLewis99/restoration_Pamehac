@@ -55,7 +55,7 @@ unique(df_all$Species)
 
 
 # sum previous catch ----
-## first, create a table for T (total catch)
+## first, create a table for abun = T (total catch) and biomass
 df_sum <- df_all |>
   group_by(Year, Species, Station, Sweep) |>
   summarise(bio.sum = sum(Weight.g), abun = n()) 
@@ -467,7 +467,7 @@ df_area <- df_area |>
 df_a <- left_join(df_a, df_area[,-2], by = c("Station" = "station", "Year" = "year"))
 df_a <- df_a |>
   group_by(Year, Species, Station) |>
-  mutate(abun.stand = abun/area, bio.stand = bio/area) #
+  mutate(abun.stand = abun/area*100, bio.stand = bio/area*100) #
 
 unique(df_a$Station)
 
