@@ -103,7 +103,7 @@ baci.plot <- function(x, z){
     theme(axis.text.x  = element_text(angle=90, vjust=0.4, size=10)) +
     #facet_grid(Treatment ~ Time) +
     facet_grid(forcats::fct_rev(type) ~ forcats::fct_rev(time)) +
-#    geom_errorbar(aes(ymin=mean-se, ymax=mean+se), width=0.5, position=position_dodge(1)) +
+    geom_errorbar(aes(ymin=mean-sd, ymax=mean+sd), width=0.5, position=position_dodge(1)) +
     {if (z == "b"){
       ylab("Mean Biomass Estimate (g/100 sq. m)")
     } else if (z == "d"){
@@ -236,4 +236,25 @@ tab_baci <- function(df, species, metric){
               sd = sd({{metric}})
     )
   return(df_test)    
+}
+
+
+
+
+#' Confidence Interval table
+#'
+#' @param df dataframe
+#' @param name name of the file to be exported, e.g. bt_den for brook trout density or bt for brook trout biomass
+#'
+#' @return a csv file with the confidence intervals for the glmmTMB object to be used in Overview.Rmd
+#' @export
+#'
+#' @examples
+tab.ci <- function(df, name){
+  #browser()
+  df_ciout <- as.data.frame(confint(df))
+  df_ciout <- cbind(parm = rownames(df_ciout), data.frame(df_ciout, row.names = NULL)) 
+  colnames(df_ciout)[2] <- "2.5%"
+  colnames(df_ciout)[3] <- "97.5%"
+  write.csv(df_ciout, paste0("output/", name, "_ci.csv"))
 }
