@@ -6,6 +6,7 @@
 # source ----
 # source("Pam_abun_bio.R")
 source("Pam_data_new.R")
+source("Pam_fun.R")
 
 
 # See Seal Cove code for original work and thoughts on this approach
@@ -150,9 +151,11 @@ spatialAutoCorrGG_fun(bt.biomass.all)
 summary(bt.glmm2)
 mean_by_site(df_sumBT, "d")
 baci.plot(df_baciBT, "d")
+ggsave(paste0("output/BT_density.png"), width=10, height=8, units="in")
 ggplot(df_aBT, aes(x = Station, y = abun.stand)) + geom_boxplot() + facet_wrap(~Year)
 
 confint(bt.glmm2)
+tab.ci(bt.glmm2, "bt_den") 
 
 
 
@@ -257,9 +260,14 @@ test <- summary(as.glmm1)
 test$vcov$cond
 mean_by_site(df_sumAS, "d")
 baci.plot(df_baciAS, "d")
+ggsave(paste0("output/AS_density.png"), width=10, height=8, units="in")
 ggplot(df_aAS, aes(x = Station, y = abun.stand)) + geom_boxplot() + facet_wrap(~Year)
 confint(as.glmm1)[1:4, ]
 confint(as.glmm2)[1:4, ]
+
+
+confint(as.glmm1)
+tab.ci(as.glmm1, "as_den") 
 
 
 
@@ -352,11 +360,13 @@ spatialAutoCorrGG_fun(bt_bio.biomass.all)
 summary(bt_bio.glmm2)
 mean_by_site(df_sumAS, "b")
 baci.plot(df_baciAS, "b")
+ggsave(paste0("output/BT_biomass.png"), width=10, height=8, units="in")
+ggplot(df_aBT, aes(x = Station, y = bio.stand)) + geom_boxplot() + facet_wrap(~Year)
+
+
 confint(bt_bio.glmm2)
-ggplot(df_aBT, aes(x = Station, y = abun.stand)) + geom_boxplot() + facet_wrap(~Year)
-
-
-
+confint(bt_bio.glmm2)[1:4, ]
+tab.ci(bt_bio.glmm2, "bt_bio") 
 
 
 ## AS ----
@@ -453,8 +463,13 @@ spatialAutoCorrGG_fun(as_bio.biomass.all)
 summary(as_bio.glmm2)
 mean_by_site(df_sumAS, "b")
 baci.plot(df_baciAS, "b")
-confint(as_bio.glmm2)
-ggplot(df_aAS, aes(x = Station, y = abun.stand)) + geom_boxplot() + facet_wrap(~Year)
+ggsave(paste0("output/AS_biomass.png"), width=10, height=8, units="in")
+ggplot(df_aAS, aes(x = Station, y = bio.stand)) + geom_boxplot() + facet_wrap(~Year)
+
+
+confint(bt_bio.glmm2)
+confint(bt_bio.glmm2)[1:4, c(3, 1, 2)]
+tab.ci(bt_bio.glmm2, "as_bio") 
 
 
 
