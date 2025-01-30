@@ -394,6 +394,8 @@ df_a <- full_join(tmp1, tmp2, by = c("Year", "Species", "Station"))
 df_a |> print(n = Inf)
 str(df_a, give.attr = F)
 #write.csv(df_a, "derived_data/df_a1.csv")
+
+
 ## zeros ----
 
 ### This yields 175 rows (5-Years x 4-Species x 12 Stations = 240)  - (11 Station:Years where no fish were caught x 4 Speices = 44) - these are structural "zeros" and therefore, don't need to be in teh analysis.
