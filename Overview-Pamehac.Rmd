@@ -1,0 +1,239 @@
+---
+title: "Overview-Pamehac"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: fill
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+library(kableExtra)
+library(magrittr)
+
+source("Pam_fun.R")
+source("Pam_data_new.R")
+
+# library ----
+library(nlme)
+library(glmmTMB)
+library(DHARMa)
+library(readr)
+library(tidyr)
+library(ggplot2)
+library(cowplot)
+
+#load data for CIs
+# create pattern
+temp = list.files(path = "output", pattern=".*_ci.csv$", full.names = T)
+
+# read all files in a folder that match a pattern and name each one
+name_files = function(x) {
+  name = gsub(".*output/", "", x)
+  name = gsub("_ci.csv", "", paste0(name, "_ci"))
+  return(name)
+}
+
+# create a list of dataframes, change the subscript to a name, extract as dataframes
+ls_sc_ci = (lapply(temp, read.csv))
+names(ls_sc_ci) <- name_files(temp)
+list2env(ls_sc_ci, envir = .GlobalEnv)
+
+```
+
+# Background
+### or why this has taken so long  {data-height=300}
+
+Delays on this part of teh Synthesis work were a bit less my fault.  First, I had to do a deep dive into the removal estimates (see ReadMe) but basically, came to the conclusion that removal estiamtes are not appropriate for the type of data that we have.  It is better to use the total catch as a minimum estimate and go with that rather than produce estimates of how many fish are missed which are invariably, going to introduce bias.
+
+I also had to spend some time trying to figure out how Scrution got his results.  Again, see ReadMe file for an explanation but basically, the feeling is that the results in Scruton et al. 1998 are not all correct.
+
+
+
+
+BT {data-navmenu="Summary_all"}
+=====
+
+
+Column
+-----------------------------------------------------------------------
+
+### Density
+
+```{r}
+# created in mean_stderrors_andplots_KL.R and from glmm_anova.R
+knitr::include_graphics("output/BT_density.png")
+```
+
+Column
+-----------------------------------------------------------------------
+
+### Biomass
+
+```{r}
+knitr::include_graphics("output/BT_biomass.png")
+```
+
+
+BTYOY {data-navmenu="Summary_all"}
+=====
+
+Column
+-----------------------------------------------------------------------
+
+### Density
+
+```{r}
+knitr::include_graphics("output/BTYOY_density.png")
+```
+
+Column
+-----------------------------------------------------------------------
+
+### Biomass
+
+```{r}
+knitr::include_graphics("output/BTYOY_biomass.png")
+```
+
+AS {data-navmenu="Summary_all"}
+=====
+
+Column
+-----------------------------------------------------------------------
+
+### Density
+
+```{r}
+knitr::include_graphics("output/AS_density.png")
+```
+
+Column
+-----------------------------------------------------------------------
+
+### Biomass
+
+```{r}
+knitr::include_graphics("output/AS_biomass.png")
+```
+
+
+
+ASYOY {data-navmenu="Summary_all"}
+=====
+
+Column
+-----------------------------------------------------------------------
+
+### Density
+
+```{r}
+knitr::include_graphics("output/ASYOY_density.png")
+```
+
+Column
+-----------------------------------------------------------------------
+
+### Biomass
+
+```{r}
+knitr::include_graphics("output/ASYOY_biomass.png")
+```
+
+
+
+<!-- Summary_all -->
+<!-- Just CIs -->
+  
+BT {data-navmenu="Summary_CI"}
+=====
+
+
+Column
+-----------------------------------------------------------------------
+
+### Density
+
+```{r, echo=FALSE}
+kbl(bt_den_ci[1:4, c(2, 5, 3:4)], 
+    col.names = c('parm', 'Estimate', '2.5%', '97.5%'),
+    align = 'c', caption = "BT density CIs", digits = 3 ) |>
+  kable_paper()
+```
+
+
+```{r, echo=FALSE}
+kbl(btyoy_den_ci[1:5, c(2, 5, 3:4)],
+    col.names = c('parm', 'Estimate', '2.5%', '97.5%'),
+    align = 'c', caption = "BTYOY density CIs", digits = 3 ) |>
+  kable_paper()
+```
+
+
+Column
+-----------------------------------------------------------------------
+
+### Biomass
+
+```{r, echo=FALSE}
+kbl(bt_bio_ci[1:4, c(2, 5, 3:4)],
+    col.names = c('parm', 'Estimate', '2.5%', '97.5%'),
+    align = 'c', caption = "BT Biomass CIs", digits = 3 ) |>
+  kable_paper()
+```
+
+
+
+```{r, echo=FALSE}
+kbl(btyoy_bio_ci[1:5, c(2, 5, 3:4)],
+    col.names = c('parm', 'Estimate', '2.5%', '97.5%'),
+    align = 'c', caption = "BTYOY Biomass CIs", digits = 3 ) |>
+  kable_paper()
+```
+
+
+
+AS {data-navmenu="Summary_CI"}
+=====
+
+
+Column
+-----------------------------------------------------------------------
+
+### Density
+
+```{r, echo=FALSE}
+kbl(as_den_ci[1:5, c(2, 5, 3:4)],
+    col.names = c('parm', 'Estimate', '2.5%', '97.5%'),
+    align = 'c', caption = "AS density CIs", digits = 3 ) |>
+  kable_paper()
+```
+
+```{r, echo=FALSE}
+kbl(asyoy_den_ci[1:4, c(2, 5, 3:4)],
+    col.names = c('parm', 'Estimate', '2.5%', '97.5%'),
+    align = 'c', caption = "ASYOY density CIs", digits = 3 ) |>
+  kable_paper()
+```
+
+
+Column
+-----------------------------------------------------------------------
+
+### Biomass
+
+```{r, echo=FALSE}
+kbl(as_bio_ci[1:4, c(2, 5, 3:4)],
+    col.names = c('parm', 'Estimate', '2.5%', '97.5%'),
+    align = 'c', caption = "AS Biomass CIs", digits = 3 ) |>
+  kable_paper()
+```
+
+
+```{r, echo=FALSE}
+kbl(asyoy_bio_ci[1:4, c(2, 5, 3:4)],
+    col.names = c('parm', 'Estimate', '2.5%', '97.5%'),
+    align = 'c', caption = "ASYOY Biomass CIs", digits = 3 ) |>
+  kable_paper()
+```
+
