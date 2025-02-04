@@ -258,3 +258,41 @@ tab.ci <- function(df, name){
   colnames(df_ciout)[3] <- "97.5%"
   write.csv(df_ciout, paste0("output/", name, "_ci.csv"))
 }
+
+
+#' above_below_year
+#'
+#' @param df dataframe of year, type, time, abundance
+#' @param z filter variable: response variable - density or biomass, density == "d", biomass == "b"
+#'
+#' @return
+#' @export
+#'
+#' @examples
+above_below_year <- function(df, z){
+p1 <- ggplot(df, aes(x = as.factor(Year), y = exp(fit), fill = type, colour = type)) + 
+    geom_point(position = position_dodge(width = 0.5), size = 3) +
+    #facet_wrap(~Species) + 
+    theme_bw() + 
+    {if (z == "b"){
+      ylab("Biomass Estimate (g/100 sq. m)")
+    } else if (z == "d"){
+      ylab("Density Estimate (#/100 sq. m)")
+    }
+    } +
+  xlab("Year") +
+    geom_errorbar(aes(ymax = exp(fit+se.fit*1.96), ymin = exp(fit-se.fit*1.96)), linewidth=1, width=0.15, position=position_dodge(0.5)) +
+    geom_vline(xintercept = 1.5, linetype="solid", linewidth=0.5) +
+    geom_vline(xintercept = 3.5, linetype="dashed", linewidth=0.5) +
+    geom_vline(xintercept = 4.5, linetype="dashed", linewidth=0.5) +
+    theme(legend.title=element_blank()) +
+    scale_fill_discrete(name="",
+                        breaks=c("above", "below"),
+                        labels=c("Above", "Below")) +
+    scale_colour_manual(values=c("black", "dark grey"),
+                        name="",
+                        breaks=c("above", "below"),
+                        labels=c("Above", "Below")) + 
+    theme(legend.position=c(.85, .88))
+  return(p1)
+}
