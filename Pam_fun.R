@@ -285,7 +285,8 @@ p1 <- ggplot(df, aes(x = as.factor(Year), y = exp(fit), fill = type, colour = ty
     geom_vline(xintercept = 1.5, linetype="solid", linewidth=0.5) +
     geom_vline(xintercept = 3.5, linetype="dashed", linewidth=0.5) +
     geom_vline(xintercept = 4.5, linetype="dashed", linewidth=0.5) +
-    theme(legend.title=element_blank()) +
+    #theme(legend.title=element_blank()) +
+    theme(legend.position=c(.85, .88)) +
     scale_fill_discrete(name="",
                         breaks=c("above", "below"),
                         labels=c("Above", "Below")) +
@@ -293,6 +294,6 @@ p1 <- ggplot(df, aes(x = as.factor(Year), y = exp(fit), fill = type, colour = ty
                         name="",
                         breaks=c("above", "below"),
                         labels=c("Above", "Below")) + 
-    theme(legend.position=c(.85, .88))
+    #theme(legend.position=c(.85, .88))
   return(p1)
 }
