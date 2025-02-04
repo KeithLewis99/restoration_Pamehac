@@ -2,7 +2,8 @@ Pamehac:
 
 Interaction term - did I do the percent differences right.
 
-Write and produce graphs.  Compare with what Kristin has done.  Kristin made a lot of figures but there's lots of redundancy
+Write and produce graphs.  Compare with what Kristin has done.  Kristin made a lot of figures but there's lots of redundancy.  See what is of value and reproduce.  I did the Density/biomass v Year with above and below as jittered CIs.
+- need to supress x and y axis and legend as required.
 
 
 ToDo: 
