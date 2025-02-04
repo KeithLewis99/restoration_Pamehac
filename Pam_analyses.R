@@ -1,8 +1,7 @@
 # Summary:
-# This file is a comparison of density and biomass of BT and AS in Pamehac Cove.  The data are from 2017-2020.  The data are analyzed using a zero-inflated gamma model with random effects for Year.  The residuals are checked for normality, homogeneity of variance, temporal autocorrelation, and spatial autocorrelation.  The residuals are then used to create a spatial dataset that is used to check for spatial autocorrelation.  The results are then summarized and compared to the results of Scruton et al. 1998.  The results are then plotted.
+# This file is a comparison of density and biomass of BT and AS in Pamehac Cove.  The data are from 2017-2020.  The data are analyzed using a zero-inflated gamma model with random effects for Year.  The residuals are checked for normality, homogeneity of variance, temporal autocorrelation, and spatial autocorrelation.  The residuals are then used to create a spatial dataset that is used to check for spatial autocorrelation.  The results are then summarized and compared to the results of Scruton et al. 1998.  The results are then plotted - see Pam_figs_new.
 
 ## abun.stand and bio.stand area #/area*100
-
 # source ----
 # source("Pam_abun_bio.R")
 source("Pam_data_new.R")
@@ -20,21 +19,6 @@ library(DHARMa)
 #library(tidyr)
 library(ggplot2)
 library(cowplot)
-
-# Scruton figs ----
-# use this to compare to Scruton et al. 1998
-
-df_a |>  
-  group_by(Year, Species, type) |> 
-  summarise(mean_abun = mean(abun.stand)) |>
-  ggplot(aes(x = Year, y = mean_abun, group = type, fill = type)) + geom_col(position = position_dodge(width = 0.9)) +
-  facet_wrap(~Species)
-
-df_a |>  
-  group_by(Year, Species, type) |> 
-  summarise(mean_bio = mean(bio.stand)) |>
-  ggplot(aes(x = Year, y = mean_bio, group = type, fill = type)) + geom_col(position = position_dodge(width = 0.9)) +
-  facet_wrap(~Species)
 
 # check for zeros
 df_a |>
@@ -155,6 +139,8 @@ ggsave(paste0("output/BT_density.png"), width=10, height=8, units="in")
 
 confint(bt.glmm2)
 tab.ci(bt.glmm2, "bt_den") 
+
+
 
 
 
@@ -373,10 +359,14 @@ baci.plot(df_baciAS, "d")
 ggsave(paste0("output/AS_density.png"), width=10, height=8, units="in")
 
 confint(as.glmm1)[1:4, ]
-confint(as.glmm2)[1:4, ]
+#confint(as.glmm2)[1:4, ]
 confint(as.glmm1)
 tab.ci(as.glmm1, "as_den") 
 
+tmp <- confint(as.glmm1)
+tmp[1:5, c(3, 1:2)]
+# percent increase
+((exp(tmp[1,3] + tmp[2,3]))-exp(tmp[1,3]))/exp(tmp[1,3])*100
 
 
 ## ASYOY ----
@@ -586,14 +576,15 @@ spatialAutoCorrGG_fun(bt_bio.biomass.all)
 
 ### summary ----
 summary(bt_bio.glmm2)
-mean_by_site(df_sumBT, "b")
-baci.plot(df_baciBT, "b")
+mean_by_site(df_bio_sumBT, "b")
+baci.plot(df_bio_baciBT, "b")
 ggsave(paste0("output/BT_biomass.png"), width=10, height=8, units="in")
 
 
 confint(bt_bio.glmm2)
 confint(bt_bio.glmm2)[1:4, ]
 tab.ci(bt_bio.glmm2, "bt_bio") 
+
 
 
 ## BTYOY ----
@@ -690,11 +681,11 @@ spatialAutoCorrGG_fun(btyoy_bio.biomass.all)
 ### summary ----
 summary(btyoy_bio.glmm2)
 mean_by_site(df_sumBTYOY, "b")
-baci.plot(df_baciBTYOY, "b")
+baci.plot(df_bio_baciBTYOY, "b")
 ggsave(paste0("output/BTYOY_biomass.png"), width=10, height=8, units="in")
 
 confint(btyoy_bio.glmm2)[1:4, ]
-confint(btyoy_bio.glmm1)[1:4, ]
+#confint(btyoy_bio.glmm1)[1:4, ]
 tab.ci(btyoy_bio.glmm2, "btyoy_bio") 
 
 
@@ -801,8 +792,8 @@ spatialAutoCorrGG_fun(as_bio.biomass.all)
 
 ### summary ----
 summary(as_bio.glmm2)
-mean_by_site(df_sumAS, "b")
-baci.plot(df_baciAS, "b")
+mean_by_site(df_bio_sumAS, "b")
+baci.plot(df_bio_baciAS, "b")
 ggsave(paste0("output/AS_biomass.png"), width=10, height=8, units="in")
 
 
@@ -810,6 +801,13 @@ confint(as_bio.glmm2)
 confint(as_bio.glmm2)[1:4, c(3, 1, 2)]
 tab.ci(as_bio.glmm2, "as_bio") 
 
+tmp <- confint(as_bio.glmm2)
+tmp[1:5, c(3, 1:2)]
+# percent increase
+((exp(tmp[1,3] + tmp[2,3]))-exp(tmp[1,3]))/exp(tmp[1,3])*100
+# not sure that this is 100% right: do I do this or is it just the difference between the after:below and before:below - the latter I think
+((exp(tmp[1,3] + tmp[2,3] + tmp[3,3] + tmp[4,3]))-exp(tmp[1,3]))/exp(tmp[1,3])*100
+((exp(tmp[1,3] + tmp[2,3] + tmp[4,3]))-exp(tmp[1,3] + tmp[2,3]))/exp(tmp[1,3]+ tmp[2,3])*100
 
 
 ## ASYOY ----
@@ -910,8 +908,8 @@ spatialAutoCorrGG_fun(asyoy_bio.biomass.all)
 
 ### summary ----
 summary(asyoy_bio.glmm2)
-mean_by_site(df_sumASYOY, "b")
-baci.plot(df_baciASYOY, "b")
+mean_by_site(df_bio_sumASYOY, "b")
+baci.plot(df_bio_baciASYOY, "b")
 ggsave(paste0("output/ASYOY_biomass.png"), width=10, height=8, units="in")
 
 
