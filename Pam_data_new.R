@@ -489,6 +489,9 @@ str(df_a, give.attr=F)
 
 df_sumBT <- tab_type(df_a, "BT", abun.stand)
 df_baciBT <- tab_baci(df_a, "BT", abun.stand)
+df_bio_sumBT <- tab_type(df_a, "BT", bio.stand)
+df_bio_baciBT <- tab_baci(df_a, "BT", bio.stand)
+
 
 df_sumAS <- tab_type(df_a, "AS", abun.stand)
 df_baciAS <- tab_baci(df_a, "AS", abun.stand)
@@ -497,8 +500,12 @@ df_bio_baciAS <- tab_baci(df_a, "AS", bio.stand)
 
 df_sumBTYOY <- tab_type(df_a, "BTYOY", abun.stand)
 df_baciBTYOY <- tab_baci(df_a, "BTYOY", abun.stand)
+df_bio_sumBTYOY <- tab_type(df_a, "BTYOY", bio.stand)
+df_bio_baciBTYOY <- tab_baci(df_a, "BTYOY", bio.stand)
 
 df_sumASYOY <- tab_type(df_a, "ASYOY", abun.stand)
 df_baciASYOY <- tab_baci(df_a, "ASYOY", abun.stand)
+df_bio_sumASYOY <- tab_type(df_a, "ASYOY", bio.stand)
+df_bio_baciASYOY <- tab_baci(df_a, "ASYOY", bio.stand)
 
 # END ----
