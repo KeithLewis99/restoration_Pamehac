@@ -8,16 +8,12 @@ source("Pam_fun.R")
 # See ReadMe for thoughts on Pamehac. 
 
 # library ----
-#library(nlme)
-library(glmmTMB)
-library(DHARMa)
-#library(readr)
-#library(tidyr)
 library(ggplot2)
 library(cowplot)
 
 # Scruton figs ----
 # use this to compare to Scruton et al. 1998
+## but I think Kristin's figures are better - use them
 
 # density (Fig X in Scruton)
 df_a |>  
@@ -71,44 +67,47 @@ View(df_a |>
                  mean_abun = mean(abun.stand),
                  se_abun = sd(abun.stand)/n))
 
+## above-below ----
 # create a df with variables, data, and predicted values
-tmp <- cbind(df_aBT[,c("Year", "time", "type", "abun.stand", "bio.stand")],
+btd <- cbind(df_aBT[,c("Year", "time", "type", "abun.stand", "bio.stand")],
              as.data.frame(predict(bt.glmm2, se.fit = T))
 )
+btb <- cbind(df_aBT[,c("Year", "time", "type", "abun.stand", "bio.stand")],
+             as.data.frame(predict(bt_bio.glmm2, se.fit = T))
+)
+btyd <- cbind(df_aBTYOY[,c("Year", "time", "type", "abun.stand", "bio.stand")],
+             as.data.frame(predict(btyoy.glmm2, se.fit = T))
+)
+btyb <- cbind(df_aBTYOY[,c("Year", "time", "type", "abun.stand", "bio.stand")],
+             as.data.frame(predict(btyoy_bio.glmm2, se.fit = T))
+)
+asd <- cbind(df_aAS[,c("Year", "time", "type", "abun.stand", "bio.stand")],
+             as.data.frame(predict(as.glmm1, se.fit = T))
+)
+asb <- cbind(df_aAS[,c("Year", "time", "type", "abun.stand", "bio.stand")],
+             as.data.frame(predict(as_bio.glmm2, se.fit = T))
+)
+asyd <- cbind(df_aASYOY[,c("Year", "time", "type", "abun.stand", "bio.stand")],
+             as.data.frame(predict(asyoy.glmm2, se.fit = T))
+)
+asyb <- cbind(df_aASYOY[,c("Year", "time", "type", "abun.stand", "bio.stand")],
+             as.data.frame(predict(asyoy_bio.glmm2, se.fit = T))
+)
 
+
+## create plots ----
 # this plots converts the fitted value and se to CIs taking zeros and the link into account.  CI's are not symetrical and don't overlap zero!
-ggplot(tmp, aes(x = as.factor(Year), y = exp(fit), group = type, colour = type)) + 
-  geom_point(position = position_dodge(width = 0.5), size = 3) +
-  #facet_wrap(~Species) + 
-  theme_bw() + 
-  ylab("Density Estimate  (#/100 sq. meters)") +
-  xlab("Year") +
-  geom_errorbar(aes(ymax = exp(fit+se.fit*1.96), ymin = exp(fit-se.fit*1.96)), linewidth=1, width=0.15, position=position_dodge(0.5)) +
-  geom_vline(xintercept = 1.5, linetype="solid", linewidth=0.5) +
-  geom_vline(xintercept = 3.5, linetype="dashed", linewidth=0.5) +
-  geom_vline(xintercept = 4.5, linetype="dashed", linewidth=0.5) +
-  theme(legend.title=element_blank()) +
-  #scale_fill_manual(values=c("#black","white")) +
-  theme(legend.position=c(.2, .88))
-ggsave(paste0("output/all_density.png"), width=10, height=8, units="in")
+source("Pam_fun.R")
+p1 <- above_below_year(btd, "d")
+p2 <- above_below_year(btyd, "d")
+p3 <- above_below_year(asd, "d")
+p4 <- above_below_year(asyd, "d")
 
+p5 <- above_below_year(btd, "b")
+p6 <- above_below_year(btyd, "b")
+p7 <- above_below_year(asd, "b")
+p8 <- above_below_year(asyd, "b")
 
-ggplot(tmp, aes(x = as.factor(Year), y = exp(fit), fill = type, colour = type)) + 
-  geom_point(position = position_dodge(width = 0.5), size = 3) +
-  #facet_wrap(~Species) + 
-  theme_bw() + 
-  ylab("Density Estimate  (#/100 sq. meters)") +
-  xlab("Year") +
-  geom_errorbar(aes(ymax = exp(fit+se.fit*1.96), ymin = exp(fit-se.fit*1.96)), linewidth=1, width=0.15, position=position_dodge(0.5)) +
-  geom_vline(xintercept = 1.5, linetype="solid", linewidth=0.5) +
-  geom_vline(xintercept = 3.5, linetype="dashed", linewidth=0.5) +
-  geom_vline(xintercept = 4.5, linetype="dashed", linewidth=0.5) +
-  theme(legend.title=element_blank()) +
-  scale_fill_discrete(name="",
-                      breaks=c("above", "below"),
-                      labels=c("Above", "Below")) +
-  scale_colour_manual(values=c("black", "dark grey"),
-                      name="",
-                      breaks=c("above", "below"),
-                      labels=c("Above", "Below")) + 
-  theme(legend.position=c(.85, .88))
+plot_grid(p1, p2, p3, p4, labels = c('A', 'B', 'C', 'D'), nrow = 2)
+plot_grid(p5, p6, p7, p8, nrow = 2)
+
