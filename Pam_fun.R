@@ -269,7 +269,8 @@ tab.ci <- function(df, name){
 #' @export
 #'
 #' @examples
-above_below_year <- function(df, z){
+above_below_year <- function(df, z, leg){
+  # browser()
 p1 <- ggplot(df, aes(x = as.factor(Year), y = exp(fit), fill = type, colour = type)) + 
     geom_point(position = position_dodge(width = 0.5), size = 3) +
     #facet_wrap(~Species) + 
@@ -278,22 +279,29 @@ p1 <- ggplot(df, aes(x = as.factor(Year), y = exp(fit), fill = type, colour = ty
       ylab("Biomass Estimate (g/100 sq. m)")
     } else if (z == "d"){
       ylab("Density Estimate (#/100 sq. m)")
+    } else if (z == "n"){
+      theme(axis.title.y = element_blank())
     }
-    } +
+  } +
   xlab("Year") +
     geom_errorbar(aes(ymax = exp(fit+se.fit*1.96), ymin = exp(fit-se.fit*1.96)), linewidth=1, width=0.15, position=position_dodge(0.5)) +
     geom_vline(xintercept = 1.5, linetype="solid", linewidth=0.5) +
     geom_vline(xintercept = 3.5, linetype="dashed", linewidth=0.5) +
     geom_vline(xintercept = 4.5, linetype="dashed", linewidth=0.5) +
     #theme(legend.title=element_blank()) +
-    theme(legend.position=c(.85, .88)) +
+    {if(leg == "y") {
+      theme(legend.position=c(.9, .85))
+      } else if(leg == "n"){
+        theme(legend.position="none")
+    }
+} +
     scale_fill_discrete(name="",
                         breaks=c("above", "below"),
                         labels=c("Above", "Below")) +
     scale_colour_manual(values=c("black", "dark grey"),
                         name="",
                         breaks=c("above", "below"),
-                        labels=c("Above", "Below")) + 
+                        labels=c("Above", "Below")) 
     #theme(legend.position=c(.85, .88))
   return(p1)
 }

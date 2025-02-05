@@ -98,16 +98,76 @@ asyb <- cbind(df_aASYOY[,c("Year", "time", "type", "abun.stand", "bio.stand")],
 ## create plots ----
 # this plots converts the fitted value and se to CIs taking zeros and the link into account.  CI's are not symetrical and don't overlap zero!
 source("Pam_fun.R")
-p1 <- above_below_year(btd, "d")
-p2 <- above_below_year(btyd, "d")
-p3 <- above_below_year(asd, "d")
-p4 <- above_below_year(asyd, "d")
+p1 <- above_below_year(btd, "d", "n")
+p2 <- above_below_year(btyd, "n", "y")
+p3 <- above_below_year(asd, "d", "n")
+p4 <- above_below_year(asyd, "n", "n")
 
-p5 <- above_below_year(btd, "b")
-p6 <- above_below_year(btyd, "b")
-p7 <- above_below_year(asd, "b")
-p8 <- above_below_year(asyd, "b")
+p5 <- above_below_year(btd, "b", "n")
+p6 <- above_below_year(btyd, "n", "y")
+p7 <- above_below_year(asd, "b", "n")
+p8 <- above_below_year(asyd, "n", "n")
 
 plot_grid(p1, p2, p3, p4, labels = c('A', 'B', 'C', 'D'), nrow = 2)
-plot_grid(p5, p6, p7, p8, nrow = 2)
+ggsave("output/all_density_new.png", width=10, height=8, units="in")
 
+plot_grid(p5, p6, p7, p8, labels = c('A', 'B', 'C', 'D'), nrow = 2)
+ggsave("output/all_biomass_new.png", width=10, height=8, units="in")
+
+# all salmonids ----
+# note that these are NOT based on modeloutputs
+df_a |>  
+  group_by(Year,type) |> 
+  summarise(n = n(),
+            mean_abun = mean(abun.stand),
+            se_abun = sd(abun.stand)/n) |>
+ggplot(aes(x = as.factor(Year), y = mean_abun, fill = type, colour = type)) + 
+  geom_point(position = position_dodge(width = 0.5), size = 3) +
+  #facet_wrap(~Species) + 
+  theme_bw() + 
+    ylab("Density Estimate (#/100 sq. m)") +
+  xlab("Year") +
+  geom_errorbar(aes(ymax = mean_abun+se_abun*1.96, ymin = mean_abun-se_abun*1.96), linewidth=1, width=0.15, position=position_dodge(0.5)) +
+  geom_vline(xintercept = 1.5, linetype="solid", linewidth=0.5) +
+  geom_vline(xintercept = 3.5, linetype="dashed", linewidth=0.5) +
+  geom_vline(xintercept = 4.5, linetype="dashed", linewidth=0.5) +
+  #theme(legend.title=element_blank()) +
+  #theme(legend.position=c(.85, .88)) +
+  scale_fill_discrete(name="",
+                      breaks=c("above", "below"),
+                      labels=c("Above", "Below")) +
+  scale_colour_manual(values=c("black", "dark grey"),
+                      name="",
+                      breaks=c("above", "below"),
+                      labels=c("Above", "Below")) 
+ggsave("output/salmonid_density_new.png", width=10, height=8, units="in")
+
+
+
+df_a |>  
+  group_by(Year,type) |> 
+  summarise(n = n(),
+            mean_bio = mean(bio.stand),
+            se_bio = sd(bio.stand)/n) |>
+  ggplot(aes(x = as.factor(Year), y = mean_bio, fill = type, colour = type)) + 
+  geom_point(position = position_dodge(width = 0.5), size = 3) +
+  #facet_wrap(~Species) + 
+  theme_bw() + 
+  ylab("Biomass Estimate (g/100 sq. m)") +
+  xlab("Year") +
+  geom_errorbar(aes(ymax = mean_bio+se_bio*1.96, ymin = mean_bio-se_bio*1.96), linewidth=1, width=0.15, position=position_dodge(0.5)) +
+  geom_vline(xintercept = 1.5, linetype="solid", linewidth=0.5) +
+  geom_vline(xintercept = 3.5, linetype="dashed", linewidth=0.5) +
+  geom_vline(xintercept = 4.5, linetype="dashed", linewidth=0.5) +
+  #theme(legend.title=element_blank()) +
+  #theme(legend.position=c(.85, .88)) +
+  scale_fill_discrete(name="",
+                      breaks=c("above", "below"),
+                      labels=c("Above", "Below")) +
+  scale_colour_manual(values=c("black", "dark grey"),
+                      name="",
+                      breaks=c("above", "below"),
+                      labels=c("Above", "Below")) 
+ggsave("output/salmonid_biomass_new.png", width=10, height=8, units="in")
+
+# END ----
