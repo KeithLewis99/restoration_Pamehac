@@ -508,4 +508,29 @@ df_baciASYOY <- tab_baci(df_a, "ASYOY", abun.stand)
 df_bio_sumASYOY <- tab_type(df_a, "ASYOY", bio.stand)
 df_bio_baciASYOY <- tab_baci(df_a, "ASYOY", bio.stand)
 
+
+
+# for Paul ----
+## van-dam bates
+df_tmp <- read.csv("data/output_pamehac_by_station.csv")
+
+df_tmp_mean <- df_tmp |>
+  filter(Species == "BT" & Year == 1992) |> 
+  summarize(mean = mean(abundance.caught),
+            mean_cs = mean(species.abundance.contributions)
+  )
+
+df_tmp |>
+  filter(Species == "BT" & Year == 1992) |>
+  select(Station, abundance.caught, species.abundance.contributions, species.abundance.contributions.lcl, species.abundance.contributions.ucl) |>
+  ggplot() +
+  geom_point(aes(x = Station, y = species.abundance.contributions), color = "red") +
+  geom_errorbar(aes(x = Station, ymin = species.abundance.contributions.lcl, ymax = species.abundance.contributions.ucl), color = "red") +
+  geom_point(aes(x = Station, y = abundance.caught)) +
+  geom_hline(yintercept = df_tmp_mean$mean, color = "blue") + 
+  geom_hline(yintercept = df_tmp_mean$mean_cs, color = "black") + 
+  ylab("Abundance") + 
+  theme_bw()
+
+
 # END ----
