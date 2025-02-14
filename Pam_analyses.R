@@ -803,11 +803,16 @@ tab.ci(as_bio.glmm2, "as_bio")
 
 tmp <- confint(as_bio.glmm2)
 tmp[1:5, c(3, 1:2)]
-# percent increase
+# percent increase - main effect
 ((exp(tmp[1,3] + tmp[2,3]))-exp(tmp[1,3]))/exp(tmp[1,3])*100
+
+# interaction
 # not sure that this is 100% right: do I do this or is it just the difference between the after:below and before:below - the latter I think
-((exp(tmp[1,3] + tmp[2,3] + tmp[3,3] + tmp[4,3]))-exp(tmp[1,3]))/exp(tmp[1,3])*100
-((exp(tmp[1,3] + tmp[2,3] + tmp[4,3]))-exp(tmp[1,3] + tmp[2,3]))/exp(tmp[1,3]+ tmp[2,3])*100
+((exp(tmp[1,3] + tmp[2,3] + tmp[3,3] + tmp[4,3]))-exp(tmp[1,3]))/exp(tmp[1,3])*100 # this is the difference of all the terms from the intecept
+((exp(tmp[1,3] + tmp[2,3] + tmp[4,3]))-exp(tmp[1,3] + tmp[2,3]))/exp(tmp[1,3]+ tmp[2,3])*100 # this is the difference between the after:below and before:below
+
+# this is the 
+((exp(tmp[1,3] + tmp[2,3] + tmp[3,3] + tmp[4,3]))-exp(tmp[1,3] + tmp[2,3]+ tmp[3,3]))/exp(tmp[1,3]+ tmp[2,3] + tmp[3,3])*100
 
 
 ## ASYOY ----
