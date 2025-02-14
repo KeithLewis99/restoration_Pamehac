@@ -276,9 +276,11 @@ p1 <- ggplot(df, aes(x = as.factor(Year), y = exp(fit), fill = type, colour = ty
     #facet_wrap(~Species) + 
     theme_bw() + 
     {if (z == "b"){
-      ylab("Biomass Estimate (g/100 sq. m)")
+      #ylab("Biomass Estimate (g/100 sq. m)")
+      ylab(expression("Biomass Estimate (g/m" ^2*")"))
     } else if (z == "d"){
-      ylab("Density Estimate (#/100 sq. m)")
+      #ylab("Density Estimate (#/100 sq. m)")
+      ylab(expression("Density Estimate (#/100 m" ^2*")"))
     } else if (z == "n"){
       theme(axis.title.y = element_blank())
     }

@@ -97,7 +97,7 @@ asyb <- cbind(df_aASYOY[,c("Year", "time", "type", "abun.stand", "bio.stand")],
 
 ## create plots ----
 # this plots converts the fitted value and se to CIs taking zeros and the link into account.  CI's are not symetrical and don't overlap zero!
-source("Pam_fun.R")
+
 p1 <- above_below_year(btd, "d", "n")
 p2 <- above_below_year(btyd, "n", "y")
 p3 <- above_below_year(asd, "d", "n")
@@ -116,6 +116,8 @@ ggsave("output/all_biomass_new.png", width=10, height=8, units="in")
 
 # all salmonids ----
 # note that these are NOT based on modeloutputs
+#https://dataanalytics.org.uk/axis-labels-in-r-plots-using-expression/#sub_sup
+
 df_a |>  
   group_by(Year,type) |> 
   summarise(n = n(),
@@ -124,8 +126,8 @@ df_a |>
 ggplot(aes(x = as.factor(Year), y = mean_abun, fill = type, colour = type)) + 
   geom_point(position = position_dodge(width = 0.5), size = 3) +
   #facet_wrap(~Species) + 
-  theme_bw() + 
-    ylab("Density Estimate (#/100 sq. m)") +
+  theme_bw(base_size = 20) + 
+  ylab(expression("Density Estimate (#/100 m" ^2*")")) +
   xlab("Year") +
   geom_errorbar(aes(ymax = mean_abun+se_abun*1.96, ymin = mean_abun-se_abun*1.96), linewidth=1, width=0.15, position=position_dodge(0.5)) +
   geom_vline(xintercept = 1.5, linetype="solid", linewidth=0.5) +
@@ -152,8 +154,9 @@ df_a |>
   ggplot(aes(x = as.factor(Year), y = mean_bio, fill = type, colour = type)) + 
   geom_point(position = position_dodge(width = 0.5), size = 3) +
   #facet_wrap(~Species) + 
-  theme_bw() + 
-  ylab("Biomass Estimate (g/100 sq. m)") +
+  theme_bw(base_size = 20) + 
+#  ylab("Biomass Estimate (g/100 sq. m)") +
+  ylab(expression("Biomass Estimate (g/m" ^2*")")) + 
   xlab("Year") +
   geom_errorbar(aes(ymax = mean_bio+se_bio*1.96, ymin = mean_bio-se_bio*1.96), linewidth=1, width=0.15, position=position_dodge(0.5)) +
   geom_vline(xintercept = 1.5, linetype="solid", linewidth=0.5) +
