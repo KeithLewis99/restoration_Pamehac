@@ -3,7 +3,8 @@ Pamehac:
 Interaction term - did I do the percent differences right.
 
 Write and produce graphs.  Compare with what Kristin has done.  Kristin made a lot of figures but there's lots of redundancy.  See what is of value and reproduce.  I did the Density/biomass v Year with above and below as jittered CIs.
-- need to supress x and y axis and legend as required.
+- Just do the all salmonids graph.
+- need to supress x and y axis and legend as required for main fig
 
 
 ToDo: 
@@ -49,3 +50,8 @@ Run ASYOY with binomial since ziGamma's aren't working nor is Tweedie. An intera
 Do percent differences for all. Log for gamma, plogis for binomial (not needed).  
 
 If you just take the mean and sd of the T, then you get CIs < 0.  Probably need to get random effects. Figured this out - see Pam_figs_new.R
+
+Write and produce graphs.  Compare with what Kristin has done.  Kristin made a lot of figures but there's lots of redundancy.  See what is of value and reproduce.  Not much there - I have everything that I need.
+I did the Density/biomass v Year with above and below as jittered CIs.
+- Just do the all salmonids graph. Done
+- need to supress x and y axis and legend as required for main fig. Done
