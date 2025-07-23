@@ -173,4 +173,32 @@ df_a |>
                       labels=c("Above", "Below")) 
 ggsave("output/salmonid_biomass_new.png", width=10, height=8, units="in")
 
+
+# by species ----
+df_a |>  
+  group_by(Year,Species, type) |> 
+  summarise(n = n(),
+            mean_abun = mean(abun.stand),
+            se_abun = sd(abun.stand)/n) |>
+  ggplot(aes(x = as.factor(Year), y = mean_abun, fill = type, colour = type)) + 
+  geom_point(position = position_dodge(width = 0.5), size = 3) +
+  facet_wrap(~Species) + 
+  theme_bw(base_size = 20) + 
+  ylab(expression("Density Estimate (#/100 m" ^2*")")) +
+  xlab("Year") +
+  geom_errorbar(aes(ymax = mean_abun+se_abun*1.96, ymin = mean_abun-se_abun*1.96), linewidth=1, width=0.15, position=position_dodge(0.5)) +
+  geom_vline(xintercept = 1.5, linetype="solid", linewidth=0.5) +
+  geom_vline(xintercept = 3.5, linetype="dashed", linewidth=0.5) +
+  geom_vline(xintercept = 4.5, linetype="dashed", linewidth=0.5) +
+  #theme(legend.title=element_blank()) +
+  #theme(legend.position=c(.85, .88)) +
+  scale_fill_discrete(name="",
+                      breaks=c("above", "below"),
+                      labels=c("Above", "Below")) +
+  scale_colour_manual(values=c("black", "dark grey"),
+                      name="",
+                      breaks=c("above", "below"),
+                      labels=c("Above", "Below")) 
+ggsave("output/salmonid_density_new.png", width=10, height=8, units="in")
+
 # END ----
