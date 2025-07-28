@@ -12,7 +12,9 @@ library(kableExtra)
 library(magrittr)
 
 source("Pam_fun.R")
-source("Pam_data_new.R")
+# source("Pam_data_new.R")
+source("Pam_data_new-v2.R")
+#source("Pam_tables.R")
 
 # library ----
 library(nlme)
@@ -237,3 +239,58 @@ kbl(asyoy_bio_ci[1:4, c(2, 5, 3:4)],
   kable_paper()
 ```
 
+
+
+Density CI Table 
+=====
+
+
+Column
+-----------------------------------------------------------------------
+
+
+```{r den tab ci, echo=FALSE}
+all_den_ci_tabC <- read.csv("data_derived/density_ci_tabC.csv")
+kbl(all_den_ci_tabC[, c(2:9)],
+    col.names = c('spp', 'type',
+                  '1990',
+                  '1991',
+                  '1992',
+                  '1996',
+                  '2016',
+                  'total'),
+    align = 'c', caption = "Density CIs", digits = 2 ) |>
+  collapse_rows(valign = "top",
+                latex_hline = "major") |>
+  #add_header_above(header = c(" " = 3, "2004" = 1, "2005" = 1, "2007" = 1, "2009" = 1, "2016" = 1, "total" = 1)) |>
+  add_header_above(header = c(" " = 2, "Year" = 6)) |>
+  kable_paper()
+```
+
+
+Biomass CI Table 
+=====
+
+
+Column
+-----------------------------------------------------------------------
+
+
+```{r bio tab ci, echo=FALSE}
+all_bio_ci_tabC <- read.csv("data_derived/biomass_ci_tabC.csv")
+
+kbl(all_bio_ci_tabC[, c(2:9)],
+    col.names = c('spp', 'type',
+                  '1990',
+                  '1991',
+                  '1992',
+                  '1996',
+                  '2016',
+                  'total'),
+    align = 'c', caption = "Biomass CIs", digits = 2 ) |>
+  collapse_rows(valign = "top",
+                latex_hline = "major") |>
+  #  add_header_above(header = c(" " = 3, "2004" = 1, "2005" = 1, "2007" = 1, "2009" = 1, "2016" = 1, "total" = 1)) |>
+  add_header_above(header = c(" " = 2, "Year" = 6)) |>
+  kable_paper()
+```
