@@ -4,7 +4,8 @@
 ## abun.stand and bio.stand area #/area*100
 # source ----
 # source("Pam_abun_bio.R")
-source("Pam_data_new.R")
+#source("Pam_data_new.R")
+source("Pam_data_new-v2.R")
 source("Pam_fun.R")
 
 
