@@ -631,42 +631,42 @@ df_all2 |>
 
 # pool ----
 # pool by Year and Station - this is for the Cote method
-df_tab_pool <- df_tab2 |>
-  group_by(Year, Station) |>
-  summarise(`1` = sum(`1`, na.rm = T), 
-            `2` = sum(`2`, na.rm = T), 
-            `3` = sum(`3`, na.rm = T),
-            `4` = sum(`3`, na.rm = T),
-            `5` = sum(`3`, na.rm = T))
-df_tab_pool |> print(n = Inf)
-
-df_tab_pool_spc <- df_sum |>
-  group_by(Year, Station, Sweep) |>
-  summarise(bio.sum = sum(bio.sum), abun = sum(abun)) |>
-  mutate(spc = case_when(
-    Sweep == 1 ~ 0,
-    Sweep == 2 ~ abun[Sweep ==1],
-    Sweep == 3 ~ sum(c(abun[Sweep == 1 | Sweep == 2])),
-    Sweep == 4 ~ sum(c(abun[Sweep == 1 | Sweep == 2 | Sweep == 3])),
-    Sweep == 5 ~ sum(c(abun[Sweep == 1 | Sweep == 2 | Sweep == 3 | Sweep == 4]))
-  ))
-df_tab_pool_spc
-
-p <- ggplot(
-  df_tab_pool_spc,
-  aes(x = spc, y = abun, 
-      group = Station, fill = Station,
-      text = paste("SPC: ", spc, "\n",
-                   "Abund: ", abun, "\n",
-                   "Stn: ", Station, "\n",
-                   "Sweep: ", Sweep,
-                   sep = "")
-  )) +
-  geom_point() +
-  geom_path() +
-  facet_grid(Year ~ Station)
-
-p
+# df_tab_pool <- df_tab2 |>
+#   group_by(Year, Station) |>
+#   summarise(`1` = sum(`1`, na.rm = T), 
+#             `2` = sum(`2`, na.rm = T), 
+#             `3` = sum(`3`, na.rm = T),
+#             `4` = sum(`3`, na.rm = T),
+#             `5` = sum(`3`, na.rm = T))
+# df_tab_pool |> print(n = Inf)
+# 
+# df_tab_pool_spc <- df_sum |>
+#   group_by(Year, Station, Sweep) |>
+#   summarise(bio.sum = sum(bio.sum), abun = sum(abun)) |>
+#   mutate(spc = case_when(
+#     Sweep == 1 ~ 0,
+#     Sweep == 2 ~ abun[Sweep ==1],
+#     Sweep == 3 ~ sum(c(abun[Sweep == 1 | Sweep == 2])),
+#     Sweep == 4 ~ sum(c(abun[Sweep == 1 | Sweep == 2 | Sweep == 3]))
+#     # Sweep == 5 ~ sum(c(abun[Sweep == 1 | Sweep == 2 | Sweep == 3 | Sweep == 4]))
+#   ))
+# df_tab_pool_spc
+# 
+# p <- ggplot(
+#   df_tab_pool_spc,
+#   aes(x = spc, y = abun, 
+#       group = Station, fill = Station,
+#       text = paste("SPC: ", spc, "\n",
+#                    "Abund: ", abun, "\n",
+#                    "Stn: ", Station, "\n",
+#                    "Sweep: ", Sweep,
+#                    sep = "")
+#   )) +
+#   geom_point() +
+#   geom_path() +
+#   facet_grid(Year ~ Station)
+# 
+# p
 
 # sum catches by year and species - from Pam_data.R
 ## DEPRECATE? - need to check this - just commenting out for now
