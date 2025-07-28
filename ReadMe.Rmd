@@ -78,13 +78,19 @@ BUT......the really, really, really good thing for Pamehac is that there is a fi
 - Pam_figs.R - any figures
 
 ### Pipeline
-- ls_pam: list of electrofishing files in the Pamehac directory
-- df_all: take ls_pam and make a dataframe; clean it up
-- df_sum: from df_all, calculate biomass and abundance for each sweep.
-- df_grid: create a grid with all possible rows for Year, Statoin, Species, and Sweep - this is to take care of the "no line when no fish of a given species is caught" problem.
-df_grid1: take out the structural zeros
-- df_all1: join df_grid1 with df_sum to make a complete data set
-- df_all2: join df_all1 with df_stn_tag (max sweeps per year) to remove extra sweeps; replace NA's with zeros; calculate spc
+SD = sweep disaggreated, SA = sweep aggregated
+- ls_pam: list of electrofishing files in the Pamehac directory; SD  
+- df_all: take ls_pam and make a dataframe; clean it up; SD  
+- df_sum: from df_all, calculate biomass and abundance for each sweep; SD  
+- df_grid: create a grid with all possible rows for Year, Statoin, Species, and Sweep - this is to take care of the "no line when no fish of a given species is caught" problem; SD  
+df_grid1: take out the structural zeros; SD  
+- df_all1: join df_grid1 with df_sum to make a complete data set; SD  
+- df_all2: join df_all1 with df_stn_tag (max sweeps per year) to remove extra sweeps; replace NA's with zeros; calculate spc; SD  
+- df_a: Sweeps < 3; sum abundance and biomass; SA
+- df_tab1: tabular format of abundance and biomass, Sweep < 3; SA  
+- df_tab2: tabular format of abundance and biomass, all Sweeps; SA  
+- df_tab_T: sum by species and year; tabular format
+- df_tab_T1: as above but with sweeps  
 
 ### map
 ```{r, map, echo = F}
