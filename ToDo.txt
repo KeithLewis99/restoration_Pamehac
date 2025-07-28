@@ -16,7 +16,7 @@ Check AS diagnostics before proceeding
 Note:  
 I think that many of the conclusions about electrofishing should be consisdered Pamehac only.  The other sites may 'behave' better.  I also need to follow up on the suggestion by Scott Reid that catchability estimates are something that a lit review would provide valuable info on and this could form the basis for a strong prior.
 
-
+Pamehac
 Good reference:
 Tables in R: https://glin.github.io/reactable/articles/examples.html#column-formatting
 https://cran.r-project.org/web/packages/kableExtra/vignettes/awesome_table_in_html.html#Grouped_Columns__Rows
