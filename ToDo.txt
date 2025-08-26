@@ -2,29 +2,16 @@ Pamehac:
 
 Interaction term - did I do the percent differences right.
 
-Write and produce graphs.  Compare with what Kristin has done.  Kristin made a lot of figures but there's lots of redundancy.  See what is of value and reproduce.  I did the Density/biomass v Year with above and below as jittered CIs.
-- Just do the all salmonids graph.
-- need to supress x and y axis and legend as required for main fig
-
-
 ToDo: 
-Consolidate sites (5 and 8)??  What about 9?? Eliminate "5B" - waiting on Kristin to reply.  Have moved ahead with making the code.  
+Consolidate sites (5 and 8)??  What about 9?? Eliminate "5B" - waiting on Kristin to reply.  Have moved ahead with making the code.  Need a summary plot 
 Check AS diagnostics before proceeding
-
-
 
 Note:  
 I think that many of the conclusions about electrofishing should be consisdered Pamehac only.  The other sites may 'behave' better.  I also need to follow up on the suggestion by Scott Reid that catchability estimates are something that a lit review would provide valuable info on and this could form the basis for a strong prior.
 
-Pamehac
-Good reference:
-Tables in R: https://glin.github.io/reactable/articles/examples.html#column-formatting
-https://cran.r-project.org/web/packages/kableExtra/vignettes/awesome_table_in_html.html#Grouped_Columns__Rows
 
 
 Done (sometimes, I delete these):
-Then, create some nice tables like in notes (year x species-age wiht sites, total catch, sites with < 5, and more than three passes. 
-Also, tabulations of T by year and species - done but get into a nice table; done; reorg so colum titles look nice in test tab: done
 Looked at 5 sweeps and talk to Curtis/Clarke: done
 
 Need a real total for Sites:Years:species - got this in df_tab2 which includes sites with only captures in sweep 1
@@ -39,9 +26,6 @@ Assume that 5 passes were made in all streams 1990, 1991, 1996 - need to find ou
 
 Retabulate all to take into account NA could mean no fish or no effort.  NA means no fish at a Station where some fish were caught during a Sweep per species per year.  A blank line means that no fish of a given species were caught at that station in a given year.  df_a should account for this: if there was no effort, then there should be no row.  But if there was effort and there was a zero, then we need a row to account for this.  This is why we have hurdle models.
 
-Reconcile with Scruton - WTF did he do???  See if Kristin got similar numbers.  I spent a lot of time on this.  
-I asked Clarke about something Scruton may have done that may have been a little shady - he said he wasn't surprised but I can't remember what it was. 
-Check numbers against Scruton without zeros.  See ReadMe for all of these.
 
 Kristin - binders to figure out location of dams and electrofishing - not sure if this is needed.  We didn't find anything.
 
@@ -49,9 +33,5 @@ Run ASYOY with binomial since ziGamma's aren't working nor is Tweedie. An intera
 
 Do percent differences for all. Log for gamma, plogis for binomial (not needed).  
 
-If you just take the mean and sd of the T, then you get CIs < 0.  Probably need to get random effects. Figured this out - see Pam_figs_new.R
+If you just take the mean and sd of the T, then you get CIs < 0.  Probably need to get random effects. Figured this out - see Pam_figs_new.R.  Use Boot strap - was this done for Pamehac?
 
-Write and produce graphs.  Compare with what Kristin has done.  Kristin made a lot of figures but there's lots of redundancy.  See what is of value and reproduce.  Not much there - I have everything that I need.
-I did the Density/biomass v Year with above and below as jittered CIs.
-- Just do the all salmonids graph. Done
-- need to supress x and y axis and legend as required for main fig. Done
