@@ -5,16 +5,18 @@ date: "2024-08-07"
 output: 
   html_document:
     toc: true
+    toc_float: true
 bibliography: refs/references.bib
 ---
 
 ```{r, import data, echo = F, message = F}
-df_all <- read.csv("derived_data/df_all.csv")
-df_sum <- read.csv("derived_data/df_sum.csv")
-df_tab_T <- read.csv("derived_data/df_tab_T.csv")
-df_sum_subset <- read.csv("derived_data/spc_example.csv")
-df_out <- read.csv("derived_data/FSA_output.csv")
-df_tab3 <- read.csv("derived_data/df_tab3.csv")
+df_all <- read.csv("data_derived/df_all.csv")
+df_sum <- read.csv("data_derived/df_sum.csv")
+df_tab_T1 <- read.csv("data_derived/df_tab_T1.csv")
+df_sum_subset <- read.csv("data_derived/spc_example.csv")
+df_a <- read.csv("data_derived/df_a3.csv")
+df_out <- read.csv("data_derived/FSA_output.csv")
+df_tab3 <- read.csv("data_derived/df_tab3.csv")
 
 library(ggplot2)
 library(dplyr)
@@ -24,7 +26,7 @@ library(tidyr)
 # Introduction
 This file is simply a record of issues that I have had with the Pamehac analysis that was started by Kristin Loughlin and is a continuation of work begun by Dave Scruton.   See ReadMe files from Rose Blanche and Seal Cove for additional info.
 
-# Notes
+## Project organization
 
 Got a zip file from Kristin Loughlin with no folders but files as follows:  
 - Carle Strub Estimates    
@@ -33,7 +35,15 @@ Got a zip file from Kristin Loughlin with no folders but files as follows:
 
 I reorganized for my own needs.  I have recreated all the figures although there are still questions, especially about the confidence intervals so basically, I learved how to do Carle Strub and many other estimates of abundance.
 
-## Missing values (SOME OF THIS HAS CHANGED)
+
+# Pamehac Brook
+Pamehac Brook is a tributary of the largest river on the island of Newfoundland, the Exploits River (48o53 ’ N; -56 o07’ W; Figure 6, Figure 7A).  The Exploits River also has the highest Atlantic salmon run on the island.  Pamehac Brook was modified in the 1970s to enable the transport of logs to a pulp and paper mill.  There were several control dams constructed in the upper watershed of the brook and the headwaters were diverted to create a 1.5 km long high gradient diversion stream emptying into the Exploits River.  The diversion impacted water flows in 12 kilometers of the original stream including completely dewatering the stream from the diversion down to the first inflow tributary.  After the diversion was constructed, flows at the mouth of Pamehac Brook were decreased by 36% (Scruton et al. 1998).  Good quality salmon and trout habitat was destroyed due to both the dewatering and flow reductions to the original stream and obstructions to salmon migration in the diversion canal prevented anadromous salmon from even reaching the upper watershed of Pamehac Brook.  To further facilitate log driving, portions of the upper watershed above the diversion were channelized, reducing the quality of habitat and increasing flows.  The banks of the diversion stream were unstable and led to issues with erosion and sedimentation as well.  In the 1980s, log driving activities ended but the infrastructure on Pamehac Brook remained in place until 1990 when efforts were undertaken to improve both habitat and anadromous salmon accessibility in the brook.  Several organizations including Environment Resources Management Association (ERMA, a conservation group), Abitibi Price (owner of the pulp and paper mill), and Fisheries and Oceans Canada spearheaded the restoration efforts.  Two control dams and a collapsed culvert on the brook were replaced with new bridges and the diversion was removed allowing natural flows to be restored to the stream for the first time in more than two decades (Figure 7C).  The newly rewatered stream bed was surveyed for obstructions such as debris and beaver dams and these were removed.  
+Further information on the study area and these restoration efforts can be found in Scruton et al. (1998).  The main species of interest for this restoration project was Atlantic salmon given the importance of the Exploits as a salmon river.  In the first year of monitoring, there was very little change in salmon density in Pamehac Brook.   The density of young of the year increased significantly in 1992 as 42,000 fry were stocked in two locations the stream.  This stocking was not continued as the goal of the project was to examine natural recolonization of the stream by salmon.  Stocked fry would have exited the stream by 1996 as salmon smolts and density estimates from that year are considered more indicative of the natural density in the stream.  
+
+
+
+## Missing values 
+**SOME OF THIS HAS CHANGED**
 2024-10-23: checked that df_all, df_sum, df_tab1, and out all add up.  df_all and df_sum are fine.  df_tab1 can differ from the less refined dataframes because df_tab1 includes only Sweep 1 to Sweep3, i.e., it eliminates sites with only captures on Sweep 1 but the last line (filter) eliminated sites with with captures on Sweep 1 (or 2 or 3) & 4 or 5 (all three have captures on sweep 3).  So, I added df_tab2 for the tabulations because it represents all 140 sites.  Also, df_tab_T presents the data as in the table below (see tab "samples and catches by year"). There are also 17 sites with zeros in the first sweep.
 
 I think that this is OK for analytical purposes but there may be troubles with the tabulation.
@@ -64,20 +74,16 @@ So there is a discrepancy between what Clakre and Curtis remember and what is in
 
 I also found that the salmonid estimates in Fig 2 and 3 are supposed to be for juvenile but for density, the values in BT/AS/YOY do not equate to the salmonids figures.  I also cannot replicate his results in anyway.  This is especially worrisome for BT density - SCruton seems to have the raw and unscaled values plotted but not for the other years.  I spoke to Clarke about this and apparently, this paper was for a conference and he was not surprised if mistakes are made.  So, he said to proceed and not worry about replicating Scruton's values.  STill need to talk to Kristin about this.
 
-## Data {.tabset}
+# Data {.tabset}
 
-### Data
+## Notes
 See the Rose Blanche code for explanations on what I think the AMEC code does and my concerns, i.e., how to use the delta method for these types of data as well as how the initial summaries were naively done.  
 BUT......the really, really, really good thing for Pamehac is that there is a file "output_pamehac_by_station.csv" that has all of the data as derived from the AMEC functions but in raw form!!!  So, I have created code in Pam_data_new.R to bring in all the files together.  From there, one can do any type of depletion analysis.
 
-### Files
-- Pam_data.R - bring in data from Kristin's files  
-- Pam_data_new.R -  the purpose of this file is to take what was done in scratch pad and make it available for general use for Carle STrub, unmarked, and Bayesian analyses  
-- Pam_abun_bio.R - this is to do the Carle Strub estimates and get T (total Catch) as well as diagnostics - this has the "out" df - need to combine with biomass 
-- Pam_analyses.R - GLMM and diagnostics
-- Pam_figs.R - any figures
+## Files
 
-### Pipeline
+
+## Pipeline
 SD = sweep disaggreated, SA = sweep aggregated
 - ls_pam: list of electrofishing files in the Pamehac directory; SD  
 - df_all: take ls_pam and make a dataframe; clean it up; SD  
@@ -86,13 +92,15 @@ SD = sweep disaggreated, SA = sweep aggregated
 df_grid1: take out the structural zeros; SD  
 - df_all1: join df_grid1 with df_sum to make a complete data set; SD  
 - df_all2: join df_all1 with df_stn_tag (max sweeps per year) to remove extra sweeps; replace NA's with zeros; calculate spc; SD  
-- df_a: Sweeps < 3; sum abundance and biomass; SA
-- df_tab1: tabular format of abundance and biomass, Sweep < 3; SA  
+- df_a: Sweeps < 3; sum abundance and biomass; SA; df_a2: add area; df_a3: add location  
+- df_a1: this may be a relic
+- df_tab1: tabular format of abundance and biomass, Sweep <= 3; SA  
 - df_tab2: tabular format of abundance and biomass, all Sweeps; SA  
+- df_tab3: tabular format of abundance and biomass, all Sweeps whether fish or not
 - df_tab_T: sum by species and year; tabular format
 - df_tab_T1: as above but with sweeps  
 
-### map
+## map
 ```{r, map, echo = F}
 tmp <- read.csv("data/waypoints.csv")
 library(leaflet)
@@ -222,6 +230,107 @@ Lots of passes means less sites, less power, and less generalization.  1 pass me
 See What I have learned (WHIL): data issues and also data summaries below.
 
 
+
+## Consults {.tabset}
+### Scott Reid
+Talked to Scott Reid on 2024-10-16.  A very helpful and pleasant fellow.
+I described my background, the Seal Cove situation where I took the estimates without question and then the Rose Blanche/Pamehac where I noticed large variances.  This promted me to dig deeper and look at the constant capture problem.  I then described using different methods and getting very different values including very improbable ones based on how capture probability is estimated.  Scott was sympathetic and that he had encountered all of these problems.  Indeed, he is so concerned that he has shelved some of his work with abundance and uses occupancy modeling because he's mostly worried about SAR.  He did say that salmonids are probably OK ito responding well to the electrofisher.
+
+Tiered approach - Scott didn't baulk at this but did say it would have to be explained.   
+Suggested:
+
+- the importance of talking to the field staff and understanding issues  
+- report a give method with worts or decide if the data is bad or decision tree  
+- the importance of accuracy and precision - if  
+- Consensus approach - do several approaches (or more) and see if they converge.  
+- Bayesian - do a lit review and see what the catchabilities are.
+- possibility of just going with counts?  
+
+
+He shared concerns about pooling (see findings and solutions), i.e,. there are differences in size, shape, behaviour, and habitat (and also the time of year and differences in electrofishers).  He was especially concerned with flow because it probably interacts with all of the previous variables because it affects the distribution of the fish but also affects sampling.  Experience of the crews is very important too.
+
+We discussed collaboration.  
+
+### Paul Regular
+2024-10-17 - Paul gave me almost 2 hours of his time.  I explained what I was up to and we went through the various iterations.  Paul wondered if the model was over paramaterized but was positive about the approach in general. 
+We did come to the conclusion that the model is conflating q and n and is "blaming" q but not n.  Forcing B0 to be positive helps this.  So it would be good to know if the larger fish should be more catchable.  
+We did establish that JAGS uses the greatest values as the intercept.
+
+### Clarke and Curtis
+2024-10-21  I outlined the issues that i've been having, i.e., that it all comes down to capture probability which changes for species, size, behaviour, and habitat/flow and that there is no silver bullet.  We discussed 4 solutions: CS/Bayesian/tiered and report the worts, pooling, and total catch.  The first two require a lot of explanation.  Clarke seems pretty confident that 3-pass electrofishing is catching most of the fish most of the time.  Curtis agreed.  We felt that this might be the more parsimonious approach.  
+
+**They also pointed out that for Pamehac, the first years used a different electrofishing method**, i.e., the fish were driven downstream instead of being systematically fished upstream.
+
+### Kristin Loughlin
+2024-13-23: Outlined things with Kristin.  She made a lot of good suggestions about factors influencing the abundance (time of year, electorfishers).  We discussed pooling and issues with that.  She said that AS are more likely in the riffles and BT more so in the pools.  BT are also bigger in the pools.  
+
+She asked a good question - does the YOY matter when we are really just 
+
+
+## WHIL: approach
+**Findings and solutions**
+Generally, I think that the conclusion here is that you have to pick your poison and there are no silver bullets.  Also, far better to do capture-mark-recapture.  But from the WHIL section, clearly there are many sites with very few fish, the spc test often fails, and GF is often not met.  However, T ~ No in many cases, there are few cases when pass-4 or -5 will change things much, and if p > 0.5, T will be very close to No anyway.
+
+Also, for Pamehac: 
+
+- Few stations meet the T > 30 criteria in a given year  
+- Some: CS approach is fine  
+- Some: assumtions aren't met due to c2 > c1 or c1 ~ c2 >> c3 (spc/GF).
+- Hedger approach seems to work in some cases but wildly off in others.  
+
+GF > GF_crit is an indicator (although the power is probably low) but SPC needs to be looked at too.
+
+A proposal for a tiered, measured approach (i.e., pick your poison):
+
+- If T > 30 & GF < GF_crit and SPC looks OK (c1 > c2 > c3), then CS  
+- If GF > GF_crit | SPC look bad, then  
+    - if c1 << c2, then T (can't trust No and calibration will underestimate).  
+        - if calibration >~ T and No, use calibration.  
+        - if c1 ~ c2 >> c3, then T (can't trust No and calibration will overestimate)  
+- If T < 30 & T > 20 same as above  
+- If T < 20 & T > 10: same as above  
+- If T < 10 - then T == No almost all the time but why use CS as its not really valid.  
+ 
+Or, Just use T: see Clarke and Curtis meeting above. The thing is that if p > 0.5, then you get 87.5% of the fish.
+
+### On pooling
+I think I have always been a bit distrustful of the pooling approach for the reasons Scott and Kristin mentioned: different species, sizes, behaviours, habitats, flows, years, fishing crews, and time of year all suggest different catchabilities and that throwing everything in the same pot, and then multiplying the total by the proportion (without the delta method)  will somehow help. However, it did make sense to look at this just in case, so I did.  Pooling definitely helps with samples size and with spc.  However, there are still many cases when n < 30 (19/45 rows!) and about 12/45 where spc looks bad and 4/45 where GF > $GF_{crit}$ (I didn't check to see how many were in common).  So, while this improves things from the FSA:removal standpoint, we would still have lots of worts to explain plus how catchability is equal given all the above and then, delta methoding things appropriately.  Further, Scruton and Gibson [-scruton1995quantitative] explicitly recommend against this (pg. 109, 119 in pdf). I think let's give it a rest.
+
+# Data summaries {.tabset}
+
+## Stations
+
+```{r}
+with(df_all, table(Station, Sweep))
+```
+
+## by Stations-Species-Year
+```{r}
+with(df_all, table(Station, Sweep, Species, Year))
+```
+
+
+## samples & catch by year
+```{r, message=FALSE}
+library(kableExtra)
+library(magrittr)
+kbl(df_tab_T1, 
+    col.names = c('row_num', 'Year', 'n', 'T', 'n', 'T', 'n', 'T', 'n', 'T'),
+    align = 'c') |>
+  kable_paper() |>
+  # |>
+  add_header_above(c(" " = 2, "AS" = 2, "ASYOY" = 2, "BT" = 2, "BTYOY" = 2))
+  
+```
+
+# Analyses
+See restoration Granite Readme.qmd, especially the What Have I Learned (WHIL)
+
+Figs: Compare with what Kristin has done.  Kristin made a lot of figures but there's lots of redundancy.  See what is of value and reproduce.  Not much there - I have everything that I need.
+I did the Density/biomass v Year with above and below as jittered CIs.
+- Just do the all salmonids graph. Done
+- need to supress x and y axis and legend as required for main fig. Done
+
 ## WHIL: data issues {.tabset}
 
 ### data summaries
@@ -229,11 +338,17 @@ See What I have learned (WHIL): data issues and also data summaries below.
 nrow(df_all) # number of fish caught
 sum(rowSums(!is.na(df_tab3[,4:8]))) # number of sites sampled assuming 5 passes in 1990, 1991, 1996 and 3 in 1992 and 2016, including sweeps with abun == 0
 nrow(df_tab3) # number of site:species:years including sweeps with abun == 0; assumes previous is true
-nrow(df_out) # number of site:species:years that can be used in FSA
+nrow(df_a) # number of site:species:years that can be used in FSA
+nrow(df_out)
 ```
 
 ### low n
 ```{r}
+
+nrow(df_a |> filter(T < 30)) # 97 of 124
+nrow(df_a |> filter(T < 20)) # 85 of 124
+nrow(df_a |> filter(T < 10)) # 57 of 124
+nrow(df_a |> filter(T < 5)) # 33 of 124
 
 nrow(df_out |> filter(T < 30)) # 97 of 124
 nrow(df_out |> filter(T < 20)) # 85 of 124
@@ -264,16 +379,19 @@ plotly::ggplotly(p, tooltip = "text")
 print("critical value")
 qchisq(0.95, 1)
 print("count of year:species:sites")
+nrow(df_a)
+#df_a |> filter(GF > qchisq(0.95, 1))
 nrow(df_out)
 df_out |> filter(GF > qchisq(0.95, 1))
 ```
 
 ### FSA: T v No
+
+
 ```{r, echo=FALSE}
 ggplot(df_out, aes(x = T, y = No, group = as.factor(spp), colour = spp)) +
   geom_point()
 ```
-
 ### sites with 4-5 passes and fish
 
 ```{r, echo=F}
@@ -319,97 +437,6 @@ abline(h=90)
 
 
 Perhaps graph the 4-5 pass sites - its a key bit of evidences
-
-## Consults {.tabset}
-### Scott Reid
-Talked to Scott Reid on 2024-10-16.  A very helpful and pleasant fellow.
-I described my background, the Seal Cove situation where I took the estimates without question and then the Rose Blanche/Pamehac where I noticed large variances.  This promted me to dig deeper and look at the constant capture problem.  I then described using different methods and getting very different values including very improbable ones based on how capture probability is estimated.  Scott was sympathetic and that he had encountered all of these problems.  Indeed, he is so concerned that he has shelved some of his work with abundance and uses occupancy modeling because he's mostly worried about SAR.  He did say that salmonids are probably OK ito responding well to the electrofisher.
-
-Tiered approach - Scott didn't baulk at this but did say it would have to be explained.   
-Suggested:
-
-- the importance of talking to the field staff and understanding issues  
-- report a give method with worts or decide if the data is bad or decision tree  
-- the importance of accuracy and precision - if  
-- Consensus approach - do several approaches (or more) and see if they converge.  
-- Bayesian - do a lit review and see what the catchabilities are.
-- possibility of just going with counts?  
-
-
-He shared concerns about pooling (see findings and solutions), i.e,. there are differences in size, shape, behaviour, and habitat (and also the time of year and differences in electrofishers).  He was especially concerned with flow because it probably interacts with all of the previous variables because it affects the distribution of the fish but also affects sampling.  Experience of the crews is very important too.
-
-We discussed collaboration.  
-
-### Paul Regular
-2024-10-17 - Paul gave me almost 2 hours of his time.  I explained what I was up to and we went through the various iterations.  Paul wondered if the model was over paramaterized but was positive about the approach in general. 
-We did come to the conclusion that the model is conflating q and n and is "blaming" q but not n.  Forcing B0 to be positive helps this.  So it would be good to know if the larger fish should be more catchable.  
-We did establish that JAGS uses the greatest values as the intercept.
-
-### Clarke and Curtis
-2024-10-21  I outlined the issues that i've been having, i.e., that it all comes down to capture probability which changes for species, size, behaviour, and habitat/flow and that there is no silver bullet.  We discussed 4 solutions: CS/Bayesian/tiered and report the worts, pooling, and total catch.  The first two require a lot of explanation.  Clarke seems pretty confident that 3-pass electrofishing is catching most of the fish most of the time.  Curtis agreed.  We felt that this might be the more parsimonious approach.  
-
-**They also pointed out that for Pamehac, the first years used a different electrofishing method**, i.e., the fish were driven downstream instead of being systematically fished upstream.
-
-### Kristin Loughlin
-2024-13-23: Outlined things with Kristin.  She made a lot of good suggestions about factors influencing the abundance (time of year, electorfishers).  We discussed pooling and issues with that.  She said that AS are more likely in the riffles and BT more so in the pools.  BT are also bigger in the pools.  
-
-She asked a good question - does the YOY matter when we are really just 
-
-
-## findings and solutions
-Generally, I think that the conclusion here is that you have to pick your poison and there are no silver bullets.  Also, far better to do capture-mark-recapture.  But from the WHIL section, clearly there are many sites with very few fish, the spc test often fails, and GF is often not met.  However, T ~ No in many cases, there are few cases when pass-4 or -5 will change things much, and if p > 0.5, T will be very close to No anyway.
-
-Also, for Pamehac: 
-
-- Few stations meet the T > 30 criteria in a given year  
-- Some: CS approach is fine  
-- Some: assumtions aren't met due to c2 > c1 or c1 ~ c2 >> c3 (spc/GF).
-- Hedger approach seems to work in some cases but wildly off in others.  
-
-GF > GF_crit is an indicator (although the power is probably low) but SPC needs to be looked at too.
-
-A proposal for a tiered, measured approach (i.e., pick your poison):
-
-- If T > 30 & GF < GF_crit and SPC looks OK (c1 > c2 > c3), then CS  
-- If GF > GF_crit | SPC look bad, then  
-    - if c1 << c2, then T (can't trust No and calibration will underestimate).  
-        - if calibration >~ T and No, use calibration.  
-        - if c1 ~ c2 >> c3, then T (can't trust No and calibration will overestimate)  
-- If T < 30 & T > 20 same as above  
-- If T < 20 & T > 10: same as above  
-- If T < 10 - then T == No almost all the time but why use CS as its not really valid.  
- 
-Or, Just use T: see Clarke and Curtis meeting above. The thing is that if p > 0.5, then you get 87.5% of the fish.
-
-### On pooling
-I think I have always been a bit distrustful of the pooling approach for the reasons Scott and Kristin mentioned: different species, sizes, behaviours, habitats, flows, years, fishing crews, and time of year all suggest different catchabilities and that throwing everything in the same pot, and then multiplying the total by the proportion (without the delta method)  will somehow help. However, it did make sense to look at this just in case, so I did.  Pooling definitely helps with samples size and with spc.  However, there are still many cases when n < 30 (19/45 rows!) and about 12/45 where spc looks bad and 4/45 where GF > $GF_{crit}$ (I didn't check to see how many were in common).  So, while this improves things from the FSA:removal standpoint, we would still have lots of worts to explain plus how catchability is equal given all the above and then, delta methoding things appropriately.  Further, Scruton and Gibson [-scruton1995quantitative] explicitly recommend against this (pg. 109, 119 in pdf). I think let's give it a rest.
-
-## Data summaries {.tabset}
-
-### Stations
-
-```{r}
-with(df_all, table(Station, Sweep))
-```
-
-### by Stations-Species-Year
-```{r}
-with(df_all, table(Station, Sweep, Species, Year))
-```
-
-
-### samples & catch by year
-```{r, message=FALSE}
-library(kableExtra)
-library(magrittr)
-kbl(df_tab_T, 
-    col.names = c('row_num', 'Year', 'n', 'T', 'n', 'T', 'n', 'T', 'n', 'T'),
-    align = 'c') |>
-  kable_paper() |>
-  # |>
-  add_header_above(c(" " = 2, "AS" = 2, "ASYOY" = 2, "BT" = 2, "BTYOY" = 2))
-  
-```
 
 
 # References
