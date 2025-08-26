@@ -294,3 +294,27 @@ kbl(all_bio_ci_tabC[, c(2:9)],
   add_header_above(header = c(" " = 2, "Year" = 6)) |>
   kable_paper()
 ```
+
+
+CI Figs
+=====
+
+Column
+-----------------------------------------------------------------------
+
+### Density
+
+```{r}
+knitr::include_graphics("output/all_density_boot.png")
+```
+
+
+Column
+-----------------------------------------------------------------------
+
+### Biomass
+
+```{r}
+knitr::include_graphics("output/all_biomass_boot.png")
+```
+
