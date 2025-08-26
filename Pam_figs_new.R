@@ -114,10 +114,10 @@ ggsave("output/all_density_new.png", width=10, height=8, units="in")
 plot_grid(p5, p6, p7, p8, labels = c('A', 'B', 'C', 'D'), nrow = 2)
 ggsave("output/all_biomass_new.png", width=10, height=8, units="in")
 
-# all salmonids ----
+# salmonids - Naive ----
 # note that these are NOT based on modeloutputs
 #https://dataanalytics.org.uk/axis-labels-in-r-plots-using-expression/#sub_sup
-
+## density ----
 df_a |>  
   group_by(Year,type) |> 
   summarise(n = n(),
@@ -145,7 +145,7 @@ ggplot(aes(x = as.factor(Year), y = mean_abun, fill = type, colour = type)) +
 ggsave("output/salmonid_density_new.png", width=10, height=8, units="in")
 
 
-
+## biomass ----
 df_a |>  
   group_by(Year,type) |> 
   summarise(n = n(),
@@ -174,7 +174,7 @@ df_a |>
 ggsave("output/salmonid_biomass_new.png", width=10, height=8, units="in")
 
 
-# by species ----
+# by species - Naive ----
 df_a |>  
   group_by(Year,Species, type) |> 
   summarise(n = n(),
@@ -200,5 +200,51 @@ df_a |>
                       breaks=c("above", "below"),
                       labels=c("Above", "Below")) 
 ggsave("output/salmonid_density_new.png", width=10, height=8, units="in")
+
+# bootstrap ----
+
+## density ----
+den_ci <- read.csv("data_derived/density_ci.csv")
+
+ggplot(den_ci, aes(x = as.factor(Year), y = mean, fill = type, colour = type)) + 
+  geom_point(position = position_dodge(width = 0.5), size = 3) +
+  facet_wrap(~Species) + 
+  theme_bw(base_size = 20) + 
+  ylab(expression("Density Estimate (#/100 m" ^2*")")) +
+  xlab("Year") +
+  geom_errorbar(aes(ymax = ul, ymin = ll), linewidth=1, width=0.15, position=position_dodge(0.5)) +
+  geom_vline(xintercept = 1.5, linetype="solid", linewidth=0.5) +
+  geom_vline(xintercept = 3.5, linetype="dashed", linewidth=0.5) +
+  geom_vline(xintercept = 4.5, linetype="dashed", linewidth=0.5) +
+scale_fill_discrete(name="",
+                    breaks=c("above", "below"),
+                    labels=c("Above", "Below")) +
+scale_colour_manual(values=c("black", "dark grey"),
+                    name="",
+                    breaks=c("above", "below"),
+                    labels=c("Above", "Below")) 
+ggsave("output/all_density_boot.png", width=10, height=8, units="in")
+
+## biomass ----
+bio_ci <- read.csv("data_derived/biomass_ci.csv")
+
+ggplot(bio_ci, aes(x = as.factor(Year), y = mean, fill = type, colour = type)) + 
+  geom_point(position = position_dodge(width = 0.5), size = 3) +
+  facet_wrap(~Species) + 
+  theme_bw(base_size = 20) + 
+  ylab(expression("Biomass Estimate (g/m" ^2*")")) + 
+  xlab("Year") +
+  geom_errorbar(aes(ymax = ul, ymin = ll), linewidth=1, width=0.15, position=position_dodge(0.5)) +
+  geom_vline(xintercept = 1.5, linetype="solid", linewidth=0.5) +
+  geom_vline(xintercept = 3.5, linetype="dashed", linewidth=0.5) +
+  geom_vline(xintercept = 4.5, linetype="dashed", linewidth=0.5) +
+  scale_fill_discrete(name="",
+                      breaks=c("above", "below"),
+                      labels=c("Above", "Below")) +
+  scale_colour_manual(values=c("black", "dark grey"),
+                      name="",
+                      breaks=c("above", "below"),
+                      labels=c("Above", "Below")) 
+ggsave("output/all_biomass_boot.png", width=10, height=8, units="in")
 
 # END ----
