@@ -53,7 +53,7 @@ for(i in seq_along(df_all$Species)){
 }
 unique(df_all$Species)
 
-#write.csv(df_all, "data_derived/df_all.csv")
+write.csv(df_all, "data_derived/df_all.csv")
 
 
 # sum previous catch ----
@@ -63,7 +63,7 @@ df_sum <- df_all |>
   summarise(bio.sum = sum(Weight.g), abun = n()) 
 str(df_sum, give.attr = F)
 
-# write.csv(df_sum, "data_derived/df_sum.csv")
+write.csv(df_sum, "data_derived/df_sum.csv")
 
 # grid ----
 # create dataset with all possible combinations of the following variables
@@ -80,7 +80,7 @@ df_grid <- expand.grid(Year = year,
   arrange(Year, Species, Station, Sweep)
 #str(df_grid)
 
-# write.csv(df_grid, "data_derived/df_grid.csv")
+write.csv(df_grid, "data_derived/df_grid.csv")
 
 # edit grid ----
 
@@ -113,7 +113,7 @@ df_grid1 <- df_grid |>
 #str(df_grid1, give.attr = F)
 df_grid1$Year <- as.integer(as.character(df_grid1$Year))
 df_grid1$Sweep <- as.integer(df_grid1$Sweep)
-# write.csv(df_grid1, "data_derived/df_grid1.csv")
+write.csv(df_grid1, "data_derived/df_grid1.csv")
 #str(df_sum, give.attr = F)
 
 
@@ -124,7 +124,7 @@ df_all1 <- full_join(df_grid1, df_sum, by = c("Year", "Species", "Station", "Swe
 #str(df_all1, give.attr = F)
 nrow(df_all1 |> filter(Sweep > 3)) # 360 rows with Sweep > 3 + 540 = 900
 
-# write.csv(df_all1, "data_derived/df_all.csv")
+write.csv(df_all1, "data_derived/df_all.csv")
 
 
 # get max Sweep ----
@@ -154,7 +154,7 @@ df_all2 <- full_join(df_all1, df_stn_tag, by = c("Year")) |>
 df_all2 <- df_all2 |>
   replace_na(list(bio.sum = 0, abun = 0)) 
 
-# write.csv(df_all2, "data_derived/df_all2.csv")
+write.csv(df_all2, "data_derived/df_all2.csv")
 
 
 
@@ -200,7 +200,7 @@ str(df_all2, give.attr = F)
 #   arrange(Year, Species, Station, Sweep)
 # str(df_sum, give.attr = F)
 # #View(df_sum)
-# #write.csv(df_sum, "data_derived/df_sum.csv")
+# write.csv(df_sum, "data_derived/df_sum.csv")
 # 
 # now for when Sweep == 1 is True but there is a missing sweep - don't need this bc you are only using the first value but it will make the spc graphs a bit hard to interpret
 # test <- df_sum |>
@@ -252,8 +252,7 @@ p <- ggplot(
 
 p
 
-#write.csv(df_sum[df_sum$Species == "AS" & df_sum$Year == 2016,], 
-      #"data_derived/spc_example.csv"
+write.csv(df_all2[df_all2$Species == "AS" & df_all2$Year == 2016,], "data_derived/spc_example.csv")
 plotly::ggplotly(p, tooltip = "text")
 
 
@@ -287,7 +286,7 @@ df_a <- df_all2 |>
 #          ) |>
 #            mutate_at(c("abun", "bio"), ~replace_na(.,0))
 # str(df_a, give.attr = F)
-#write.csv(df_a, "data_derived/df_a2.csv")
+write.csv(df_a, "data_derived/df_a2.csv")
 
 # to check that the expansion using "complete" worked
 unique(df_a$Station)
@@ -356,7 +355,7 @@ str(df_loc)
 df_a <- left_join(df_a, df_loc, by = c("Station" = "station_way")) |>
   filter(!Station %in% c("5B", "9"))  # remove 5B and 9 for good  BUT what about "5A", "8A", and "9"
 str(df_a, give.attr=F)
-#write.csv(df_a, "data_derived/df_a3.csv")
+write.csv(df_a, "data_derived/df_a3.csv")
 
 
 
@@ -529,7 +528,7 @@ df_tab_T1 <- df_sum |>
               values_from = c(T, n)) 
 df_tab_T1
 str(df_tab_T, give.attr = F)
-#write.csv(df_tab_T[, c(1, 6, 2, 7, 3, 8, 4, 9, 5)], "data_derived/df_tab_T.csv")
+write.csv(df_tab_T1[, c(1, 6, 2, 7, 3, 8, 4, 9, 5)], "data_derived/df_tab_T1.csv")
 
 # this summary is for all sites that were fished irregardless of whether they had fish or not.  The assumption here is that there were 5 passes in 1990, 1991, 1996 but three in 1992 and 2016.  Scruton says minimum of 4 passes in 1990-1996 but if this is the case, 1992 had none.  To determine if 4 or 5 would require returning to original data - not sure if this is worth it.  
 df_tab3 <- 
@@ -547,7 +546,7 @@ str(df_tab3, give.attr = F)
 nrow(df_tab3)
 #View(df_tab3 |> filter(!is.na(`1`)) |> count(`1`))
 sum(rowSums(!is.na(df_tab3[,4:8])))
-#write.csv(df_tab3, "data_derived/df_tab3.csv")
+write.csv(df_tab3, "data_derived/df_tab3.csv")
 
 ## for FSA ----
 # this would be what is used in FSA - not doing it but keeping for consisttency
@@ -570,7 +569,7 @@ tmp2 <-
 # df_a <- full_join(tmp1, tmp2, by = c("Year", "Species", "Station"))
 # df_a |> print(n = Inf)
 # str(df_a, give.attr = F)
-#write.csv(df_a, "data_derived/df_a1.csv")
+write.csv(df_a, "data_derived/df_a1.csv")
 
 ## zeros and >30 ----
 # proportion > 30

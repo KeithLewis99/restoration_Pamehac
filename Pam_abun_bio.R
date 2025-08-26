@@ -1,5 +1,5 @@
 # this is to do the Carle Strub estimates and get T (total Catch) as well as diagnostics.
-source("Pam_data_new.R")
+source("Pam_data_new-v2.R")
 
 ### CS ----
 library(FSA)
@@ -58,13 +58,13 @@ head(out)
 # 
 # 
 # ### GF calc ----
-# out$GF <- with(out, round((c1 - (No*p))^2/No*p + 
-#                             (c2 - No*(1-p)*p)^2/(No*(1-p)*p) +
-#                             (c3 - (No*(1-p)^2*p))^2/(No*(1-p)^2*p)
-#                           ,4)             
-# )
-# str(out)
-# write.csv(out, "derived_data/FSA_output.csv")
+out$GF <- with(out, round((c1 - (No*p))^2/No*p +
+                            (c2 - No*(1-p)*p)^2/(No*(1-p)*p) +
+                            (c3 - (No*(1-p)^2*p))^2/(No*(1-p)^2*p)
+                          ,4)
+)
+str(out)
+write.csv(out, "data_derived/FSA_output.csv")
 # dchisq(1.2813, 2) ## What is the likelihood of this value
 # pchisq(1.2813, 2) # probability of this value or less - cumulative density
 # 1-pchisq(1.2813, 2) #- this is the pvalue
