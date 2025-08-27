@@ -16,6 +16,7 @@ source("Pam_fun.R")
 source("Pam_data_new-v2.R")
 #source("Pam_tables.R")
 
+tabC <- read.csv("output/params_all.csv")
 # library ----
 library(nlme)
 library(glmmTMB)
@@ -238,6 +239,26 @@ kbl(asyoy_bio_ci[1:4, c(2, 5, 3:4)],
     align = 'c', caption = "ASYOY Biomass CIs", digits = 3 ) |>
   kable_paper()
 ```
+
+
+Parameter CI
+=====
+
+
+Column
+-----------------------------------------------------------------------
+
+```{r pb tab, echo=FALSE}
+kbl(tabC[, c(2:3, 10,11)], 
+    col.names = c('Species-age', 'Parameter', 'Density',
+                  'Biomass'),
+    align = 'c', caption = "Density and Biomass CIs", digits = 3 ) |>
+  collapse_rows(valign = "top",
+                latex_hline = "major") |>
+  add_header_above(header = c(" " = 2, "Density" = 1, "Biomass" = 1)) |>
+  kable_paper()
+```
+
 
 
 
