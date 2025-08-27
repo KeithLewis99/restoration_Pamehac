@@ -40,8 +40,8 @@ tab_bio <- rbind(bt_bio_ci[1:3,-1], btyoy_bio_ci[1:3,-1], as_bio_ci[1:3, -1], as
 
 tab <- cbind(tab_den, tab_bio[, 2:4])
 tab$parm[tab$parm == "cond.(Intercept)"] <- "Int"
-tab$parm[tab$parm == "cond.trtsc"] <- "Trt"
-tab$parm[tab$parm == "cond.typerun"] <- "Type"
+tab$parm[tab$parm == "cond.timebefore"] <- "Time"
+tab$parm[tab$parm == "cond.typebelow"] <- "Type"
 
 library(kableExtra)
 kbl(tab[, c(5, 1, 4, 2:3, 8, 6:7)], 
@@ -68,15 +68,20 @@ tabC$ci_bio <- paste(round(tabC$Estimate.1, 2),
                      ")")
 
 kbl(tabC[, c(1:2, 9,10)], 
-    col.names = c('Species-age', 'Parameter', 'Density',
+    col.names = c('Species-age', 
+                  'Parameter', 
+                  'Density',
                   'Biomass'),
     align = 'c', caption = "Density and Biomass CIs", digits = 3 ) |>
   collapse_rows(valign = "top",
                 latex_hline = "major") |>
-  add_header_above(header = c(" " = 2, "Density" = 1, "Biomass" = 1)) |>
+  add_header_above(header = c(" " = 2, 
+                              "Density" = 1, 
+                              "Biomass" = 1)) |>
   #add_header_above(header = c(" " = 2, "Summer" = 6)) |>
   kable_paper()
 
+write.csv(tabC, "output/params_all.csv")
 # # density - raw values ----
 # ## this is a summary of the values used in GC_analyses.R to create table
 library(dplyr)
