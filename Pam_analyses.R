@@ -20,6 +20,7 @@ library(DHARMa)
 #library(tidyr)
 library(ggplot2)
 library(cowplot)
+library(emmeans)
 
 # check for zeros
 df_a |>
@@ -27,6 +28,14 @@ df_a |>
   summarise(a = sum(abun != 0), 
             a0 = sum(abun == 0))
 
+# the below code removes 5B and 9 in Pam_data_new-v2.R
+# df_a <- left_join(df_a, df_loc, by = c("Station" = "station_way")) |>
+#   filter(!Station %in% c("5B", "9")) 
+# But I have debated what to do about 5A and 8A which only appear in 3 and 2 years respectively.  
+# test the effect of these by removing them here
+
+# df_a <- df_a |> filter(! Station %in% c("5A", "8A"))
+# unique(df_a$Station)
 
 # Density ----
 ## BT ----
@@ -75,9 +84,16 @@ summary(bt.glmm2)
 # str(bt.glmm2)
 anova(bt.glmm1, bt.glmm2) # this suggests that model bt.glmm2 without dispersion is better than with (bt.glmm1)
 
+# Get the model with the lowest AIC
+tmp <- anova(bt.glmm1, bt.glmm2)
+best_model_name <- rownames(tmp)[which.min(tmp$AIC)]
+
+# Assign the best model to a new object
+best_model <- get(best_model_name)
 
 ### diagnostics ----
-bt.glmm2_simres <- simulateResiduals(bt.glmm2, plot = T)
+par(mai = c(0.5, 0.5, 0.5, 0.5))
+bt.glmm2_simres <- simulateResiduals(best_model, plot = T)
 # str(bt.glmm1_simres,1)
 residuals(bt.glmm2_simres) 
 # these are scaled residuals
@@ -133,7 +149,7 @@ spatialAutoCorrGG_fun(bt.biomass.all)
 # Diagnostics had a few issues but largely fixed or not a big deal
 
 ### summary ----
-summary(bt.glmm2)
+summary(best_model)
 mean_by_site(df_sumBT, "d")
 baci.plot(df_baciBT, "d")
 ggsave(paste0("output/BT_density.png"), width=10, height=8, units="in")
@@ -189,9 +205,15 @@ summary(btyoy.glmm2)
 # str(bt.glmm2)
 anova(btyoy.glmm1, btyoy.glmm2) # this suggests that model btyoy.glmm2 without dispersion is slightly better than with (btyoy.glmm1)
 
+# Get the model with the lowest AIC
+tmp <- anova(btyoy.glmm1, btyoy.glmm2)
+best_model_name <- rownames(tmp)[which.min(tmp$AIC)]
+
+# Assign the best model to a new object
+best_model <- get(best_model_name)
 
 ### diagnostics ----
-btyoy.glmm2_simres <- simulateResiduals(btyoy.glmm2, plot = T)
+btyoy.glmm2_simres <- simulateResiduals(best_model, plot = T)
 # str(bt.glmm1_simres,1)
 residuals(btyoy.glmm2_simres) 
 # these are scaled residuals
@@ -240,7 +262,7 @@ spatialAutoCorrGG_fun(btyoy.biomass.all)
 # Diagnostics are fine - proceed
 
 ### summary ----
-summary(btyoy.glmm2)
+summary(best_model)
 mean_by_site(df_sumBTYOY, "d")
 baci.plot(df_baciBTYOY, "d")
 ggsave(paste0("output/BTYOY_density.png"), width=10, height=8, units="in")
@@ -298,10 +320,15 @@ summary(as.glmm2)
 anova(as.glmm1, as.glmm2)
 # str(as.glmm2)
 # as.glmm1 is the better model with ziformula = ~ 1 and when type + time - significant difference
+# Get the model with the lowest AIC
+tmp <- anova(as.glmm1, as.glmm2)
+best_model_name <- rownames(tmp)[which.min(tmp$AIC)]
 
+# Assign the best model to a new object
+best_model <- get(best_model_name)
 
 ### diagnostics ----
-as.glmm1_simres <- simulateResiduals(as.glmm1, plot = T)
+as.glmm1_simres <- simulateResiduals(best_model, plot = T)
 # str(as.glmm1_simres,1)
 residuals(as.glmm1_simres) 
 # these are scaled residuals
@@ -353,7 +380,7 @@ spatialAutoCorrGG_fun(as.biomass.all)
 # Diagnostics look fantastic for this model.  Proceed with this model (as.glmm1).  See glmm_anova for above but without REML which will allow for the BACI.
 
 ### summary ----
-test <- summary(as.glmm1)
+test <- summary(best_model)
 test$vcov$cond
 mean_by_site(df_sumAS, "d")
 baci.plot(df_baciAS, "d")
@@ -368,6 +395,39 @@ tmp <- confint(as.glmm1)
 tmp[1:5, c(3, 1:2)]
 # percent increase
 ((exp(tmp[1,3] + tmp[2,3]))-exp(tmp[1,3]))/exp(tmp[1,3])*100
+
+
+## emmeans
+# the below match the "cond" component in emmeans
+test
+test$coefficients$cond[1,1]
+test$coefficients$cond[1,1] + test$coefficients$cond[2,1]
+test$coefficients$cond[1,1] + test$coefficients$cond[3,1]
+test$coefficients$cond[1,1] + test$coefficients$cond[2,1] +
+test$coefficients$cond[3,1] + test$coefficients$cond[4,1]
+
+
+emmeans(best_model, ~ type*time, component = "cond")
+emm.as.den <- as.data.frame(emmeans(best_model, ~ type*time,       component = "response"))
+# Despite the really big differences in the means, the time is not significant because of really, really large CIs.  So this applies to the interactoin term as well since it is a sum of all the parameter estimates which includes time.  
+#This also makes a difference in % change.  When zeros are not included or ziformula = ~1, then percent change is -68%.  When ziformula != ~1, then need to use emmeans (to make life easier) and the difference is only -31%.
+
+# type term - after above v after below
+((emm.as.den[2,3] - emm.as.den[1,3])/
+    emm.as.den[1,3])*100
+((emm.as.den[2,3] - emm.as.den[4,3])/
+  emm.as.den[4,3])*100
+df_aAS |> filter(time == "before" & type == "below")
+df_aAS |> filter(time == "after" & type == "below") |> print(n = Inf)
+
+df_aAS |> filter(time == "before" & type == "below")
+df_aAS |> filter(time == "before" & type == "after")
+
+df_aASYOY |> filter(time == "before" & type == "below")
+df_aASYOY |> filter(time == "before" & type == "above")
+
+df_aBT |> filter(time == "before" & type == "below")
+df_aBT |> filter(time == "before" & type == "above")
 
 
 ## ASYOY ----
@@ -389,7 +449,7 @@ plot(density(df_aASYOY$abun.stand, na.rm = T))
 ###  Tried removing 1992 as this was the stocking year
 ### Tried many different starting values to no effect - start=list(beta=c(1, 1, 1, 1)),
 ### The only thing that worked was simplifying the model for asyoy.glmm2, therefore, I think that the only thing to do is to switch to a binomial approach.
-### I tried this and it didn't work.  The reason is that there is no values for before:below:abun>1 and therefore, its inappropriate to use an interaction term in the model.  This explains why it works for the other species-age groups. See scratch_pad_ASYOY.R for details and proofs
+### I tried this and it didn't work.  The reason is that there are no values for before:below:abun>1 and therefore, its inappropriate to use an interaction term in the model.  This explains why it works for the other species-age groups. See scratch_pad_ASYOY.R for details and proofs
 #### So, we'll just have to go with the main effects - all we can do
 
 asyoy.glmm1 <- glmmTMB(
@@ -423,8 +483,16 @@ summary(asyoy.glmm2)
 # asyoy.glmm1 does not converge so use asyoy.glmm2.  But diagnostics aren't good for homogeneity.  Re-ran with dispersion formula for time but diagnostics still bad.  Then, modified the ziformula since lots of zeros and that worked
 anova(asyoy.glmm1, asyoy.glmm2)
 
+# Get the model with the lowest AIC
+tmp <- anova(asyoy.glmm1, asyoy.glmm2)
+best_model_name <- rownames(tmp)[which.min(tmp$AIC)]
+
+# Assign the best model to a new object
+best_model <- get(best_model_name)
+
+
 ### diagnostics ----
-asyoy.glmm2_simres <- simulateResiduals(asyoy.glmm2, plot = T)
+asyoy.glmm2_simres <- simulateResiduals(best_model, plot = T)
 # str(as.glmm1_simres,1)
 residuals(asyoy.glmm2_simres) 
 # these are scaled residuals
@@ -473,14 +541,19 @@ spatialAutoCorrGG_fun(asyoy.biomass.all)
 # Diagnostics are fine - proceed
 
 ### summary ----
-summary(asyoy.glmm2)
+summary(best_model)
 mean_by_site(df_sumASYOY, "d")
 baci.plot(df_baciASYOY, "d")
 ggsave(paste0("output/ASYOY_density.png"), width=10, height=8, units="in")
 
-confint(asyoy.glmm2)
+confint(best_model)
 tab.ci(asyoy.glmm2, "asyoy_den") 
 
+## emmeans
+emmeans(best_model, ~ type*time, component = "cond")
+emm.bt.den <- as.data.frame(emmeans(best_model, ~ type,       component = "response"))
+((emm.bt.den[2,2]-emm.bt.den[1,2])/
+    emm.bt.den[1,2])*100
 
 
 # Biomass ----
@@ -506,7 +579,6 @@ bt_bio.glmm1 <- glmmTMB(
   REML = TRUE,
   data = df_aBT
 )
-
 summary(bt_bio.glmm1)
 
 
@@ -523,9 +595,16 @@ anova(bt_bio.glmm1, bt_bio.glmm2)
 
 # bt_bio.glmm2 is the better model but see how diagnostics look 
 
+# Get the model with the lowest AIC
+tmp <- anova(bt_bio.glmm1, bt_bio.glmm2)
+best_model_name <- rownames(tmp)[which.min(tmp$AIC)]
+
+# Assign the best model to a new object
+best_model <- get(best_model_name)
+
 
 ### diagnostics ----
-bt_bio.glmm2_simres <- simulateResiduals(bt_bio.glmm2, plot = T)
+bt_bio.glmm2_simres <- simulateResiduals(best_model, plot = T)
 # str(as_bio.glmm1_simres,1)
 residuals(bt_bio.glmm2_simres) 
 # these are scaled residuals
@@ -576,14 +655,14 @@ spatialAutoCorrGG_fun(bt_bio.biomass.all)
 # Diagnostics look fine for this model.  Proceed with this model (bt_bio.glmm2).  See glmm_anova for above but without REML which will allow for the BACI.
 
 ### summary ----
-summary(bt_bio.glmm2)
+summary(best_model)
 mean_by_site(df_bio_sumBT, "b")
 baci.plot(df_bio_baciBT, "b")
 ggsave(paste0("output/BT_biomass.png"), width=10, height=8, units="in")
 
 
-confint(bt_bio.glmm2)
-confint(bt_bio.glmm2)[1:4, ]
+confint(best_model)
+confint(best_model)[1:4, ]
 tab.ci(bt_bio.glmm2, "bt_bio") 
 
 
@@ -627,9 +706,15 @@ anova(btyoy_bio.glmm1, btyoy_bio.glmm2)
 
 # btyoy_bio.glmm2 is a marginally better model but see how diagnostics look 
 
+# Get the model with the lowest AIC
+tmp <- anova(btyoy_bio.glmm1, btyoy_bio.glmm2)
+best_model_name <- rownames(tmp)[which.min(tmp$AIC)]
+
+# Assign the best model to a new object
+best_model <- get(best_model_name)
 
 ### diagnostics ----
-btyoy_bio.glmm2_simres <- simulateResiduals(btyoy_bio.glmm2, plot = T)
+btyoy_bio.glmm2_simres <- simulateResiduals(best_model, plot = T)
 # str(as_bio.glmm1_simres,1)
 residuals(btyoy_bio.glmm2_simres) 
 # these are scaled residuals
@@ -680,12 +765,12 @@ spatialAutoCorrGG_fun(btyoy_bio.biomass.all)
 # Diagnostics look fine for this model.  Proceed with this model (btyoy_bio.glmm2).  See glmm_anova for above but without REML which will allow for the BACI.
 
 ### summary ----
-summary(btyoy_bio.glmm2)
+summary(best_model)
 mean_by_site(df_sumBTYOY, "b")
 baci.plot(df_bio_baciBTYOY, "b")
 ggsave(paste0("output/BTYOY_biomass.png"), width=10, height=8, units="in")
 
-confint(btyoy_bio.glmm2)[1:4, ]
+confint(best_model)[1:4, ]
 #confint(btyoy_bio.glmm1)[1:4, ]
 tab.ci(btyoy_bio.glmm2, "btyoy_bio") 
 
@@ -738,9 +823,16 @@ anova(as_bio.glmm1, as_bio.glmm2)
 # str(as_bio.glmm2)
 # as_bio.glmm2 is a slightly better model, for both original and ziformula ~ time
 
+# Get the model with the lowest AIC
+tmp <- anova(as_bio.glmm1, as_bio.glmm2)
+best_model_name <- rownames(tmp)[which.min(tmp$AIC)]
+
+# Assign the best model to a new object
+best_model <- get(best_model_name)
+
 
 ### diagnostics ----
-as_bio.glmm2_simres <- simulateResiduals(as_bio.glmm2, plot = T)
+as_bio.glmm2_simres <- simulateResiduals(best_model, plot = T)
 
 
 # str(as_bio.glmm1_simres,1)
@@ -792,14 +884,14 @@ spatialAutoCorrGG_fun(as_bio.biomass.all)
 # Diagnostics were fine for first iteration except for temp autocorrelation.  Tweaked the ziformula and now it all looks fantastic Proceed with this model (as.glmm1).  See glmm_anova for above but without REML which will allow for the BACI.
 
 ### summary ----
-summary(as_bio.glmm2)
+summary(best_model)
 mean_by_site(df_bio_sumAS, "b")
 baci.plot(df_bio_baciAS, "b")
 ggsave(paste0("output/AS_biomass.png"), width=10, height=8, units="in")
 
 
-confint(as_bio.glmm2)
-confint(as_bio.glmm2)[1:4, c(3, 1, 2)]
+confint(best_model)
+confint(best_model)[1:4, c(3, 1, 2)]
 tab.ci(as_bio.glmm2, "as_bio") 
 
 tmp <- confint(as_bio.glmm2)
@@ -824,6 +916,40 @@ model.matrix.lm(as_bio.glmm2)
 ((exp(tmp[1,3] + tmp[2,3] + tmp[3,3] + tmp[4,3]))-exp(tmp[1,3] + tmp[2,3]+ tmp[3,3]))/exp(tmp[1,3]+ tmp[2,3] + tmp[3,3])*100
 
 # however, 2 and 4 give the same result which is scary
+
+## emmeans
+
+emmeans(best_model, ~ type*time, component = "cond")
+em.as.bio <- as.data.frame(emmeans(best_model, ~ type*time,       component = "response"))
+
+# first significant term
+((em.as.bio[2,3] - em.as.bio[1,3])/
+    em.as.bio[1,3])*100
+
+# interaction term
+((emm.as.den[2,3] - emm.as.den[4,4])/
+    emm.as.den[4,4])*100
+# to show why CI's are so wide; Before period had only a couple of stations and they differed enormously.
+dd <- c(0, 38)
+tt <- c(0, 800)
+mean(tt)
+sd(tt)
+confint(tt)
+confidence_interval <- function(vector, interval) {
+  # Standard deviation of sample
+  vec_sd <- sd(vector)
+  # Sample size
+  n <- length(vector)
+  # Mean of sample
+  vec_mean <- mean(vector)
+  # Error according to t distribution
+  error <- qt((interval + 1)/2, df = n - 1) * vec_sd / sqrt(n)
+  # Confidence interval as a vector
+  result <- c("lower" = vec_mean - error, "upper" = vec_mean + error)
+  return(result)
+}
+confidence_interval(tt, 0.95)
+confidence_interval(dd, 0.95)
 
 
 ## ASYOY ----
