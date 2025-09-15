@@ -3,11 +3,11 @@ Pamehac:
 Interaction term - did I do the percent differences right.
 
 ToDo: 
-Consolidate sites (5 and 8)??  What about 9?? Eliminate "5B" - waiting on Kristin to reply.  Have moved ahead with making the code.  Need a summary plot 
-Check AS diagnostics before proceeding
+Consolidate sites (5 and 8)??  What about 9?? Eliminate "5B" - waiting on Kristin to reply.  Have moved ahead with making the code.  See ReadMe - remove stations.  Just need to talk to Kristin about 5A and maybe 8B.  Line 357 in the data.R is the key line for removing code.  Some issues I was having yesterday or not apparent today but this may have been due to coding fatigue which I seem to get after a while.  
 
-Note:  
-I think that many of the conclusions about electrofishing should be consisdered Pamehac only.  The other sites may 'behave' better.  I also need to follow up on the suggestion by Scott Reid that catchability estimates are something that a lit review would provide valuable info on and this could form the basis for a strong prior.
+Check AS diagnostics before proceeding - wait untilt he above is done.
+
+
 
 
 
