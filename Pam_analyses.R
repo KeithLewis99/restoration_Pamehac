@@ -417,17 +417,25 @@ emm.as.den <- as.data.frame(emmeans(best_model, ~ type*time,       component = "
     emm.as.den[1,3])*100
 ((emm.as.den[2,3] - emm.as.den[4,3])/
   emm.as.den[4,3])*100
+
+# compare above before and after
+df_aAS |> filter(time == "before" & type == "above")
+df_aAS |> filter(time == "after" & type == "above") |> print(n = Inf)
+
+# compare below, before and after
 df_aAS |> filter(time == "before" & type == "below")
 df_aAS |> filter(time == "after" & type == "below") |> print(n = Inf)
 
+# before, above and below
 df_aAS |> filter(time == "before" & type == "below")
-df_aAS |> filter(time == "before" & type == "after")
+df_aAS |> filter(time == "before" & type == "above")
+
+df_aAS |> filter(time == "after" & type == "below")
+df_aAS |> filter(time == "after" & type == "above")
 
 df_aASYOY |> filter(time == "before" & type == "below")
 df_aASYOY |> filter(time == "before" & type == "above")
 
-df_aBT |> filter(time == "before" & type == "below")
-df_aBT |> filter(time == "before" & type == "above")
 
 
 ## ASYOY ----
@@ -437,8 +445,9 @@ df_aASYOY <- df_a[df_a$Species == "ASYOY",]
 df_aASYOY <- df_a[df_a$Species == "ASYOY" & df_a$Year != "1992",]
 df_aASYOY$int <- interaction(df_aASYOY$type, df_aASYOY$time)
 plot(density(df_aASYOY$abun.stand, na.rm = T))
+ggplot(df_aASYOY, aes(x = Station, y = abun.stand)) + geom_boxplot() + facet_wrap(~Year)
 
-
+ggplot(df_aASYOY, aes(x = Station, y = abun.stand)) + geom_boxplot() + facet_grid(type~time)
 
 ### analyses ----
 ### Need glmmTMB to have random effects and a non-normal distribution
