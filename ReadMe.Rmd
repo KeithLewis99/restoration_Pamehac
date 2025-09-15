@@ -93,12 +93,23 @@ df_grid1: take out the structural zeros; SD
 - df_all1: join df_grid1 with df_sum to make a complete data set; SD  
 - df_all2: join df_all1 with df_stn_tag (max sweeps per year) to remove extra sweeps; replace NA's with zeros; calculate spc; SD  
 - df_a: Sweeps < 3; sum abundance and biomass; SA; df_a2: add area; df_a3: add location  
-- df_a1: this may be a relic
+- df_a1: this may be a relic  
 - df_tab1: tabular format of abundance and biomass, Sweep <= 3; SA  
 - df_tab2: tabular format of abundance and biomass, all Sweeps; SA  
 - df_tab3: tabular format of abundance and biomass, all Sweeps whether fish or not
 - df_tab_T: sum by species and year; tabular format
 - df_tab_T1: as above but with sweeps  
+
+## remove Stations
+Sites with missing years - see df_all.xlsx.  
+
+9 and 5B are only sampled in 1991/1992 and 1991 respectively.  There are no other 9 stations but there is 5 and 5A.  Conclusion - eliminate 9 and 5B.  
+
+By the same logic, I should drop 8A which was only done in 2 years.  
+
+5A was done in three "after" years but so was Stn 3. But Stn 3 has no A or B sites - this argues for keeping it.  What about 5A?
+
+I went through all the models again without 5A and 8A - long story, short, there's not much difference.  I changed the data set used for analysis (df_a) in Pam_analysis.R and compared the point estimate and the CIs for each model.  Many were virtually identical.  BTY density was a bit more different for the interaction but in no case would it change the decision, i.e., accept/reject hypothesis.
 
 ## map
 ```{r, map, echo = F}
@@ -392,6 +403,7 @@ df_out |> filter(GF > qchisq(0.95, 1))
 ggplot(df_out, aes(x = T, y = No, group = as.factor(spp), colour = spp)) +
   geom_point()
 ```
+
 ### sites with 4-5 passes and fish
 
 ```{r, echo=F}
@@ -405,8 +417,8 @@ df_all |>
   pivot_wider(names_from = Sweep, values_from = count, values_fill = 0) |>
   mutate(percent4_5 = (sum(`4`, `5`)/sum(`1`, `2`, `3`)*100), 
          percent4 = (sum(`4`)/sum(`1`, `2`, `3`)*100),
-         diff = sum(`1`, `2`, `3`) - sum(`1`, `2`, `3`, `4`)
-         )
+         diff = sum(`1`, `2`, `3`) - sum(`1`, `2`, `3`, `4`)) |>
+  relocate(`1`, .after = Station)
 ```
 
 ### p v T
