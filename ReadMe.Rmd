@@ -109,7 +109,9 @@ By the same logic, I should drop 8A which was only done in 2 years.
 
 5A was done in three "after" years but so was Stn 3. But Stn 3 has no A or B sites - this argues for keeping it.  What about 5A?
 
-I went through all the models again without 5A and 8A - long story, short, there's not much difference.  I changed the data set used for analysis (df_a) in Pam_analysis.R and compared the point estimate and the CIs for each model.  Many were virtually identical.  BTY density was a bit more different for the interaction but in no case would it change the decision, i.e., accept/reject hypothesis.
+I went through all the models again without 5A and 8A - long story, short, there's not much difference.  I changed the data set used for analysis (df_a) in Pam_analysis.R and compared the point estimate and the CIs for each model.  Many were virtually identical.  BTY density was a bit more different for the interaction but in no case would it change the decision, i.e., accept/reject hypothesis.  
+
+So, I think its best just to keep 5A and 8A - discussed with Clarke and Kristin at meeting in early Sept.
 
 ## map
 ```{r, map, echo = F}
