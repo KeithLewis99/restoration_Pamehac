@@ -291,7 +291,9 @@ str(tab_den, give.attr = F)
 #https://stackoverflow.com/questions/38554383/bootstrapped-confidence-intervals-with-dplyr
 library(Hmisc)
 
-spp_den.ci <- df_a |>
+
+spp_den.ci <- df_a |> 
+  filter(!(Year == 1992 & Species == "ASYOY")) |>
   group_by(Species, Year, type) |>
   do(data.frame(rbind(Hmisc::smean.cl.boot(.$abun.stand)))) |>
   rename(mean = Mean, ll = Lower, ul = Upper)
@@ -385,24 +387,26 @@ kbl(all_den_ci_tabC,
 
 
 ### density by year -----
+### I COPIED THIS FROM GRANITE CANAL AND THINK THAT I MODIFIED THE BELOW BUT FORGOT TO DELETE IT
 #### I'm not sure if this is really needed, i.e., this does not match Kristin's figures which are for the whole year; but there is a reason that you can't match.  I could so a sum of all fish or biomass in a year but then that is what I would be stuck with - a number.  This is not awful but there would be no confidence intervals around it.  Also, i'm not sure what the point of it is.  A yearly trend in fish and biomass.  Largely driven by ASY.
-year_den_tot.ci <- df_b |>
-  filter(Year != 2006 & trt != "con" & Month != "Sept") |>
-  group_by(Year, trt, type) |>
-  #need to get a total here
-  do(data.frame(rbind(Hmisc::smean.cl.boot(.$T.stand)))) |>
-  rename(mean = Mean, ll = Lower, ul = Upper)
-
-year_den_tot.ci$ci <- paste0("(", round(year_den_tot.ci$ll, 1), ", ", round(year_den_tot.ci$ul, 1), ")")
-year_den_tot.ci
-
-write.csv(year_den_tot.ci, "data_derived/density_all_year.csv")
+# year_den_tot.ci <- df_b |>
+#   filter(Year != 2006 & trt != "con" & Month != "Sept") |>
+#   group_by(Year, trt, type) |>
+#   #need to get a total here
+#   do(data.frame(rbind(Hmisc::smean.cl.boot(.$T.stand)))) |>
+#   rename(mean = Mean, ll = Lower, ul = Upper)
+# 
+# year_den_tot.ci$ci <- paste0("(", round(year_den_tot.ci$ll, 1), ", ", round(year_den_tot.ci$ul, 1), ")")
+# year_den_tot.ci
+# 
+# write.csv(year_den_tot.ci, "data_derived/density_all_year.csv")
 
 
 
 
 ## biomass - CI ----
 spp_bio.ci <- df_a |>
+  filter(!(Year == 1992 & Species == "ASYOY")) |>
   group_by(Species, Year, type) |>
   do(data.frame(rbind(Hmisc::smean.cl.boot(.$bio.stand)))) |>
   rename(mean = Mean, ll = Lower, ul = Upper)
@@ -492,17 +496,19 @@ kbl(all_bio_ci_tabC,
 
 
 ### biomass by year -----
-year_bio_tot.ci <- df_b |>
-  filter(Year != 2006 & trt != "con" & Month != "Sept") |>
-  group_by(Year, trt, type) |>
-  
-  do(data.frame(rbind(Hmisc::smean.cl.boot(.$B.stand)))) |>
-  rename(mean = Mean, ll = Lower, ul = Upper)
+### I COPIED THIS FROM GRANITE CANAL AND THINK THAT I MODIFIED THE BELOW BUT FORGOT TO DELETE IT
 
-year_bio_tot.ci$ci <- paste0("(", round(year_bio_tot.ci$ll, 1), ", ", round(year_bio_tot.ci$ul, 1), ")")
-year_bio_tot.ci
-
-
-write.csv(year_bio_tot.ci, "data_derived/biomass_all_year.csv")
+# year_bio_tot.ci <- df_b |>
+#   filter(Year != 2006 & trt != "con" & Month != "Sept") |>
+#   group_by(Year, trt, type) |>
+#   
+#   do(data.frame(rbind(Hmisc::smean.cl.boot(.$B.stand)))) |>
+#   rename(mean = Mean, ll = Lower, ul = Upper)
+# 
+# year_bio_tot.ci$ci <- paste0("(", round(year_bio_tot.ci$ll, 1), ", ", round(year_bio_tot.ci$ul, 1), ")")
+# year_bio_tot.ci
+# 
+# 
+# write.csv(year_bio_tot.ci, "data_derived/biomass_all_year.csv")
 
 # END ----
