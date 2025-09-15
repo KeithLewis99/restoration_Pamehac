@@ -186,9 +186,7 @@ btyoy.glmm1 <- glmmTMB(
   REML = TRUE,
   data = df_aBTYOY
 )
-
 summary(btyoy.glmm1)
-
 
 
 # Fifield advised the following
@@ -279,8 +277,8 @@ df_aAS <- df_a[df_a$Species == "AS",]
 df_aAS$int <- interaction(df_aAS$type, df_aAS$time)
 with(df_aAS, table(abun, Year))
 plot(density(df_aAS$abun.stand, na.rm = T))
-ggplot(df_aAS, aes(x = Station, y = abun.stand)) + geom_boxplot() + facet_wrap(~Year)
-
+ggplot(df_aAS, aes(x = Station, y = abun.stand)) + geom_boxplot() + facet_grid(type~Year)
+ggplot(df_aAS, aes(x = Station, y = abun.stand)) + geom_boxplot() + facet_grid(type~time)
 
 
 ### analyses ----
@@ -298,7 +296,6 @@ as.glmm1 <- glmmTMB(
   #   optArgs=list(method = "BFGS")),
   data = df_aAS
 )
-
 summary(as.glmm1)
 # str(bt.glmm1)
 
@@ -445,7 +442,7 @@ df_aASYOY <- df_a[df_a$Species == "ASYOY",]
 df_aASYOY <- df_a[df_a$Species == "ASYOY" & df_a$Year != "1992",]
 df_aASYOY$int <- interaction(df_aASYOY$type, df_aASYOY$time)
 plot(density(df_aASYOY$abun.stand, na.rm = T))
-ggplot(df_aASYOY, aes(x = Station, y = abun.stand)) + geom_boxplot() + facet_wrap(~Year)
+ggplot(df_aASYOY, aes(x = Station, y = abun.stand)) + geom_boxplot() + facet_grid(type~Year)
 
 ggplot(df_aASYOY, aes(x = Station, y = abun.stand)) + geom_boxplot() + facet_grid(type~time)
 
@@ -794,7 +791,7 @@ summary(df_aAS$bio.stand)
 with(df_aAS, table(bio, Year))
 with(df_aAS, table(bio, Station, Year))
 ggplot(df_aAS, aes(x = Station, y = bio.stand)) + geom_boxplot() + facet_wrap(~Year)
-
+ggplot(df_aAS, aes(x = Station, y = bio.stand)) + geom_boxplot() + facet_grid(type~Year)
 
 
 ### analyses ----
@@ -970,6 +967,7 @@ with(df_aASYOY, table(bio, Year))
 with(df_aASYOY, table(bio, Station, Year))
 ggplot(df_aASYOY, aes(x = Station, y = bio.stand)) + geom_boxplot() + facet_wrap(~Year)
 
+ggplot(df_aASYOY, aes(x = Station, y = bio.stand)) + geom_boxplot() + facet_grid(type~Year)
 
 
 ### analyses ----
