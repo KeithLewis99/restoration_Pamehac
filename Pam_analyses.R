@@ -58,7 +58,8 @@ ggplot(df_aBT, aes(x = Station, y = abun.stand)) + geom_boxplot() + facet_wrap(~
 #### Need Gamma with ziformula because there are zeros
 #### I ran both models with a ziformula = ~ 1. bt.glmm2 was the better model but residuals were worse.  I noticed some zeros and experimented with modifying the ziformula and found that ~ time was best.  This also seemed to help the resids but nothing is significant which seems to match the BACI plots.  The main question is whether there are hidden zeros, i.e., Stations with no zeros because these don't seem to get entered in the datasets.
 bt.glmm1 <- glmmTMB(
-  abun.stand ~ type*time + gen + (1 | Year), #+ (1 | Station),
+  abun.stand ~ type*time + (1 | Year), #+ (1 | Station),
+  # abun.stand ~ type*time + gen + (1 | Year), #+ (1 | Station),
   #abun.stand ~ type*time + as.numeric(Year) + (1 | Year),
   dispformula = ~ int,
   family=ziGamma(link="log"), 
@@ -74,7 +75,8 @@ summary(bt.glmm1)
 # Fifield advised the following
 ### PLOTS/RESULTS WITH AND WITHOUT DISPERSION FOR THE GLMMTMB.  
 bt.glmm2 <- glmmTMB(
-  abun.stand ~ type*time + gen + (1 | Year), 
+  abun.stand ~ type*time + (1 | Year), 
+  # abun.stand ~ type*time + gen + (1 | Year), 
   #+ (1 | Station),
 #  abun.stand ~ type*time + as.numeric(Year) + (1 | Year),
   family=ziGamma(link="log"), 
@@ -110,7 +112,7 @@ testQuantiles(bt.glmm2_simres)
 plotResiduals(bt.glmm2_simres, form = df_aBT$time)
 plotResiduals(bt.glmm2_simres, form = df_aBT$type)
 plotResiduals(bt.glmm2_simres, form = df_aBT$int)
-plotResiduals(bt.glmm2_simres, form = df_aBT$gen)
+# plotResiduals(bt.glmm2_simres, form = df_aBT$gen)
 plotResiduals(bt.glmm2_simres, form = df_aBT$Year) # not part of the model and Dave wasn't concerned about this, especially since not much that can be done
 
 # redundant with above
@@ -161,6 +163,9 @@ ggsave(paste0("output/BT_density.png"), width=10, height=8, units="in")
 confint(bt.glmm2)
 tab.ci(bt.glmm2, "bt_den") 
 
+df_aBT |> group_by(time) |> count(abun == 0) 
+df_aBT |> group_by(Year) |> summarise(meanYear = mean(abun.stand))
+
 ### emmeans ---- 
 ### sc only has runs
 emmeans(best_model, ~ type*time, component = "cond")
@@ -198,7 +203,7 @@ ggplot(df_aBTYOY, aes(x = Station, y = abun.stand)) + geom_boxplot() + facet_wra
 #### 
 
 btyoy.glmm1 <- glmmTMB(
-  abun.stand ~ type*time + (1 | Year),
+  abun.stand ~ type*time + as.factor(Year) + (1 | Year),
   dispformula = ~ int,
   family=ziGamma(link="log"), 
   ziformula = ~ 1,
@@ -287,11 +292,23 @@ ggsave(paste0("output/BTYOY_density.png"), width=10, height=8, units="in")
 confint(btyoy.glmm2)
 tab.ci(btyoy.glmm2, "btyoy_den") 
 
+
+# before, above and below
+df_aBTYOY |> filter(time == "before" & type == "below")
+df_aBTYOY |> filter(time == "before" & type == "above")
+
+df_aBTYOY |> filter(time == "after" & type == "below")
+df_aBTYOY |> filter(time == "after" & type == "above")
+
+df_aBTYOY |> group_by(time) |> count(abun == 0) 
+df_aBTYOY |> group_by(Year) |> summarise(meanYear = mean(abun.stand))
+
 ### blup ---- 
 btyd_rdm <- modelbased::estimate_grouplevel(best_model)
 plot(btyd_rdm) # this seems to work now
 ggsave(paste0("output/BTY_density_blups.png"), width=8, height=6, units="in")
-
+VarCorr(best_model)
+df_aBT |> group_by(Year) |> summarise(meanYear = mean(abun.stand))
 
 ## AS ----
 ### data ----
@@ -308,7 +325,8 @@ ggplot(df_aAS, aes(x = Station, y = abun.stand)) + geom_boxplot() + facet_grid(t
 #### Need Gamma with ziformula because there are zeros
 #### I ran both models with a ziformula = ~ 1. as.glmm1 was the better model but the model had some issues with homogeneity of type and autocorrelation.  I experimented with modifying the dispformula and ziformula and found that the below is best for diagnostics
 as.glmm1 <- glmmTMB(
-  abun.stand ~ type*time + gen + (1 | Year), #+ (1 | Station),
+  abun.stand ~ type*time + (1 | Year), #+ (1 | Station),
+  # abun.stand ~ type*time + gen + (1 | Year), #+ (1 | Station),
   dispformula = ~ type,
   family=ziGamma(link="log"), 
   ziformula = ~ type + time,
@@ -327,7 +345,8 @@ summary(as.glmm1)
 ### glmmTMB to glm.  The estimates are virtually identical but the Std. Errors are much smaller for glmmTMB.
 ### PLOTS/RESULTS WITH AND WITHOUT DISPERSION FOR THE GLMMTMB.  
 as.glmm2 <- glmmTMB(
-  abun.stand ~ type*time + gen + (1 | Year), #+ (1 | Station),
+  abun.stand ~ type*time + (1 | Year), #+ (1 | Station),
+  # abun.stand ~ type*time + gen + (1 | Year), #+ (1 | Station),
   family=ziGamma(link="log"), 
   ziformula = ~ type + time,
   REML = TRUE,
@@ -416,7 +435,7 @@ tmp[1:5, c(3, 1:2)]
 ((exp(tmp[1,3] + tmp[2,3]))-exp(tmp[1,3]))/exp(tmp[1,3])*100
 
 
-## emmeans ----
+### emmeans ----
 # the below match the "cond" component in emmeans
 test
 test$coefficients$cond[1,1]
@@ -452,16 +471,19 @@ df_aAS |> filter(time == "before" & type == "above")
 df_aAS |> filter(time == "after" & type == "below")
 df_aAS |> filter(time == "after" & type == "above")
 
-df_aASYOY |> filter(time == "before" & type == "below")
-df_aASYOY |> filter(time == "before" & type == "above")
-
 df_aAS |> group_by(time) |> count(abun == 0) 
+df_aAS |> group_by(Year) |> summarise(meanYear = mean(abun.stand))
 
-### blup ---- 
+#### blup ---- 
 asd_rdm <- modelbased::estimate_grouplevel(best_model)
 p <- plot(asd_rdm) # this seems to work now
 p + labs(y = "BLUP - 95% CI")
 ggsave(paste0("output/AS_density_blups.png"), width=8, height=6, units="in")
+
+#### zi ----
+summary(best_model)$coefficients$zi
+plogis(summary(best_model)$coefficients$zi[,1])
+plogis(-3.6378846 + 3.2218477)
 
 
 ## ASYOY ----
@@ -593,6 +615,8 @@ emm.bt.den <- as.data.frame(emmeans(best_model, ~ type,       component = "respo
 
 # compare above before and after
 df_aASYOY |> group_by(time) |> count(abun == 0) 
+df_aASYOY |> group_by(Year) |> summarise(meanYear = mean(abun.stand))
+
 # compare above before and after - 5/6 before have zeros
 df_aASYOY |> filter(time == "before" & type == "above")
 df_aASYOY |> filter(time == "before" & type == "below") |> print(n = Inf)
@@ -603,6 +627,10 @@ p <- plot(asyd_rdm) # this seems to work now
 p + labs(y = "BLUP - 95% CI")
 ggsave(paste0("output/ASY_density_blups.png"), width=8, height=6, units="in")
 
+#### zi ----
+summary(best_model)$coefficients$zi
+plogis(summary(best_model)$coefficients$zi)
+plogis(-0.8649972 + 2.6567588) # this matches 6/7 stations before had zero
 
 
 # Biomass ----
@@ -1061,7 +1089,7 @@ summary(asyoy_bio.glmm1)
 
 
 asyoy_bio.glmm2 <- glmmTMB(
-  bio.stand ~ type + time + (1 | Year),
+  bio.stand ~ type*time + (1 | Year),
   family=ziGamma(link="log"), 
   ziformula = ~ time, #~1,
   REML = TRUE,
