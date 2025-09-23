@@ -31,8 +31,8 @@ asyoy_den_ci$species <- "ASYOY"
 
 tab_den <- rbind(bt_den_ci[1:4,-1],
                  btyoy_den_ci[1:4,-1],
-                 as_den_ci[1:4, -1],
-                 asyoy_den_ci[1:3, -1])
+                 as_den_ci[1:7, -1],
+                 asyoy_den_ci[1:5, -1])
 
 bt_bio_ci$species <- "BT"
 btyoy_bio_ci$species <- "BTYOY"
@@ -41,14 +41,15 @@ asyoy_bio_ci$species <- "ASYOY"
 
 tab_bio <- rbind(bt_bio_ci[1:4,-1],
                  btyoy_bio_ci[1:4,-1],
-                 as_bio_ci[1:4, -1],
-                 asyoy_bio_ci[1:3, -1])
+                 as_bio_ci[1:7, -1],
+                 asyoy_bio_ci[1:5, -1])
 
 tab <- cbind(tab_den, tab_bio[, 2:4])
 tab$parm[tab$parm == "cond.(Intercept)"] <- "Int"
 tab$parm[tab$parm == "cond.timebefore"] <- "Time"
 tab$parm[tab$parm == "cond.typebelow"] <- "Type"
 tab$parm[tab$parm == "cond.typebelow:timebefore"] <- "Interaction"
+
 
 library(kableExtra)
 kbl(tab[, c(5, 1, 4, 2:3, 8, 6:7)], 
