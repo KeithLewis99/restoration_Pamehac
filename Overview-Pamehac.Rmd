@@ -340,8 +340,6 @@ knitr::include_graphics("figs/species_bio_ci.png")
 Density {data-navmenu="BLUPs"}
 =====
 
-95% CIs of random effects
-
 Column
 -----------------------------------------------------------------------
 
@@ -376,7 +374,6 @@ knitr::include_graphics("output/ASY_density_blups.png")
 Biomass {data-navmenu="BLUPs"}
 =====
 
-95% CIs of random effects
 
 Column
 -----------------------------------------------------------------------
