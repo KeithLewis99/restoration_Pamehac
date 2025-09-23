@@ -456,6 +456,18 @@ emm.as.den <- as.data.frame(emmeans(best_model, ~ type*time,       component = "
 ((emm.as.den[2,3] - emm.as.den[4,3])/
   emm.as.den[4,3])*100
 
+
+#### blup ---- 
+asd_rdm <- modelbased::estimate_grouplevel(best_model)
+p <- plot(asd_rdm) # this seems to work now
+p + labs(y = "BLUP - 95% CI")
+ggsave(paste0("output/AS_density_blups.png"), width=8, height=6, units="in")
+
+#### zi ----
+summary(best_model)$coefficients$zi
+plogis(summary(best_model)$coefficients$zi[,1])
+plogis(-3.6378846 + 3.2218477)
+
 # compare above before and after
 df_aAS |> filter(time == "before" & type == "above")
 df_aAS |> filter(time == "after" & type == "above") |> print(n = Inf)
@@ -473,18 +485,6 @@ df_aAS |> filter(time == "after" & type == "above")
 
 df_aAS |> group_by(time) |> count(abun == 0) 
 df_aAS |> group_by(Year) |> summarise(meanYear = mean(abun.stand))
-
-#### blup ---- 
-asd_rdm <- modelbased::estimate_grouplevel(best_model)
-p <- plot(asd_rdm) # this seems to work now
-p + labs(y = "BLUP - 95% CI")
-ggsave(paste0("output/AS_density_blups.png"), width=8, height=6, units="in")
-
-#### zi ----
-summary(best_model)$coefficients$zi
-plogis(summary(best_model)$coefficients$zi[,1])
-plogis(-3.6378846 + 3.2218477)
-
 
 ## ASYOY ----
 ### data ----
