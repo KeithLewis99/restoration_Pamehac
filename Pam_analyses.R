@@ -465,8 +465,22 @@ ggsave(paste0("output/AS_density_blups.png"), width=8, height=6, units="in")
 
 #### zi ----
 summary(best_model)$coefficients$zi
-plogis(summary(best_model)$coefficients$zi[,1])
+zi <- as.data.frame(summary(best_model)$coefficients$zi[,1])
+pzi <- as.data.frame(plogis(summary(best_model)$coefficients$zi[,1]))
+
 plogis(-3.6378846 + 3.2218477)
+
+cmean <- as.data.frame(emmeans(best_model, ~ type*time, component = "cond", type = "response"))
+ezi <- as.data.frame(emmeans(best_model, ~ type*time, component = "zi"))
+as.data.frame(emmeans(best_model, ~ type*time, component = "zi", type = "response"))
+
+zi[1,1] + zi[2,1]
+zi[1,1] + zi[3,1] 
+zi[1,1] + zi[2,1] + zi[3,1]
+cmean[1, 3]*(1-plogis(zi[1,1])) # not right
+cmean[2, 3]*(1-plogis(zi[1,1]+zi[2,1])) # not right
+cmean[3, 3]*(1-plogis(zi[1,1]+zi[3,1])) # this is perfect but ranef() is basically zero
+cmean[4, 3]*(1-plogis(zi[1,1]+zi[2,1]+zi[3,1])) # this is perfect
 
 # compare above before and after
 df_aAS |> filter(time == "before" & type == "above")
@@ -485,6 +499,9 @@ df_aAS |> filter(time == "after" & type == "above")
 
 df_aAS |> group_by(time) |> count(abun == 0) 
 df_aAS |> group_by(Year) |> summarise(meanYear = mean(abun.stand))
+
+
+
 
 ## ASYOY ----
 ### data ----
@@ -998,27 +1015,38 @@ model.matrix.lm(as_bio.glmm2)
 ((exp(tmp[1,3] + tmp[2,3] + tmp[4,3]))-exp(tmp[1,3] + tmp[2,3]))/exp(tmp[1,3]+ tmp[2,3])*100 
 
 # 3 - or is this - I think that this is right because its the full interaction (before:below) compared to the after:below:after and its consistent with the design matrix while the above is not
-
+# yes - this 
 ((exp(tmp[1,3] + tmp[2,3] + tmp[3,3] + tmp[4,3]))-exp(tmp[1,3] + tmp[2,3]))/exp(tmp[1,3]+ tmp[2,3])*100 
 
+((exp(tmp[1,3] + tmp[2,3]))-exp(tmp[1,3] + tmp[2,3] + tmp[3,3] + tmp[4,3]))/exp(tmp[1,3] + tmp[2,3] + tmp[3,3] + tmp[4,3])*100 
 
-# 4 - this is difference between the interaction and the main effects
+# 4 - this is difference between the interaction (add all terms together to get what is in emmeans) and the main effects
 ((exp(tmp[1,3] + tmp[2,3] + tmp[3,3] + tmp[4,3]))-exp(tmp[1,3] + tmp[2,3]+ tmp[3,3]))/exp(tmp[1,3]+ tmp[2,3] + tmp[3,3])*100
 
 # however, 2 and 4 give the same result which is scary
 
-## emmeans
-
-emmeans(best_model, ~ type*time, component = "cond")
-em.as.bio <- as.data.frame(emmeans(best_model, ~ type*time,       component = "response"))
+## emmeans ----
+ccond <- as.data.frame(emmeans(best_model, ~ type*time, component = "cond")) # these are sums of the parameter estimates ofthe conditional model
+cmean <- as.data.frame(emmeans(best_model, ~ type*time, component = "cond", type = "response")) # ccond exponentiated
+em.as.bio <- as.data.frame(emmeans(best_model, ~ type*time, component = "response"))
 
 # first significant term
 ((em.as.bio[2,3] - em.as.bio[1,3])/
     em.as.bio[1,3])*100
 
 # interaction term
-((emm.as.den[2,3] - emm.as.den[4,4])/
-    emm.as.den[4,4])*100
+((em.as.bio[2,3] - em.as.bio[4,3])/
+    em.as.bio[4,3])*100
+
+((exp(tmp[1,3] + tmp[2,3]))-exp(tmp[1,3] + tmp[2,3] + tmp[3,3] + tmp[4,3]))/exp(tmp[1,3] + tmp[2,3] + tmp[3,3] + tmp[4,3])*100 
+
+pzi <- plogis(summary(best_model)$coefficients$zi)
+exp(cmean[,3])
+cmean[1,3]*(1-(pzi[1]))
+cmean[2,3]*(1-(pzi[1]))
+cmean[3,3]*(1-(pzi[1] + pzi[2]))
+cmean[4,3]*(1-(pzi[1] + pzi[2]))
+cmean[1,3]*(1-(pzi[1]))
 # to show why CI's are so wide; Before period had only a couple of stations and they differed enormously.
 dd <- c(0, 38)
 tt <- c(0, 800)
