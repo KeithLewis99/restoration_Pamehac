@@ -64,15 +64,16 @@ kbl(tab[, c(5, 1, 4, 2:3, 8, 6:7)],
 
 
 tabC <- tab[, c(5, 1, 4, 2:3, 8, 6:7)]
-tabC$ci_den <- paste(round(tabC$Estimate, 2), 
-                     "(", 
+tabC$ci_den <- paste0(round(tabC$Estimate, 2), 
+                     " (", 
                      round(tabC$X2.5., 2), 
                      ", ",
                      round(tabC$X97.5., 2), 
                      ")")
-tabC$ci_bio <- paste(round(tabC$Estimate.1, 2), 
-                     "(", 
+tabC$ci_bio <- paste0(round(tabC$Estimate.1, 2), 
+                     " (", 
                      round(tabC$X2.5..1, 2), 
+                     ", ",
                      round(tabC$X97.5..1, 2), 
                      ")")
 
