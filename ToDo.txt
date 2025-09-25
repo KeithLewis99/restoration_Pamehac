@@ -1,15 +1,6 @@
-Pamehac:
-
-Interaction term - did I do the percent differences right.
-
 ToDo: 
-Consolidate sites (5 and 8)??  What about 9?? Eliminate "5B" - waiting on Kristin to reply.  Have moved ahead with making the code.  See ReadMe - remove stations.  Just need to talk to Kristin about 5A and maybe 8B.  Line 357 in the data.R is the key line for removing code.  Some issues I was having yesterday or not apparent today but this may have been due to coding fatigue which I seem to get after a while.  
 
-Check AS diagnostics before proceeding - wait untilt he above is done.
-
-
-
-
+Wins: dashboard, readme in markdown, and map function to replace loops - do multiple graphs instead of facet_grid for publication quality.  Dahsboard to Word.  struggle with glmm hurdle models, percent differences, signfificant zi terms, and BLUPs.
 
 Done (sometimes, I delete these):
 Looked at 5 sweeps and talk to Curtis/Clarke: done
@@ -35,3 +26,11 @@ Do percent differences for all. Log for gamma, plogis for binomial (not needed).
 
 If you just take the mean and sd of the T, then you get CIs < 0.  Probably need to get random effects. Figured this out - see Pam_figs_new.R.  Use Boot strap - was this done for Pamehac?
 
+Consolidate sites (5 and 8)??  What about 9?? Eliminate "5B" - waiting on Kristin to reply.  Have moved ahead with making the code.  See ReadMe - remove stations.  Just need to talk to Kristin about 5A and maybe 8B.  Line 357 in the data.R is the key line for removing code.  Some issues I was having yesterday or not apparent today but this may have been due to coding fatigue which I seem to get after a while.
+	- see meeting notes
+Check AS diagnostics before proceeding - wait untilt he above is done.
+
+
+Interaction term - did I do the percent differences right. See AS Biomass Interaction.
+How do params line up with emmeans - they should!!  Influence of zeros
+ - Yes. The code is a bit of a mess but I did show what parameters produce the various values in emmeans and therefore, that i'm doing this all correctly. I was able to recreate the response values in emmeans by exponentiating the conditional parameter estimates and doing a plogis (inverse logit) on the zi parameter values.  Got 2/4 so assuming the emmeans knows something I don't and going ahead with it.
