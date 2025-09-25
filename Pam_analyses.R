@@ -467,8 +467,8 @@ ggsave(paste0("output/AS_density_blups.png"), width=8, height=6, units="in")
 summary(best_model)$coefficients$zi
 zi <- as.data.frame(summary(best_model)$coefficients$zi[,1])
 pzi <- as.data.frame(plogis(summary(best_model)$coefficients$zi[,1]))
-
-plogis(-3.6378846 + 3.2218477)
+plogis(-3.6378846)
+plogis(-3.6378846 + 3.2218477) # probability of zeros
 
 cmean <- as.data.frame(emmeans(best_model, ~ type*time, component = "cond", type = "response"))
 ezi <- as.data.frame(emmeans(best_model, ~ type*time, component = "zi"))
