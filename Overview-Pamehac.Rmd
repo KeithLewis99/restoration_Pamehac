@@ -403,3 +403,5 @@ ASY
 ```{r}
 knitr::include_graphics("output/ASY_biomass_blups.png")
 ```
+
+# Notes
