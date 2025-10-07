@@ -1037,6 +1037,8 @@ em.as.bio <- as.data.frame(emmeans(best_model, ~ type*time, component = "respons
 # interaction term
 ((em.as.bio[2,3] - em.as.bio[4,3])/
     em.as.bio[4,3])*100
+((em.as.bio[4,3] - em.as.bio[2,3])/
+    em.as.bio[2,3])*100
 
 ((exp(tmp[1,3] + tmp[2,3]))-exp(tmp[1,3] + tmp[2,3] + tmp[3,3] + tmp[4,3]))/exp(tmp[1,3] + tmp[2,3] + tmp[3,3] + tmp[4,3])*100 
 
