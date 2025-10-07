@@ -405,3 +405,7 @@ knitr::include_graphics("output/ASY_biomass_blups.png")
 ```
 
 # Notes
+"output/plot_baci_explained.png"
+```{r}
+knitr::include_graphics("output/plot_baci_explained.png")
+```
