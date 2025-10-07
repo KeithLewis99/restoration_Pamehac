@@ -45,9 +45,9 @@ tab_bio <- rbind(bt_bio_ci[1:4,-1],
                  asyoy_bio_ci[1:5, -1])
 
 tab <- cbind(tab_den, tab_bio[, 2:4])
-tab$parm[tab$parm == "cond.(Intercept)"] <- "Int"
-tab$parm[tab$parm == "cond.timebefore"] <- "Time"
-tab$parm[tab$parm == "cond.typebelow"] <- "Type"
+tab$parm[tab$parm == "cond.(Intercept)"] <- "Int-Above"
+tab$parm[tab$parm == "cond.timebefore"] <- "Time-Before"
+tab$parm[tab$parm == "cond.typebelow"] <- "Type-Below"
 tab$parm[tab$parm == "cond.typebelow:timebefore"] <- "Interaction"
 
 
@@ -92,6 +92,8 @@ kbl(tabC[, c(1:2, 9,10)],
   kable_paper()
 
 write.csv(tabC, "output/params_all.csv")
+
+
 # # density - raw values ----
 # ## this is a summary of the values used in GC_analyses.R to create table
 library(dplyr)
