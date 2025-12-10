@@ -147,6 +147,8 @@ Why does the AMEC function not return its output aside from a graph and a csv fi
 
 After reviewing the early (~ pre-2000) literature on depletion estimates, it became clear that the CS method is best but there is a whole new literature composed of N-mixture models and Bayesian approaches.  
 
+But note Barket et al. [-@barker2018reliability] severly criticize these approaches.  I’m not sure if this extends to the other methods but imagine that it must since p is always going to be a latent variable, i.e., these are CMR models but without a means to directly estimate p which is always going to be a problem.  Quote: "Our message is that fundamentally count data under imperfect detection can only be reliably used as indices. Having controlled for detectability using covariates, counts through ratios of their expectations provide reliable information about relative abundance, but not absolute abundance N or p.” They do advocate for a CMR approach if absolute abundance is needed.
+
 ### early
 After extensive exploration, it is clear that there is no "right" way to model abundance for all of the species:year:stations.  This is consistent with Riley and Fausch [-@riley1992underestimation] who found "decreasing capture probability was a frequent problem when estimating trout abundance in small Colorado mountain streams".  Their streams seem comparable to Seal Cove.
 
@@ -459,5 +461,11 @@ abline(h=90)
 
 Perhaps graph the 4-5 pass sites - its a key bit of evidences
 
+# Replacement
 
+Spent some time looking at replacement.  Ran into the problem of figuring out what Scruton did because a lot of the numbers in the paper do not add up to what I have.  This required going back to the notebooks and worksheets and spreadsheets.  The notebooks (and worksheets) do not list species-age classes.  The just give the species and length.  But, in the spreadsheets, it appears that the determination of age-class had been made.  Also, areas match between all three (at least the ones I checked) so we are assuming that the data are correct, that Scruton's calculations are wrong, and that the paper is being billed as a re-analysis of his work.  
+
+Also, learned that the sum of biomass of all species divided by the area * 1/4 is that same as the sum of the biomass of each species divided by the area.  Keep getting this confused.  One thing that i'm sure that SCruton did not do is add biomass/area up by Station for each species.  
+
+.
 # References
