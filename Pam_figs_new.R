@@ -446,4 +446,179 @@ save_plot("figs/species_bio_ci.png",
           base_width = 10,
           bg = "white")
 
+
+
+# by years ----
+## these are averags of the total density and biomass
+## density ----
+years_den_tot.ci <- read.csv("data_derived/density_all_years.csv")
+
+p11 <- ggplot(years_den_tot.ci, aes(x = as.factor(Year), y = mean, 
+                                    fill = (type), 
+                                    colour = (type), 
+                                    shape = (type) 
+)) + 
+  geom_point(position = position_dodge(width = 0.5), size = 3) +
+  #facet_wrap(~Species, scales = "free_y") + 
+  theme_bw(base_size = 20) + 
+  ylab(expression("Density Estimate (#/100 m" ^2*")")) +
+  #ylab("") +
+  xlab("Year") +
+  #xlab("") +
+  theme(legend.position= "none") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  geom_errorbar(aes(ymax = ll, 
+                    ymin = ul), 
+                linewidth=1, width=0.15, position=position_dodge(0.5)) +
+  geom_vline(xintercept = 1.5, linetype="solid", linewidth=0.5) +
+  geom_vline(xintercept = 3.5, linetype="dashed", linewidth=0.5) +
+  geom_vline(xintercept = 4.5, linetype="dashed", linewidth=0.5) +
+  #theme(legend.position=c(.85, .88)) +
+  scale_fill_discrete(name="",
+                      breaks=c("above", "below"),
+                      labels=c("Above", "Below")) +
+  scale_colour_manual(values=c("black", "dark grey"),
+                      name="",
+                      breaks=c("above", "below"),
+                      labels=c("Above", "Below")) +
+  scale_shape_manual(values = c(16, 16),
+                     name="",
+                     breaks=c("above", "below"),
+                     labels=c("Above", "Below"))
+
+p11
+ggsave("figs/salmonids_density_ci.png", width=10, height=8, units="in")
+
+## biomass ----
+years_bio_tot.ci <- read.csv("data_derived/biomass_all_years.csv")
+
+p12 <- ggplot(years_bio_tot.ci, aes(x = as.factor(Year), y = mean, 
+                                    fill = (type), 
+                                    colour = (type), 
+                                    shape = (type) 
+)) + 
+  geom_point(position = position_dodge(width = 0.5), size = 3) +
+  #facet_wrap(~Species, scales = "free_y") + 
+  theme_bw(base_size = 20) + 
+  ylab(expression("Biomass Estimate (g/100 m" ^2*")")) +
+  #ylab("") +
+  xlab("Year") +
+  #xlab("") +
+  theme(legend.position= "none") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  geom_errorbar(aes(ymax = ll, 
+                    ymin = ul), 
+                linewidth=1, width=0.15, position=position_dodge(0.5)) +
+  geom_vline(xintercept = 1.5, linetype="solid", linewidth=0.5) +
+  geom_vline(xintercept = 3.5, linetype="dashed", linewidth=0.5) +
+  geom_vline(xintercept = 4.5, linetype="dashed", linewidth=0.5) +
+  #theme(legend.position=c(.85, .88)) +
+  scale_fill_discrete(name="",
+                      breaks=c("above", "below"),
+                      labels=c("Above", "Below")) +
+  scale_colour_manual(values=c("black", "dark grey"),
+                      name="",
+                      breaks=c("above", "below"),
+                      labels=c("Above", "Below")) +
+  scale_shape_manual(values = c(16, 16),
+                     name="",
+                     breaks=c("above", "below"),
+                     labels=c("Above", "Below"))
+p12
+ggsave("figs/salmonids_biomass_ci.png", width=10, height=8, units="in")
+
+
+# total biomass ----
+source("Pam_data_new-v2.R")
+df_bio <- df_a |>
+  filter(Year != 1992 | Species != "ASYOY") |>
+  group_by(Year, type, Species) |>
+  summarise(bio.sum = sum(bio), bio.stand.sum = sum(bio.stand)) |>
+  print(n = Inf)
+df_bio |> filter(Year == 1992)
+
+p0 <- ggplot(df_bio, aes(x = Year, y = bio.sum, group = Species, colour = Species)) +
+  geom_line() +
+  geom_point() +
+  facet_wrap(~type) + 
+  ylab("Biomass (g)") +
+  theme_bw()
+
+df_a$area
+length(df_a$area)
+df_bio_tot <- df_a |>
+  filter(Year != 1992 | Species != "ASYOY") |>
+  group_by(Year, type) |>
+  summarise(bio.tot.sum = sum(bio), bio.tot.stand.sum = sum(bio.stand), area.sum = sum(area)) |>
+  print(n = Inf)
+
+# get divisor for area
+df_temp <- df_a |>
+  filter(Year != 1992 | Species != "ASYOY") |>
+  group_by(Year, type) |>
+  summarise(count = length(unique(Species)))
+
+df_bio_tot <- left_join(df_bio_tot, df_temp, by = c("Year", "type"))
+df_bio_tot <- df_bio_tot |> 
+  group_by(Year, type) |>
+  mutate(area.sum.scaled = area.sum/count)
+
+ggplot(df_bio_tot, aes(x = Year, y = bio.tot.sum)) +
+  geom_line() +
+  geom_point() +
+  facet_wrap(~type) +
+  theme_bw() + 
+  ylab("Biomass (g)")
+
+
+# area
+df_bio_tot$df_bio_stand <- df_bio_tot$bio.tot.sum/df_bio_tot$area.sum.scaled*100
+
+# units
+df_bio_tot$units <- NA
+df_bio_tot$units <- ifelse(df_bio_tot$type == "above", 175, 542+449)
+df_bio_tot$units[2] <- 542
+
+
+p1 <- ggplot(df_bio_tot, aes(x = Year, y = bio.tot.sum,, group = type, colour = type)) +
+  geom_line() +
+  geom_point() +
+#  facet_wrap(~type) +
+  theme_bw() + 
+  ylab("Biomass (g)")
+
+p2 <- ggplot(df_bio_tot, aes(x = Year, y = df_bio_stand, group = type, colour = type)) +
+  geom_line() +
+  geom_point() +
+#  facet_wrap(~type) +
+  theme_bw() + 
+  ylab("Biomass (g)/unit")
+
+# 1.322683 fold difference in the biomass/unit
+sum(df_bio_tot$df_bio_stand[9:10])/sum(df_bio_tot$df_bio_stand[1:2])
+# how is biomass calculated
+# df_bio_tot$bio.tot.stand.sum1 <- df_bio_tot$bio.tot.sum/df_bio_tot$units
+# df_bio_tot$bio.tot.stand.sum2 <- df_bio_tot$bio.tot.stand.sum*100/df_bio_tot$units
+# df_bio_tot$bio.tot.stand.sum3 <- df_bio_tot$df_bio_stand/df_bio_tot$units
+
+# calculate kg
+df_bio_tot$kg <- df_bio_tot$df_bio_stand*0.001*df_bio_tot$units
+# df_bio_tot$kg_1 <- df_bio_tot$bio.tot.stand.sum*0.001*df_bio_tot$units
+  
+p3 <- ggplot(df_bio_tot, aes(x = Year, y = kg, group = type, colour = type)) +
+  geom_line() +
+  geom_point() +
+  ylab("Biomass (kg)") + 
+#  facet_wrap(~type) + 
+  theme_bw()
+
+# 2.865929 fold difference in kg
+sum(df_bio_tot$kg[9:10])/sum(df_bio_tot$kg[1:2])
+
+p4 <- cowplot::plot_grid(p1, p2, p3, labels = c('B', 'C', 'D'), nrow = 1)
+
+p5 <- cowplot::plot_grid(p0, p4, labels = c('A'), nrow = 2)
+
+ggsave(paste0("output/replacement.png"), width=10, height=8, units="in")
+
 # END ----

@@ -404,6 +404,14 @@ ASY
 knitr::include_graphics("output/ASY_biomass_blups.png")
 ```
 
+# Replacement
+
+<div style="float: right; width: 60%; padding-left: 15px;">
+  <img src="output/replacement.png" style="width: 100%;">
+</div>
+
+Caption: A) biomass by species above and below diversion, B) Biomass of species combined, C) biomass/unit combined, D) extrapolated biomass  
+
 # Notes
 "output/plot_baci_explained.png"
 ```{r}
