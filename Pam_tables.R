@@ -99,159 +99,159 @@ write.csv(tabC, "output/params_all.csv")
 library(dplyr)
 library(tidyr)
 library(ggplot2)
-df_b <- read.csv("data_derived/df_b.csv")
-bt_tab <- df_b |>
-  filter(Species == "BT" & Year != 2006 & trt != "con" & Month != "Sept") |>
-  group_by(Species, Year, trt) |>
-  summarize(count = n(),
-            mean = mean(T.stand),
-            se = sd(T.stand)/sqrt(count))
-
-bty_tab <- df_b |>
-  filter(Species == "BTYOY" & Year != 2006 & trt != "con" & Month != "Sept") |>
-  group_by(Species, Year, trt) |>
-  summarize(count = n(),
-            mean = mean(T.stand),
-            se = sd(T.stand)/sqrt(count))
-
-as_tab <- df_b |>
-  filter(Species == "AS" & Year != 2006 & trt != "con" & Month != "Sept") |>
-  group_by(Species, Year, trt) |>
-  summarize(count = n(),
-            mean = mean(T.stand),
-            se = sd(T.stand)/sqrt(count))
-
-#  alter because there was a significant difference in type
-asy_tab <- df_b |>
-  filter(Species == "ASYOY" & Year != 2006 & trt != "con" & Month != "Sept") |>
-  group_by(Species, Year, trt, type) |>
-  summarize(count = n(),
-            mean = mean(T.stand),
-            se = sd(T.stand)/sqrt(count))
-
-spec_summ <- rbind(bt_tab, bty_tab, as_tab)
-spec_summ$type <- NA
-spec_summ <- spec_summ[, c(1:3, 7, 5, 6)]
-
-spec_summ <- rbind(spec_summ, asy_tab[, -5])
-
-
-## totals ----
-tot_tab <- df_b |>
-  filter(Species != "ASYOY", Year != 2006 & trt != "con" & Month != "Sept") |>
-  group_by(Species, trt) |>
-  summarize(count = n(),
-            mean = mean(T.stand),
-            se = sd(T.stand)/sqrt(count))
-tot_tab$type <- NA
-tot_tab <- tot_tab[, c(1:2, 6, 4, 5)]
-
-totASY_tab <- df_b |>
-  filter(Species == "ASYOY", Year != 2006 & trt != "con" & Month != "Sept") |>
-  group_by(Species, trt, type) |>
-  summarize(count = n(),
-            mean = mean(T.stand),
-            se = sd(T.stand)/sqrt(count))
-tot_all_tab <- rbind(tot_tab, totASY_tab[, -4])
-
-
-tmp <- pivot_wider(spec_summ,
-                   id_cols = c(Species, trt, type),
-                   names_from = c(Year),
-                   values_from = c(mean, se)
-)
-str(tmp)
-tmp <- tmp[, c(1:3, 4, 9, 5, 10, 6, 11, 7, 12, 8, 13)]
-
-tab_den <- left_join(tmp, tot_all_tab, by = c("Species", "trt", "type"))
-tab_den$Species <- factor(tab_den$Species, levels = c("BT", "BTYOY", "AS", "ASYOY"))
-tab_den <- tab_den[order(tab_den$Species),]
-
-
-write.csv(tab_den, "data_derived/density_table.csv")
-
-df_den <- rbind(spec_summ, tot_all_tab)
-ggplot(df_den, aes(x = Year, y = mean)) +
-  geom_point() +
-  geom_smooth(method = "lm") +
-  facet_grid(Species ~ trt, scales = "free_y")
-
-
-
-# biomass - raw values ----
-## this is a summary of the values used in GC_analyses.R to create table
-
-spp_bio_tab <- df_b |>
-  filter(Species != "ASYOY" & Year != 2006 & trt != "con" & Month != "Sept") |>
-  group_by(Species, Year, trt) |>
-  summarize(count = n(),
-            mean = mean(B.stand),
-            se = sd(B.stand)/sqrt(count))
-
-as_bio_tab <- df_b |>
-  filter(Species == "ASYOY" & Year != 2006 & trt != "con" & Month != "Sept") |>
-  group_by(Species, Year, trt, type) |>
-  summarize(count = n(),
-            mean = mean(B.stand),
-            se = sd(B.stand)/sqrt(count))
-
-
-
-spp_bio_tab$type <- NA
-spp_bio_tab <- spp_bio_tab[, c(1:3, 7, 5, 6)]
-
-spec_bio_summ <- rbind(spp_bio_tab, as_bio_tab[, -5])
-
-
-# totals ----
-tot_bio_tab <- df_b |>
-  filter(Species != "ASYOY", Year != 2006 & trt != "con" & Month != "Sept") |>
-  group_by(Species, trt) |>
-  summarize(count = n(),
-            mean = mean(B.stand),
-            se = sd(B.stand)/sqrt(count))
-tot_bio_tab$type <- NA
-tot_bio_tab <- tot_bio_tab[, c(1:2, 6, 4, 5)]
-
-totASY_bio_tab <- df_b |>
-  filter(Species == "ASYOY", Year != 2006 & trt != "con" & Month != "Sept") |>
-  group_by(Species, trt, type) |>
-  summarize(count = n(),
-            mean = mean(B.stand),
-            se = sd(B.stand)/sqrt(count))
-
-tot_all_bio_tab <- rbind(tot_bio_tab, totASY_bio_tab[, -4])
-
-
-tmp_bio <- pivot_wider(spec_bio_summ,
-                       id_cols = c(Species, trt, type),
-                       names_from = c(Year),
-                       values_from = c(mean, se)
-)
-str(tmp_bio)
-tmp_bio <- tmp_bio[, c(1:3, 4, 9, 5, 10, 6, 11, 7, 12, 8, 13)]
-
-tab_bio <- left_join(tmp_bio, tot_all_bio_tab, by = c("Species", "trt", "type"))
-tab_bio$Species <- factor(tab_bio$Species, levels = c("BT", "BTYOY", "AS", "ASYOY"))
-tab_bio <- tab_bio[order(tab_bio$Species),]
-
-write.csv(tab_bio, "data_derived/biomass_table.csv")
-
-df_bio <- rbind(spec_bio_summ, tot_all_bio_tab)
-ggplot(df_bio, aes(x = Year, y = mean)) +
-  geom_point() +
-  geom_smooth(method = "lm") +
-  ylab("Biomass") +
-  facet_grid(Species ~ trt, scales = "free_y")
-
-# make table ----
-tab_den
-tab_bio
-library(kableExtra)
-
-tab_all <- left_join(tab_den, tab_bio, by = c("Species", "trt", "type"))
-str(tab_all, give.attr = F)
-str(tab_den, give.attr = F)
+# df_b <- read.csv("data_derived/df_b.csv")
+# bt_tab <- df_b |>
+#   filter(Species == "BT" & Year != 2006 & trt != "con" & Month != "Sept") |>
+#   group_by(Species, Year, trt) |>
+#   summarize(count = n(),
+#             mean = mean(T.stand),
+#             se = sd(T.stand)/sqrt(count))
+# 
+# bty_tab <- df_b |>
+#   filter(Species == "BTYOY" & Year != 2006 & trt != "con" & Month != "Sept") |>
+#   group_by(Species, Year, trt) |>
+#   summarize(count = n(),
+#             mean = mean(T.stand),
+#             se = sd(T.stand)/sqrt(count))
+# 
+# as_tab <- df_b |>
+#   filter(Species == "AS" & Year != 2006 & trt != "con" & Month != "Sept") |>
+#   group_by(Species, Year, trt) |>
+#   summarize(count = n(),
+#             mean = mean(T.stand),
+#             se = sd(T.stand)/sqrt(count))
+# 
+# #  alter because there was a significant difference in type
+# asy_tab <- df_b |>
+#   filter(Species == "ASYOY" & Year != 2006 & trt != "con" & Month != "Sept") |>
+#   group_by(Species, Year, trt, type) |>
+#   summarize(count = n(),
+#             mean = mean(T.stand),
+#             se = sd(T.stand)/sqrt(count))
+# 
+# spec_summ <- rbind(bt_tab, bty_tab, as_tab)
+# spec_summ$type <- NA
+# spec_summ <- spec_summ[, c(1:3, 7, 5, 6)]
+# 
+# spec_summ <- rbind(spec_summ, asy_tab[, -5])
+# 
+# 
+# ## totals ----
+# tot_tab <- df_b |>
+#   filter(Species != "ASYOY", Year != 2006 & trt != "con" & Month != "Sept") |>
+#   group_by(Species, trt) |>
+#   summarize(count = n(),
+#             mean = mean(T.stand),
+#             se = sd(T.stand)/sqrt(count))
+# tot_tab$type <- NA
+# tot_tab <- tot_tab[, c(1:2, 6, 4, 5)]
+# 
+# totASY_tab <- df_b |>
+#   filter(Species == "ASYOY", Year != 2006 & trt != "con" & Month != "Sept") |>
+#   group_by(Species, trt, type) |>
+#   summarize(count = n(),
+#             mean = mean(T.stand),
+#             se = sd(T.stand)/sqrt(count))
+# tot_all_tab <- rbind(tot_tab, totASY_tab[, -4])
+# 
+# 
+# tmp <- pivot_wider(spec_summ,
+#                    id_cols = c(Species, trt, type),
+#                    names_from = c(Year),
+#                    values_from = c(mean, se)
+# )
+# str(tmp)
+# tmp <- tmp[, c(1:3, 4, 9, 5, 10, 6, 11, 7, 12, 8, 13)]
+# 
+# tab_den <- left_join(tmp, tot_all_tab, by = c("Species", "trt", "type"))
+# tab_den$Species <- factor(tab_den$Species, levels = c("BT", "BTYOY", "AS", "ASYOY"))
+# tab_den <- tab_den[order(tab_den$Species),]
+# 
+# 
+# write.csv(tab_den, "data_derived/density_table.csv")
+# 
+# df_den <- rbind(spec_summ, tot_all_tab)
+# ggplot(df_den, aes(x = Year, y = mean)) +
+#   geom_point() +
+#   geom_smooth(method = "lm") +
+#   facet_grid(Species ~ trt, scales = "free_y")
+# 
+# 
+# 
+# # biomass - raw values ----
+# ## this is a summary of the values used in GC_analyses.R to create table
+# 
+# spp_bio_tab <- df_b |>
+#   filter(Species != "ASYOY" & Year != 2006 & trt != "con" & Month != "Sept") |>
+#   group_by(Species, Year, trt) |>
+#   summarize(count = n(),
+#             mean = mean(B.stand),
+#             se = sd(B.stand)/sqrt(count))
+# 
+# as_bio_tab <- df_b |>
+#   filter(Species == "ASYOY" & Year != 2006 & trt != "con" & Month != "Sept") |>
+#   group_by(Species, Year, trt, type) |>
+#   summarize(count = n(),
+#             mean = mean(B.stand),
+#             se = sd(B.stand)/sqrt(count))
+# 
+# 
+# 
+# spp_bio_tab$type <- NA
+# spp_bio_tab <- spp_bio_tab[, c(1:3, 7, 5, 6)]
+# 
+# spec_bio_summ <- rbind(spp_bio_tab, as_bio_tab[, -5])
+# 
+# 
+# # totals ----
+# tot_bio_tab <- df_b |>
+#   filter(Species != "ASYOY", Year != 2006 & trt != "con" & Month != "Sept") |>
+#   group_by(Species, trt) |>
+#   summarize(count = n(),
+#             mean = mean(B.stand),
+#             se = sd(B.stand)/sqrt(count))
+# tot_bio_tab$type <- NA
+# tot_bio_tab <- tot_bio_tab[, c(1:2, 6, 4, 5)]
+# 
+# totASY_bio_tab <- df_b |>
+#   filter(Species == "ASYOY", Year != 2006 & trt != "con" & Month != "Sept") |>
+#   group_by(Species, trt, type) |>
+#   summarize(count = n(),
+#             mean = mean(B.stand),
+#             se = sd(B.stand)/sqrt(count))
+# 
+# tot_all_bio_tab <- rbind(tot_bio_tab, totASY_bio_tab[, -4])
+# 
+# 
+# tmp_bio <- pivot_wider(spec_bio_summ,
+#                        id_cols = c(Species, trt, type),
+#                        names_from = c(Year),
+#                        values_from = c(mean, se)
+# )
+# str(tmp_bio)
+# tmp_bio <- tmp_bio[, c(1:3, 4, 9, 5, 10, 6, 11, 7, 12, 8, 13)]
+# 
+# tab_bio <- left_join(tmp_bio, tot_all_bio_tab, by = c("Species", "trt", "type"))
+# tab_bio$Species <- factor(tab_bio$Species, levels = c("BT", "BTYOY", "AS", "ASYOY"))
+# tab_bio <- tab_bio[order(tab_bio$Species),]
+# 
+# write.csv(tab_bio, "data_derived/biomass_table.csv")
+# 
+# df_bio <- rbind(spec_bio_summ, tot_all_bio_tab)
+# ggplot(df_bio, aes(x = Year, y = mean)) +
+#   geom_point() +
+#   geom_smooth(method = "lm") +
+#   ylab("Biomass") +
+#   facet_grid(Species ~ trt, scales = "free_y")
+# 
+# # make table ----
+# tab_den
+# tab_bio
+# library(kableExtra)
+# 
+# tab_all <- left_join(tab_den, tab_bio, by = c("Species", "trt", "type"))
+# str(tab_all, give.attr = F)
+# str(tab_den, give.attr = F)
 
 # kbl(tab_den,
 #     col.names = c('spp', 'trt', 'type',
@@ -515,4 +515,31 @@ kbl(all_bio_ci_tabC,
 # 
 # write.csv(year_bio_tot.ci, "data_derived/biomass_all_year.csv")
 
+
+# bootstrap - totals ----
+### get cde from 
+
+## density by year -----
+source("Pam_data_new-v2.R")
+df_tot <- df_a |>  
+  filter(!(Year == 1992 & Species == "ASYOY")) |>
+  group_by(Year, Station, area, time, type) |>
+  summarise(T_sum = sum(abun),
+            B_sum = sum(bio)) |>
+  mutate(T_sum.stand = T_sum/area*100,
+         B_sum.stand = B_sum/area*100)
+df_tot
+
+years_den_tot.ci <- df_tot |>
+  group_by(Year, type) |>
+  do(data.frame(rbind(Hmisc::smean.cl.boot(.$T_sum.stand)))) |>
+  rename(mean = Mean, ll = Lower, ul = Upper)
+write.csv(years_den_tot.ci, "data_derived/density_all_years.csv")
+
+## biomass by year -----
+years_bio_tot.ci <- df_tot |>
+  group_by(Year, type) |>
+  do(data.frame(rbind(Hmisc::smean.cl.boot(.$B_sum.stand)))) |>
+  rename(mean = Mean, ll = Lower, ul = Upper)
+write.csv(years_den_tot.ci, "data_derived/biomass_all_years.csv")
 # END ----
