@@ -335,8 +335,13 @@ grid_den <- plot_grid(p1_clean,
                       p3_clean, 
                       ncol = 2, align = "hv", axis = "tblr",
                       scale = 0.9,
-                      labels = c("AS", "ASY","BT", "BTY"),
-                      hjust = -3, 
+                      #labels = c("AS", "ASY","BT", "BTY"),
+                      labels = c("Atlantic salmon age-1+", 
+                                 "Atlantic salmon YOY",
+                                 "Brook trout age-1+", 
+                                 "Brook trout YOY"),
+                      #hjust = -3,
+                      hjust = -0.5,
                       vjust = 1.25)
 
 # Add shared axis labels
@@ -351,6 +356,11 @@ save_plot("figs/species_den_ci.png",
           base_width = 10,
           bg = "white")
 
+# save_plot("figs/species_den_ci_pres.png", 
+#           final_plot_den, 
+#           base_height = 6, 
+#           base_width = 10,
+#           bg = "white")
 
 ## biomass ----
 bio_ci <- read.csv("data_derived/biomass_ci.csv")
@@ -529,6 +539,7 @@ ggsave("figs/salmonids_biomass_ci.png", width=10, height=8, units="in")
 
 
 # total biomass ----
+# this is to replicate Table 3 in Scruton 1998
 source("Pam_data_new-v2.R")
 df_bio <- df_a |>
   filter(Year != 1992 | Species != "ASYOY") |>
@@ -544,7 +555,7 @@ p0 <- ggplot(df_bio, aes(x = Year, y = bio.sum, group = Species, colour = Specie
   ylab("Biomass (g)") +
   theme_bw()
 
-df_a$area
+
 length(df_a$area)
 df_bio_tot <- df_a |>
   filter(Year != 1992 | Species != "ASYOY") |>
@@ -594,8 +605,10 @@ p2 <- ggplot(df_bio_tot, aes(x = Year, y = df_bio_stand, group = type, colour = 
   theme_bw() + 
   ylab("Biomass (g)/unit")
 
-# 1.322683 fold difference in the biomass/unit
+# 1.322683 fold difference in the biomass/unit 1990- 2016
 sum(df_bio_tot$df_bio_stand[9:10])/sum(df_bio_tot$df_bio_stand[1:2])
+# 1.806902 fold difference in the biomass/unit 1990-2016
+sum(df_bio_tot$df_bio_stand[5:6])/sum(df_bio_tot$df_bio_stand[1:2])
 # how is biomass calculated
 # df_bio_tot$bio.tot.stand.sum1 <- df_bio_tot$bio.tot.sum/df_bio_tot$units
 # df_bio_tot$bio.tot.stand.sum2 <- df_bio_tot$bio.tot.stand.sum*100/df_bio_tot$units
@@ -612,8 +625,15 @@ p3 <- ggplot(df_bio_tot, aes(x = Year, y = kg, group = type, colour = type)) +
 #  facet_wrap(~type) + 
   theme_bw()
 
-# 2.865929 fold difference in kg
+# 2.865929 fold difference in kg 1990-2016
 sum(df_bio_tot$kg[9:10])/sum(df_bio_tot$kg[1:2])
+# 2.420494 fold difference in kg 1990-1992
+sum(df_bio_tot$kg[5:6])/sum(df_bio_tot$kg[1:2])
+# 2.041598 fold difference in kg 1990-1996
+sum(df_bio_tot$kg[7:8])/sum(df_bio_tot$kg[1:2])
+
+
+
 
 p4 <- cowplot::plot_grid(p1, p2, p3, labels = c('B', 'C', 'D'), nrow = 1)
 
