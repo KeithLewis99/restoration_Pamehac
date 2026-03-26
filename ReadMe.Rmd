@@ -72,7 +72,9 @@ Found the file "Comparison_Pamehac_Scrutonetal1998_paper.xlsx.  This is a compar
 
 So there is a discrepancy between what Clakre and Curtis remember and what is in Scruton et al [-@scruton1998pamehac], i.e., the number of passes and whether the fish were driven to the nets. Spoke to Keith Clarke about this on 2024-10-25.  He said he's not surprised that there is a discrepancy and that differences in methodology may have been glossed over.  But he's sure that Bourgeois had something to do with this.  
 
-I also found that the salmonid estimates in Fig 2 and 3 are supposed to be for juvenile but for density, the values in BT/AS/YOY do not equate to the salmonids figures.  I also cannot replicate his results in anyway.  This is especially worrisome for BT density - SCruton seems to have the raw and unscaled values plotted but not for the other years.  I spoke to Clarke about this and apparently, this paper was for a conference and he was not surprised if mistakes are made.  So, he said to proceed and not worry about replicating Scruton's values.  STill need to talk to Kristin about this.
+I also found that the salmonid estimates in Fig 2 and 3 are supposed to be for juvenile but for density, the values in BT/AS/YOY do not equate to the salmonids figures.  I also cannot replicate his results in anyway.  This is especially worrisome for BT density - SCruton seems to have the raw and unscaled values plotted but not for the other years.  I spoke to Clarke about this and apparently, this paper was for a conference and he was not surprised if mistakes are made.  So, he said to proceed and not worry about replicating Scruton's values.  STill need to talk to Kristin about this.  
+
+Summary of issues: specifically the density for total salmonids is less than the sum of the total and the density for BT in 1996 above the diversion appears to be an unscaled count which calls into question the claim that juvenile salmonids demonstrated a 18.3 fold increase by 1996.
 
 # Data {.tabset}
 
