@@ -404,7 +404,7 @@ ASY
 knitr::include_graphics("output/ASY_biomass_blups.png")
 ```
 
-# Replacement
+# Production
 
 <div style="float: right; width: 60%; padding-left: 15px;">
   <img src="output/replacement.png" style="width: 100%;">

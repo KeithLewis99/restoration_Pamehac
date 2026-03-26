@@ -250,7 +250,9 @@ p <- ggplot(
                    sep = "")
   )) +
   geom_point() +
-  geom_path()
+  geom_path() +
+  ylab("Abundance") +
+  xlab("Sum previous catch")
 
 p
 

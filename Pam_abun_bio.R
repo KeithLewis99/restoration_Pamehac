@@ -87,7 +87,9 @@ plot(density(out$T))
  
  
 p <- ggplot(out, aes(x = T, y = No, group = as.factor(spp), colour = spp)) +
-  geom_point()
+  geom_point() +
+  xlab("Total Catch") +
+  ylab("Estiamted Catch")
 p
 # 
 # 

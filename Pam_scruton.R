@@ -93,11 +93,13 @@ x <- df_tab1b
 # bind year, species and station to res_list
 out <- cbind(year = x$Year, 
              spp = x$Species, 
-             sta = x$Station,
+             sta = x$Station
             # area = x$sum_area,
              #area = x$area,
-#             type = x$type,
-             out)
+#             type = x$type
+#             out
+)
+str(out)
 # df_tab1 
 out1 <- out |> 
   group_by(year, spp, sta) |>
