@@ -1,5 +1,6 @@
 # REVISION - RAW ----
 ## After a great deal of thought, I decided that bootstraping is not the way to go.  See MMM_data in archive electrofishing for an explanation.  Briefly, bootstrapping makes no sense when only a few samples are available and the data are not normally distributed.  In this case, we have 3-4 samples per year and treatment and the data are not normally distributed.  So, I am going to just report the raw means and standard deviations for each year and treatment.  I will also report the total mean and standard error across all years for each treatment.  I will make tables for both density and biomass.  I will also make a table that summarizes the parameter estimates from the models.
+
 library(dplyr)
 library(tidyr)
 library(ggplot2)
@@ -185,6 +186,7 @@ save_plot("figs/raw_species_bio.png",
           bg = "white")
 
 
+# summaries ----
 # get df_b in archival format
 head(df_b)
 df_b$study_area <- "Pamehac"
@@ -192,10 +194,14 @@ df_b_arch <- df_b[, -12] |>
   rename(species = Species, year = Year, site = Station, trt = type, mean_den = abun.stand, mean_bio = bio.stand) |>
   select(study_area, species, year, site, trt, mean_den, mean_bio)
 
-write.csv(df_b_arch, "data_derived/PB_age.csv", , row.names = F)
+df_b_arch$age_new <- if_else(df_b_arch$species %in% c("AS", "BT"), "age-1+", "YOY")
+df_b_arch$species <- if_else(df_b_arch$species == "ASYOY", "AS", df_b_arch$species)
+df_b_arch$species <- if_else(df_b_arch$species == "BTYOY", "BT", df_b_arch$species)
+
+write.csv(df_b_arch, "../archival_data/archive_electrofish/data_derived/MMM/PB_age_1990_2016.csv", , row.names = F)
 
 PB_site <- df_b_arch |>
-  group_by(study_area, species, year) |>
+  group_by(study_area, species, age_new, year, trt) |>
   summarise(n = n(),
             min_den = min(mean_den), 
             max_den = max(mean_den),
@@ -206,11 +212,11 @@ PB_site <- df_b_arch |>
             mean_bio = mean(mean_bio),
             sd_bio = sd(mean_bio, na.rm = T)
   )
-write.csv(PB_site, "data_derived/PB_site.csv", , row.names = F)
+write.csv(PB_site, "../archival_data/archive_electrofish/data_derived/MMM/PB_site_1990_2016.csv", , row.names = F)
 
 
 PB_year <- df_b_arch |>
-  group_by(study_area, species) |>
+  group_by(study_area, species, age_new, trt) |>
   summarise(n = n(),
             min_den = min(mean_den), 
             max_den = max(mean_den),
@@ -221,4 +227,4 @@ PB_year <- df_b_arch |>
             mean_bio = mean(mean_bio),
             sd_bio = sd(mean_bio, na.rm = T)
   )
-write.csv(PB_year, "data_derived/PB_year.csv", , row.names = F)
+write.csv(PB_year, "../archival_data/archive_electrofish/data_derived/MMM/PB_yr_1990_2016.csv", , row.names = F)
