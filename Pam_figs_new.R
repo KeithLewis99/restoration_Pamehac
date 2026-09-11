@@ -540,6 +540,8 @@ ggsave("figs/salmonids_biomass_ci.png", width=10, height=8, units="in")
 
 # total biomass ----
 # this is to replicate Table 3 in Scruton 1998
+
+### BUT deprecated now due to GD's work - see Project Keith - biomass_PB_m12.R
 source("Pam_data_new-v2.R")
 df_bio <- df_a |>
   filter(Year != 1992 | Species != "ASYOY") |>
@@ -560,7 +562,9 @@ length(df_a$area)
 df_bio_tot <- df_a |>
   filter(Year != 1992 | Species != "ASYOY") |>
   group_by(Year, type) |>
-  summarise(bio.tot.sum = sum(bio), bio.tot.stand.sum = sum(bio.stand), area.sum = sum(area)) |>
+  summarise(bio.tot.sum = sum(bio), 
+            bio.tot.stand.sum = sum(bio.stand), 
+            area.sum = sum(area)) |>
   print(n = Inf)
 
 # get divisor for area
@@ -605,6 +609,7 @@ p2 <- ggplot(df_bio_tot, aes(x = Year, y = df_bio_stand, group = type, colour = 
   theme_bw() + 
   ylab("Biomass (g)/unit")
 
+# these should not be used - not kg
 # 1.322683 fold difference in the biomass/unit 1990- 2016
 sum(df_bio_tot$df_bio_stand[9:10])/sum(df_bio_tot$df_bio_stand[1:2])
 # 1.806902 fold difference in the biomass/unit 1990-2016

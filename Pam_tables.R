@@ -541,5 +541,5 @@ years_bio_tot.ci <- df_tot |>
   group_by(Year, type) |>
   do(data.frame(rbind(Hmisc::smean.cl.boot(.$B_sum.stand)))) |>
   rename(mean = Mean, ll = Lower, ul = Upper)
-write.csv(years_den_tot.ci, "data_derived/biomass_all_years.csv")
+write.csv(years_bio_tot.ci, "data_derived/biomass_all_years.csv")
 # END ----
