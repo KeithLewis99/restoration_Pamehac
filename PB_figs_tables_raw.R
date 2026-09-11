@@ -9,24 +9,43 @@ library(cowplot)
 df_b <- read.csv("data_derived/df_a3.csv")
 str(df_b)
 
+df_b <- df_b |> filter(!(Year == 1992 &
+                         Species == "ASYOY")
+                       )
+
 ## split data ----
 df_b_split <- df_b |> 
   filter(Year != "Total") |>
   split(df_b$Species)
-str(df_b_split)
+str(df_b_split,1)
 
 ### density ----
 plot_den <- map(names(df_b_split), function(Species) {
-  df <- df_b_split[[Species]]  
-  ggplot(df, 
+  df <- df_b_split[[Species]]
+  #df <- df_b_split$AS
+  if(Species == "ASYOY"){
+    tmp <- df[1,]
+    tmp[, c(2, 7:8, 10: 11)] <- NA
+    tmp$Year <- 1992
+    df <- rbind(df, tmp)
+  }
+  legend_ASYOY <- if(any(df$Species == "AS"))theme(
+    legend.position=c(0.40, 0.88),
+    legend.background = element_rect(fill = "transparent", color = NA), legend.title=element_blank(),
+    legend.key.size = unit(0.4, "cm")
+    )
+  legend_notASYOY <- if(any(df$Species != "AS"))
+    theme(legend.position= "none")
+ggplot(df, 
          aes(x = as.factor(Year), y = abun.stand, fill = type, colour = type, shape = type)) + 
     geom_point(position = position_jitterdodge(dodge.width = 0.5, jitter.width = 0.3), size = 3) +
-    theme_bw(base_size = 20) + 
     theme_bw(base_size = 20) + 
     ylab(expression("Density Estimate (#/100 m" ^2*")")) +
     xlab("Year") +
     theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-    theme(legend.position= "none") +
+    #theme(legend.position= "none") +
+    legend_notASYOY + 
+    legend_ASYOY +
     geom_vline(xintercept = 1.5, linetype="solid", linewidth=0.5) +
     geom_vline(xintercept = 3.5, linetype="dashed", linewidth=0.5) +
     geom_vline(xintercept = 4.5, linetype="dashed", linewidth=0.5) +
@@ -212,6 +231,7 @@ PB_site <- df_b_arch |>
             mean_bio = mean(mean_bio),
             sd_bio = sd(mean_bio, na.rm = T)
   )
+
 write.csv(PB_site, "../archival_data/archive_electrofish/data_derived/MMM/PB_site_1990_2016.csv", , row.names = F)
 
 
