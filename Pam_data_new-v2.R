@@ -458,6 +458,22 @@ df_tab1 <- df_all2 |>
   #             names_from = Sweep, values_from = abun) |> 
   pivot_wider(id_cols = c(Year, Species, Station),
               names_from = Sweep, values_from = c(abun, bio.sum), values_fill = 0) #bio.sum abun
+write.csv(df_tab1, "data_derived/tab1.csv")
+
+tmp <- left_join(df_tab1, df_area, by = c("Station" = "station", "Year" = "year")) |>
+  filter(!(Station == "5B" | Station == "9"))
+write.csv(tmp, "data_derived/tab1_area.csv")
+
+tmp$time <- NA
+tmp$type <- NA
+
+tmp <- tmp |>
+  mutate(time = if_else(Year == 1990, "before", "after")) |>
+  mutate(type = if_else(Station == "6"|Station == "7", "above", "below"))
+tmp$time <- as.factor(tmp$time)
+tmp$type <- as.factor(tmp$type)
+
+write.csv(tmp, "data_derived/tab1_area_trt_time.csv")
 #  filter(!(is.na(`2`) & is.na(`3`))) 
 #filter(!(is.na(`abun_2`) & is.na(`abun_3`))) 
 # mutate_at(c(4:9), ~replace_na(.,0))
@@ -635,6 +651,18 @@ df_all2 |>
             abun = sum(abun)) |>
   filter(abun >= 3)
 
+
+# proportion of zeros in <= 3 sweeps (add Species to get the value by Species)
+## used in ms text
+df_a %>%
+  group_by(Year) %>%
+  summarise(
+    n_zero = sum(abun == 0, na.rm = TRUE),
+    n_total = n(),
+    prop_zero = n_zero / n_total
+  )
+
+df_summary
 
 # pool ----
 # pool by Year and Station - this is for the Cote method
