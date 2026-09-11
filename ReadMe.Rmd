@@ -149,7 +149,9 @@ Why does the AMEC function not return its output aside from a graph and a csv fi
 
 After reviewing the early (~ pre-2000) literature on depletion estimates, it became clear that the CS method is best but there is a whole new literature composed of N-mixture models and Bayesian approaches.  
 
-But note Barket et al. [-@barker2018reliability] severly criticize these approaches.  I’m not sure if this extends to the other methods but imagine that it must since p is always going to be a latent variable, i.e., these are CMR models but without a means to directly estimate p which is always going to be a problem.  Quote: "Our message is that fundamentally count data under imperfect detection can only be reliably used as indices. Having controlled for detectability using covariates, counts through ratios of their expectations provide reliable information about relative abundance, but not absolute abundance N or p.” They do advocate for a CMR approach if absolute abundance is needed.
+But note Barket et al. [-@barker2018reliability] severly criticize these approaches.  I’m not sure if this extends to the other methods but imagine that it must since p is always going to be a latent variable, i.e., these are CMR models but without a means to directly estimate p which is always going to be a problem.  Quote: "Our message is that fundamentally count data under imperfect detection can only be reliably used as indices. Having controlled for detectability using covariates, counts through ratios of their expectations provide reliable information about relative abundance, but not absolute abundance N or p.” They do advocate for a CMR approach if absolute abundance is needed.  
+
+Bayesian and other approaches are in Rcode_archive.  
 
 ### early
 After extensive exploration, it is clear that there is no "right" way to model abundance for all of the species:year:stations.  This is consistent with Riley and Fausch [-@riley1992underestimation] who found "decreasing capture probability was a frequent problem when estimating trout abundance in small Colorado mountain streams".  Their streams seem comparable to Seal Cove.
@@ -269,7 +271,7 @@ He shared concerns about pooling (see findings and solutions), i.e,. there are d
 We discussed collaboration.  
 
 ### Paul Regular
-2024-10-17 - Paul gave me almost 2 hours of his time.  I explained what I was up to and we went through the various iterations.  Paul wondered if the model was over paramaterized but was positive about the approach in general. 
+2024-10-17 - Paul gave me almost 2 hours of his time.  I explained what I was up to and we went through the various iterations [mostly, I think, on the Richter approach].  Paul wondered if the model was over paramaterized but was positive about the approach in general. 
 We did come to the conclusion that the model is conflating q and n and is "blaming" q but not n.  Forcing B0 to be positive helps this.  So it would be good to know if the larger fish should be more catchable.  
 We did establish that JAGS uses the greatest values as the intercept.
 
@@ -290,6 +292,24 @@ In the course of the discussion, we found that for Pamehac, the BLUP for 1990 is
 Also, only interpret ziformula when a) not an intercept (zeros apply to all variables evenly), b) the term is significant, and c) only for density.  I can't see that interpretting for biomass is very meaningful but think on this.  
 
 Also, Fifield uses function map a lot.  Seems like a good way to produce publication quality images when facet_grid won't quite do it and to reduce code.
+
+### Guillaume Dauphin
+Met on 2026-05-21 with Guillaume who was a RES in Gulf region and did a lot of work on salmon and electrofishing.  He didn't disagree with my approach (pick your poison) but had great questions. He kindly offered to look at some of these data and see if he could do anything with it. But the following sums up our discussion:   
+- He was not horrified by the SPC graphs but acknowledged tha there is a problem.  
+- He emphasized that effort spent electrofishing is important.  
+- Suggested grouping the AS and BT by age-1+ and YOY under the assumption that q would be more or less equal for each age class.  
+- suggested a hierarchical approach to estimating q, i.e., estimating by site within year, averaging, and then adding covariates.  
+- did the electrofisher and upstream v downstream approaches change over time?  This can affect estimates.
+- for T v No, he suggested doing a CI and checking the sites or removing data points and rechecking.
+
+### Guillaume Dauphin II
+Guillaume did up a great Shiny app and implemented all the code for a Bayesian-MMI approach to depletion sampling and density estimation. We met again (2026-04-27).  
+- The good news is that the values for M7 are generally just a bit above T (total catch) and the relation between these values are just a bit more than 1:1.
+- He did the Shiny app in Claude.  
+- Loops could have been done differently in order to better match MARK and stock assessment notation but he did it very quickly.  But site-year and species are both combinations of variables - but its better to not use too many loops.  
+- the Bayesian-MMI approach is great.  Even though M7 is only the best of the hiearchical models, the partial models have really wide credible intervals.  
+ - feed results into glmmTMB but Guillaume is working on other 
+
 
 ## WHIL: approach
 **Findings and solutions**
@@ -363,21 +383,21 @@ nrow(df_all) # number of fish caught
 sum(rowSums(!is.na(df_tab3[,4:8]))) # number of sites sampled assuming 5 passes in 1990, 1991, 1996 and 3 in 1992 and 2016, including sweeps with abun == 0
 nrow(df_tab3) # number of site:species:years including sweeps with abun == 0; assumes previous is true
 nrow(df_a) # number of site:species:years that can be used in FSA
-nrow(df_out)
+nrow(df_out) # FSA output
 ```
 
 ### low n
+Difference between df_a and df_out is that Station == "5" and Station == "9B" have been removed from df_a. Use df_a
 ```{r}
+nrow(df_a |> filter(abun < 30)) # 143 of 168
+nrow(df_a |> filter(abun < 20)) # 132 of 168
+nrow(df_a |> filter(abun < 10)) # 105 of 168
+nrow(df_a |> filter(abun < 5)) # 81 of 168
 
-nrow(df_a |> filter(T < 30)) # 97 of 124
-nrow(df_a |> filter(T < 20)) # 85 of 124
-nrow(df_a |> filter(T < 10)) # 57 of 124
-nrow(df_a |> filter(T < 5)) # 33 of 124
-
-nrow(df_out |> filter(T < 30)) # 97 of 124
-nrow(df_out |> filter(T < 20)) # 85 of 124
-nrow(df_out |> filter(T < 10)) # 57 of 124
-nrow(df_out |> filter(T < 5)) # 33 of 124
+nrow(df_out |> filter(T < 30)) # 153 of 180
+nrow(df_out |> filter(T < 20)) # 141 of 180
+nrow(df_out |> filter(T < 10)) # 113 of 180
+nrow(df_out |> filter(T < 5)) # 89 of 180
 ```
 
 ### spc
