@@ -1,4 +1,4 @@
-ToDo: 
+ToDo: I think that I did all the below; most of its deprecated anyway since taking the GD approach.
 
 Wins: dashboard, readme in markdown, and map function to replace loops - do multiple graphs instead of facet_grid for publication quality.  Dahsboard to Word.  struggle with glmm hurdle models, percent differences, signfificant zi terms, and BLUPs.
 
